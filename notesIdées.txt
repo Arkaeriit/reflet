@@ -1,0 +1,5 @@
+Objectives:
+	Create a VM that read a custom machine code
+	Have the VM works both in a 32 bits and a 64 bits mode
+	Create an assembler for that VM
+	Create an high-level language that can be compiled for that VM

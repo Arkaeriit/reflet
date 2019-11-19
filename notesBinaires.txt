@@ -1,0 +1,2 @@
+Début : AC64 pour le 64 bits
+		AC32 pour le 32 bits
