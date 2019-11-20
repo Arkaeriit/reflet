@@ -1,2 +1,12 @@
 Début : AC64 pour le 64 bits
 		AC32 pour le 32 bits
+
+Opperations 64 bits : 
+    oppeands are coded on 10 bits
+    There are 64 registers so register nomes are coded on 6 bits
+
+    0x300 : MOV reg NUM(48)
+            Set the value of reg to a numeral value
+
+    Ox3FF : PRT reg
+            Print the content of reg    

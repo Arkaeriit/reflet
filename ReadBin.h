@@ -2,7 +2,7 @@
 #define READBIN
 
 #include <stdio.h>
-#include <stdint.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -11,6 +11,7 @@ typedef struct vm_64_struct {
     uint64_t nombreInstruction;
     uint64_t* code;
     uint32_t flags;
+    uint64_t* registers;
 } vm_64;
 
 //Sert à la fonction rb_analyze

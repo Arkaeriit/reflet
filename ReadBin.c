@@ -45,6 +45,7 @@ infofile rb_analyze(const char* filename){
  *      1 if the file can't be read
  */
 int rb_init64(vm_64* vm, const char* filename, uint32_t fileSize){
+    vm->registers = malloc(sizeof(uint64_t) * 64);
     FILE* fp = fopen(filename,"r");
     uint16_t a; //useless value
     fread(&a,2,1,fp); //the 2 first bits are ignored
