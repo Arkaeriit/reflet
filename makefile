@@ -14,14 +14,17 @@ ReadBin.o : ReadBin.c ReadBin.h
 Exec64.o : Exec64.c Exec64.h opperand.h ReadBin.h
 	gcc -c Exec64.c $(FLAGS) -o Exec64.o
 
-asasm : mainASM.o assemble64.o
-	gcc mainASM.o assemble64.o $(FLAGS) -o asasm
+asasm : mainASM.o assemble64.o assembleXX.o
+	gcc mainASM.o assemble64.o assembleXX.o $(FLAGS) -o asasm
 
 mainASM.o : mainASM.c mainASM.h
 	gcc -c mainASM.c $(FLAGS) -o mainASM.o
 
 assemble64.o : assemble64.c assemble64.h
 	gcc -c assemble64.c $(FLAGS) -o assemble64.o
+
+assembleXX.o : assembleXX.c assembleXX.h
+	gcc -c assembleXX.c $(FLAGS) -o assembleXX.o
 
 clean : 
 	rm -f *.o
