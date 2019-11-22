@@ -3,7 +3,7 @@
 
 #define MOV_RN 0x300
 
-#define PRT_R 0x3FF
+#define DSP_R 0x3FF
 
 #endif
 

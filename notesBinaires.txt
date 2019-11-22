@@ -8,5 +8,5 @@ Opperations 64 bits :
     0x300 : MOV reg NUM(48)
             Set the value of reg to a numeral value
 
-    Ox3FF : PRT reg
+    Ox3FF : DSP reg
             Print the content of reg    

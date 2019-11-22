@@ -19,7 +19,7 @@ int e64_execute(vm_64* vm){
                 reg1 = e64_reg1(inst);
                 vm->registers[reg1] = e64_num1(inst);
                 break;
-            case PRT_R :
+            case DSP_R :
                 reg1 = e64_reg1(inst);
                 printf("%" PRIu64 "\n",vm->registers[reg1]);
                 break;
@@ -41,6 +41,6 @@ uint64_t e64_num1(uint64_t inst){
  * Return the 1rst register argument of an instruction.
  */
 uint8_t e64_reg1(uint64_t inst){
-    return (uint8_t) ((inst & REG1) >> 0);
+    return (uint8_t) ((inst & REG1) >> 10);
 }
 

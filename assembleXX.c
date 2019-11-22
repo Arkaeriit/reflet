@@ -25,7 +25,6 @@ uint8_t aXX_preprocessLine(char* line,char** list){
     size_t len = strlen(line);
     for(uint8_t i=0; i<len; i++){ //how much words
         if(line[i] == ';' || line[i] == '\n' || line[i] == '\r'){
-            printf("end %u\n",i);
             i = 0xFF;
             break;
         }
@@ -66,5 +65,35 @@ uint8_t aXX_preprocessLine(char* line,char** list){
     return ret;
 }
 
+/*
+ * Read a hex number and return it's value
+ * Arguments:
+ *      number : the string represinting the number in hexadecimal
+ */
+uint64_t aXX_readHex(char* number){
+    uint64_t ret = 0;
+    for(uint8_t i=0; i<strlen(number); i++){
+        if( 48 <= number[i] && number[i] <= 57) //a digit between 0 and 9
+            ret = ret + ((number[i] - 48) << (4 * i));
+        else if(65 <= number[i] && number[i] <= 70) //a digit between A ans F
+            ret = ret + ((number[i] - 55) << (4 * i));
+    }
+    return ret;
+}
 
+/*
+ * Read a decimal number and return it's value
+ * Arguments:
+ *      number : the string represinting the number in decimal
+ */
+uint64_t aXX_readDec(char* number){
+    uint64_t ret = 0;
+    uint64_t digit = 1;
+    for(uint8_t i=0; i<strlen(number); i++){
+        if( 48 <= number[i] && number[i] <= 57) //a digit between 0 and 9
+            ret = ret + (number[i] - 48) * digit;
+        digit = digit * 10;
+    }
+    return ret;
+}
 
