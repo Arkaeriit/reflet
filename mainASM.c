@@ -2,11 +2,7 @@
 //Will be an assembler and a linker
 
 int main(int argc,char** argv){
-    if(argc < 3){
-        quickHelp();
-        return 1;
-    }
-    if(!strcmp(*(argv+1),"compile")){
+    if(!strcmp(*(argv+1),"compile") && argc > 2){
         FILE *fin,*fout;
         fin = fopen(*(argv+2),"r");
         if(fin == NULL){
@@ -34,7 +30,21 @@ int main(int argc,char** argv){
             return 2;
         }
         a64_assemble(fin,fout);
-    }//end compile
+    }else if(!strcmp(*(argv+1),"link") && argc > 3){
+        FILE **fin,*fout;
+        fin = malloc(sizeof(argc - 3));
+        for(int i=0; i<argc-3; i++){
+            fin[i] = fopen(*(argv+2+i),"r");
+            if(fin == NULL){
+                fprintf(stderr,"Error : can not read file %s.\n",*(argv+2+i));
+                return 2;
+            }
+        }
+        l64_link(fin,fout);
+    }else{
+        quickHelp();
+        return 1;
+    } 
 
     return 0;
 }

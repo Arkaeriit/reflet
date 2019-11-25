@@ -15,6 +15,7 @@ infofile rb_analyze(const char* filename){
     FILE* fp = fopen(filename,"r");
     uint16_t bufferReadStart; //buffer to read the 2-byte magic word
     fread(&bufferReadStart,1,2,fp);
+    fclose(fp);
     if(bufferReadStart == 0x64AC){
         ret.flag64 = 1;
         if( (ret.fileSize-2)%8 == 0) //instructions are 64 bytes
@@ -52,8 +53,11 @@ int rb_init64(vm_64* vm, const char* filename, uint32_t fileSize){
     vm->flags = 0;
     vm->nombreInstruction = (fileSize-2) / 8;
     vm->code = malloc(sizeof(uint64_t) * vm->nombreInstruction);
-    if(fread(vm->code,8,vm->nombreInstruction,fp) == vm->nombreInstruction)
+    if(fread(vm->code,8,vm->nombreInstruction,fp) == vm->nombreInstruction){
+        fclose(fp);
         return 0;
+    }
+    fclose(fp);
     return 1;
 }
 
