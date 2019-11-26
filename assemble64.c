@@ -1,24 +1,36 @@
+/*----------------------------------------------------------------\
+|This file contant what is needed to precompile assembly code into|
+|a object file for 64 bits machine code.                          |
+\----------------------------------------------------------------*/
+
 #include "assemble64.h"
 
+/*
+ * This function take a file containing assembly code for the asvm
+ * and compile it insto an asvm object file
+ * Arguments :
+ *      fin : pointer to the assembly code file
+ *      fout : pointer to the object file
+ */
 void a64_assemble(FILE* fin,FILE* fout){
-    char* line = malloc(255);
+    char* line = malloc(SIZELINE);
     char** elems = malloc(sizeof(char*) * 150); //We will never get 150 words
     fgets(line,255,fin);
     while(line != NULL && strlen(line) > 2){
         uint8_t n = aXX_preprocessLine(line,elems);
         uint8_t a = a64_compileLine(elems,n,line);
-        if(a == 1){
+        if(a == COMPILED_LINE_INSTRUCTION){
             fprintf(fout,"i");
             fwrite(line,8,1,fout);
-        }else if(a == 2){
+        }else if(a == COMPILED_LINE_BRANCH){
             fprintf(fout,"j");
             fwrite(line,200,1,fout);
         }else{
-            return;
+            return; //Error to do
         }
         
         aXX_freeElems(n,elems);
-        fgets(line,255,fin);
+        fgets(line,SIZELINE,fin);
     } 
 }
 
@@ -29,9 +41,9 @@ void a64_assemble(FILE* fin,FILE* fout){
  *      n : the size of elems
  *      ret : the compiled code
  * Return :
- *      1 if the result is a compiled instruction
- *      2 if the result is about branching
- *      0 if there is an error
+ *      COMPILED_LINE_NOT_OK if the result is a compiled instruction
+ *      COMPILED_LINE_BRANCH if the result is about branching
+ *      COMPILED_LINE_INSTRUCTION if there is an error
  */
 uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
     memset(ret,0,strlen(ret));
@@ -46,31 +58,31 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
                 *fullCode = MOV_RN; //We set the opperand
                 *fullCode |= (reg & REG_MASK ) << 10; //We set the register
                 *fullCode |= (num & NUM1_MASK ) << 16; //We set the data
-                return 1;
+                return COMPILED_LINE_INSTRUCTION;
             }else{ //A decimal number
                 uint8_t reg = aXX_readDec(elems[1] + 1);
                 uint64_t num = aXX_readDec(elems[2]);
                 *fullCode = MOV_RN; //We set the opperand
                 *fullCode |= (reg & REG_MASK ) << 10; //We set the register
                 *fullCode |= (num & NUM1_MASK ) << 16; //We set the data
-                return 1;
+                return COMPILED_LINE_INSTRUCTION;
             }
         }else{
-            return 0;
+            return COMPILED_LINE_NOT_OK;
         }
     }else if(!strcmp(elems[0],"DSP") && n == 2){
         if(elems[1][0] == 'R'){
             uint8_t reg = aXX_readDec(elems[1] + 1);
             *fullCode = DSP_R; //We set the opperand
             *fullCode |= (reg & REG_MASK ) << 10; //We set the register
-            return 1;
+            return COMPILED_LINE_INSTRUCTION;
         }else{
-            return 0;
+            return COMPILED_LINE_NOT_OK;
         }
     }else{
-        return 0;
+        return COMPILED_LINE_NOT_OK;
     }
-    return 0;
+    return COMPILED_LINE_NOT_OK;
 }
 
 

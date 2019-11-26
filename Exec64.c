@@ -1,3 +1,8 @@
+/*---------------------------------------------------------*\
+|This file contain what is needed to execute the code loaded|
+|into a vm.                                                 |
+\----------------------------------------------------------*/
+
 #include "Exec64.h"
 
 /*
@@ -5,8 +10,8 @@
  * Arguments:
  *      vm : the vm
  *  return:
- *      0 if everything is OK
- *      1 if an insruction can't be read
+ *      EXECUTE_OK if everything is OK
+ *      an error code if an insruction can't be read
  */
 int e64_execute(vm_64* vm){
     uint8_t reg1,reg2; //variable to store the registers' numbers.
@@ -25,11 +30,12 @@ int e64_execute(vm_64* vm){
                 break;
             default:
                 fprintf(stderr,"Error, invalid Opperand : %" PRIx16 "\nInstruction : %" PRIx64 "\n",opperand,inst);
-                return 1;
+                return EXECUTE_UNKNOWN_OPPERAND;
         }
     }
-    return 0;
+    return EXECUTE_OK;
 }
+
 /*
  * Get the numeric argument of an instruction if the instruction take 1 regster as argument
  */

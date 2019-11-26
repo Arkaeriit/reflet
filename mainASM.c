@@ -1,5 +1,9 @@
+/*---------------------------------------------\
+|This file is the main for the executable      |
+|that will launch the assembler and the linker.|
+\---------------------------------------------*/
+
 #include "mainASM.h"
-//Will be an assembler and a linker
 
 int main(int argc,char** argv){
     if(!strcmp(*(argv+1),"compile") && argc > 2){

@@ -2,7 +2,7 @@
 #define EXEC64
 
 #include "ReadBin.h"
-#include "opperand.h"
+#include "constants.h"
 
 #define REG1 0xFC00 /*Mask to get the 1st register*/
 #define REG2 0x3F0000

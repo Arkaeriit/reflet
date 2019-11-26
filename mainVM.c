@@ -1,3 +1,8 @@
+/*------------------------------------------\
+|This file contain what is needed to launch |
+the vm and interprete a binary file.        |
+\------------------------------------------*/
+
 #include "ReadBin.h"
 #include "Exec64.h"
 

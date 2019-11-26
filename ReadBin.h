@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include "constants.h"
+#include "stdbool.h"
 
 typedef struct vm_64_struct {
     uint64_t nombreInstruction;
@@ -16,8 +18,8 @@ typedef struct vm_64_struct {
 
 //Sert à la fonction rb_analyze
 typedef struct infofile_struct {
-    uint8_t flagCorrect; //indique si le binaire peut être lisible
-    uint8_t flag64; //indque si le binaire est en 64 bits
+    bool flagCorrect; //indique si le binaire peut être lisible
+    bool flag64; //indque si le binaire est en 64 bits
     uint32_t fileSize; //indique la taille du fichier binaire
 } infofile;
 

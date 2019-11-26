@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <inttypes.h>
-
+#include "constants.h"
 #include <stdio.h>
 
 void aXX_freeElems(uint8_t n,char** elems);

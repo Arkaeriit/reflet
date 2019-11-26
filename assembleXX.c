@@ -1,3 +1,11 @@
+/*---------------------------------------------------------------\
+|This file containt general purpuse fonction to create an asvm   |
+|objec file. The object file start with a magic word and then    |
+|for each instruction there is either an i followed by a compiled|
+|instruction or a j followed by a line that will be compiled into|
+|a branching instruction during the linking phase.               |
+\---------------------------------------------------------------*/
+
 #include "assembleXX.h"
 
 /*

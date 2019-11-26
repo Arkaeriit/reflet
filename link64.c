@@ -9,7 +9,7 @@
 codeHead* l64_initList(){
     codeHead* ret = malloc(sizeof(codeHead));
     ret->size = 0;
-    ret->next = malloc(sizeof(head));
+    ret->next = malloc(sizeof(struct code_struct));
     return ret;
 }
 
@@ -20,11 +20,11 @@ codeHead* l64_initList(){
  *      texte : the line we want to add.
  */
 void l64_addList(codeHead* cH,char* texte){
-    code* elem = cH.next;
-    for(int i=0; i<ch->size; i++)
+    struct code_struct* elem = cH->next;
+    for(int i=0; i<cH->size; i++)
         elem = elem->next;
-    elem->next = malloc(sizeof(head));
-    elem->code = texte;
+    elem->next = malloc(sizeof(struct code_struct)); //We assume that the next element of a line is allocated but not initialized
+    elem->texte = texte;
 }
 
 /*
@@ -36,16 +36,22 @@ void l64_addList(codeHead* cH,char* texte){
  *      the structure representing the list. We can get the text by searching return->texte
  */
 code* l64_getList(codeHead* cH,uint64_t index){
-    if(index > liste->size || index < 1){
+    if(index > cH->size || index < 1){
         printf("Erreur, mauvais indexage");
         exit(EXIT_FAILURE);
     }
-    code* ret = cH->next;
+    struct code_struct* ret = cH->next;
     for(int i=1;i<index;i++){
         ret=ret->next;
     }
     return ret;
 }
 
-void l64_link(FILE** fin,FILE* fout){
+int l64_addFile(codeHead* cH, FILE* fin){
+    
+    char bufferStart; //Used to read the byte before each instruction
+    return 1;
+}
+
+void l64_link(FILE** fin,FILE* fout){}
     

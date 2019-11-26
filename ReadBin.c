@@ -1,3 +1,9 @@
+/*--------------------------------------------\
+|This file contain what is needed to check    |
+|if a binary file contain usable asvm machine |
+|code and if it do so it loads it into a vm.  |
+\--------------------------------------------*/
+
 #include "ReadBin.h"
 
 /*
@@ -5,32 +11,31 @@
 */
 infofile rb_analyze(const char* filename){
     infofile ret;
-    struct stat st; 
+    struct stat st; //Getting the file size
     if (stat(filename, &st) == 0){
         ret.fileSize = st.st_size;
     }else{
-        ret.flagCorrect = 0;
+        ret.flagCorrect = false;
         return ret;
     }
     FILE* fp = fopen(filename,"r");
-    uint16_t bufferReadStart; //buffer to read the 2-byte magic word
-    fread(&bufferReadStart,1,2,fp);
+    uint64_t bufferReadStart; //buffer to read the magic word
+    fread(&bufferReadStart,1, BINARY_MW_SIZE ,fp);
     fclose(fp);
-    if(bufferReadStart == 0x64AC){
-        ret.flag64 = 1;
-        if( (ret.fileSize-2)%8 == 0) //instructions are 64 bytes
-            ret.flagCorrect = 1;
+    if(bufferReadStart == BINARY_MW ){
+        ret.flag64 = true;
+        if( (ret.fileSize- BINARY_MW_SIZE  )%8 == 0) //instructions are 64 bytes
+            ret.flagCorrect = true;
         else
-            ret.flagCorrect = 0;
-    }else if(bufferReadStart == 0x32AC){
-        ret.flag64 = 0;
-        ret.flag64 = 1;
-        if( (ret.fileSize-2)%4 == 0) //instructions are 32 bytes
-            ret.flagCorrect = 1;
+            ret.flagCorrect = false;
+    }else if(bufferReadStart == BINARY_32_MW ){
+        ret.flag64 = false;
+        if( (ret.fileSize- BINARY_MW_SIZE )%4 == 0) //instructions are 32 bytes
+            ret.flagCorrect = true;
         else
-            ret.flagCorrect = 0;
+            ret.flagCorrect = false;
     }else{
-        ret.flagCorrect = 0;
+        ret.flagCorrect = false;
     }
     return ret;
 }
@@ -42,22 +47,22 @@ infofile rb_analyze(const char* filename){
  *      filename : the name of the file whre the machinecode for the VM is stored
  *      fileSize : size of the file
  *  return :
- *      0 if everything if 0
- *      1 if the file can't be read
+ *      READ_OK if everything if OK
+ *      READ_NOT_OK if the file can't be read
  */
 int rb_init64(vm_64* vm, const char* filename, uint32_t fileSize){
     vm->registers = malloc(sizeof(uint64_t) * 64);
     FILE* fp = fopen(filename,"r");
     uint16_t a; //useless value
-    fread(&a,2,1,fp); //the 2 first bits are ignored
+    fread(&a, BINARY_32_MW ,1,fp); //the magic word is ignored
     vm->flags = 0;
-    vm->nombreInstruction = (fileSize-2) / 8;
+    vm->nombreInstruction = (fileSize- BINARY_MW_SIZE ) / 8;
     vm->code = malloc(sizeof(uint64_t) * vm->nombreInstruction);
     if(fread(vm->code,8,vm->nombreInstruction,fp) == vm->nombreInstruction){
         fclose(fp);
-        return 0;
+        return READ_OK;
     }
     fclose(fp);
-    return 1;
+    return READ_NOT_OK;
 }
 

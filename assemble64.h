@@ -7,7 +7,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include "assembleXX.h"
-#include "opperand.h"
+#include "constants.h"
 
 //mask for the data
 #define NUM1_MASK 0xFFFFFFFFFFFF
