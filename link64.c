@@ -19,12 +19,13 @@ codeHead* l64_initList(){
  *      cH : the list
  *      texte : the line we want to add.
  */
-void l64_addList(codeHead* cH,char* texte){
+void l64_addList(codeHead* cH,char* texte, uint8_t label){
     struct code_struct* elem = cH->next;
     for(int i=0; i<cH->size; i++)
         elem = elem->next;
     elem->next = malloc(sizeof(struct code_struct)); //We assume that the next element of a line is allocated but not initialized
     elem->texte = texte;
+    elem->label = label;
 }
 
 /*
@@ -47,10 +48,34 @@ code* l64_getList(codeHead* cH,uint64_t index){
     return ret;
 }
 
+/*
+ * Add a file to the list representing all the code.
+ *  Arguments : 
+ *      cH : the list
+ *      fin : a pointer to the file we must add
+ *  return :
+ *      LINK_OK if everything went well
+ *      an error code otherwise
+ */
 int l64_addFile(codeHead* cH, FILE* fin){
-    
-    char bufferStart; //Used to read the byte before each instruction
-    return 1;
+    uint64_t magicWord;
+    fread(&magicWord, 1, OBJECT_MW_SIZE ,fin);
+    if(magicWord != OBJECT_MW){
+        return LINK_INVALID_FILE;
+    }
+    uint8_t bufferStart; //Used to read the byte before each instruction
+    while(fread(&bufferStart, 1, 1, fin) == 1){ //There is an idication to read
+        if(bufferStart == 'i'){
+            char* instruction = malloc(sizeof(uint64_t));
+            fread(instruction, 1, sizeof(uint64_t), fin);
+            l64_addList(cH, instruction, 'i');
+        }else if(bufferStart == 'j'){
+            //todo
+        }else{
+            return LINK_INVALID_LABEL;
+        }
+    }
+    return LINK_OK;
 }
 
 void l64_link(FILE** fin,FILE* fout){}

@@ -29,6 +29,10 @@
 //binary file reader
 #define READ_OK 0
 #define READ_NOT_OK 1
+//linker
+#define LINK_INVALID_FILE 1
+#define LINK_INVALID_LABEL 2
+#define LINK_OK 0
 
 
 //Compilation constants
