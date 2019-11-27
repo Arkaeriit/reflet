@@ -26,6 +26,7 @@ void l64_addList(codeHead* cH,char* texte, uint8_t label){
     elem->next = malloc(sizeof(struct code_struct)); //We assume that the next element of a line is allocated but not initialized
     elem->texte = texte;
     elem->label = label;
+    elem->tag = malloc(sizeof(label_tag)); //let us used the chain to add label
     cH->size++;
 }
 
@@ -47,6 +48,83 @@ code* l64_getList(codeHead* cH,uint64_t index){
         ret=ret->next;
     }
     return ret;
+}
+
+/*
+ * Indicate if a label is on the list and can return it's index
+ *  Arguments :
+ *      lB : the list with the labels
+ *      labelName : name of the label we search
+ *      index : if not NULL and if we fond the label we put it's index here
+ *  return : 
+ *      true if the label we search is on the list
+ *      false if it is not
+ */
+bool l64_isLabelThere(codeHead* lB,const char* labelName,uint64_t* index){
+    code* elem = lB->next;
+    for(uint64_t i=0; i<lB->size; i++){
+        if(!strcmp(labelName,elem->tag->name)){
+            if(index != NULL)
+                *index = i;
+            return true;
+        }
+        elem = elem->next;
+    }
+    return false;
+}
+
+/*
+ * Get the tag of a label, if it is a new label it will create it's tag
+ *  Arguments :
+ *      lB : the chain where the label are stored
+ *      labelName : the ame of the label
+ *  return :
+ *      the tag of the label
+ */
+label_tag* l64_autoGetLabel(codeHead* lB, const char* labelName){
+    uint64_t index;
+    if(l64_isLabelThere(lB, labelName, &index))
+        return l64_getList(lB,index)->tag;
+    l64_addList(lB, NULL,0);
+    label_tag* ret = l64_getList(lB, lB->size - 1)->tag;
+    ret->name = malloc(sizeof(char) * MAX_SIZE_LABEL);
+    strcpy(ret->name, labelName);
+    ret->places = malloc(sizeof(uint64_t) * MAX_CALL_NUMBER);
+    ret->numberOfCalls = 0;
+    return ret;
+}
+
+/*
+ * Indicate that we are defining a new label
+ *  Arguments : 
+ *      lB : the chain with the labels
+ *      labelName : the name of the label
+ *      position : the position of the label in the linked code
+ *  return :
+ *      LINK_ERROR_DOUBLE_DEFINITION if a label with the same name is already placed
+ *      LABEL_OK otherwise
+ */
+int l64_addLabel(codeHead* lB,const char* labelName, uint64_t position){
+    label_tag* tag = l64_autoGetLabel(lB, labelName);
+    if(tag->alreadyPlaced){
+        return LINK_ERROR_DOUBLE_DEFINITION;
+    }
+    tag->alreadyPlaced = true;
+    tag->position = position;
+    return LABEL_OK;
+}
+
+/*
+ * Indicate that we will call a label from a position
+ *  Arguments :
+ *      lB : the chain with the labels
+ *      labelName : the name of the label
+ *      position : the position from where the label is called
+ */
+void l64_addCall(codeHead* lB, const char* labelName, uint64_t position){
+    label_tag* tag = l64_autoGetLabel(lB, labelName);
+    tag->numberOfCalls++;
+    tag->places[tag->numberOfCalls] = position;
 }
 
 /*

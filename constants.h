@@ -37,12 +37,16 @@ typedef uint32_t OBJECT_MW_TYPE;
 #define LINK_INVALID_FILE 1
 #define LINK_INVALID_LABEL 2
 #define LINK_OK 0
+#define LINK_ERROR_DOUBLE_DEFINITION 1
+#define LABEL_OK 0
 
 
 //Compilation constants
 #define SIZELINE 255 /*Size of a line of object code that will be read*/
 #define NUM1_MASK 0xFFFFFFFFFFFF /*assert the max size of a number*/
 #define REG_MASK 0x3F /*assert the max size of a register*/
+#define MAX_SIZE_LABEL 150 /*Max number of char in a label name*/
+#define MAX_CALL_NUMBER 1000 /*Maximun number of position from where a label can be called*/
 
 
 //Execution constants

@@ -10,3 +10,9 @@ Opperations 64 bits :
 
     Ox3FF : DSP reg
             Print the content of reg    
+
+Function call : 
+    Execution : IDK...
+Linking :
+    An other linked list where each member got : the name of the label, the position of the label, a bool stating wheather or not the label has already be placed. For the ease of use I will used the code struct as the list.
+
