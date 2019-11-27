@@ -46,12 +46,14 @@ typedef uint32_t OBJECT_MW_TYPE;
 //Execution constants
 #define REG1 0xFC00 /*Mask to get the 1st register*/
 #define REG2 0x3F0000 /*Mask to get the 2nd register*/
+#define REG3 0xFC00000 /*Mask to get the 3rd register*/
 #define NUM1 0xFFFFFFFFFFFF0000/*Mask to get the numeric value if there is only 1 register*/
 
 
 //Compilation and execution constants
 #define ARG_SHIFT_1 10
 #define ARG_SHIFT_2 16
+#define ARG_SHIFT_3 22
 
 #endif
 

@@ -77,6 +77,38 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
         }else{
             return COMPILED_LINE_NOT_OK;
         }
+    }else if(!strcmp(elems[0],"ADD")){
+        if(n == 3 && elems[1][0] == 'R' && elems[2][0] != 'R'){
+            uint8_t reg1 = aXX_readDec(elems[1] + 1);
+            uint64_t num;
+            if(elems[2][1] == 'X')
+                num = aXX_readHex(elems[2] + 1);
+            else
+                num = aXX_readDec(elems[2]);
+            *fullCode = ADD_RN;
+            *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+            *fullCode |= (num & NUM1_MASK) << ARG_SHIFT_2;
+            return COMPILED_LINE_INSTRUCTION;
+        }else if(n == 3 && elems[1][0] == 'R' && elems[2][0] == 'R'){
+            uint8_t reg1 = aXX_readDec(elems[1] + 1);
+            uint8_t reg2 = aXX_readDec(elems[2] + 1);
+            *fullCode = ADD_RR;
+            *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+            *fullCode |= (reg2 & REG_MASK) << ARG_SHIFT_2;
+            return COMPILED_LINE_INSTRUCTION;
+        }else if(n == 4 && elems[1][0] == 'R' && elems[2][0] == 'R' && elems[3][0] == 'R'){
+            uint8_t reg1 = aXX_readDec(elems[1] + 1);
+            uint8_t reg2 = aXX_readDec(elems[2] + 1);
+            uint8_t reg3 = aXX_readDec(elems[3] + 1);
+            *fullCode = ADD_RR;
+            *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+            *fullCode |= (reg2 & REG_MASK) << ARG_SHIFT_2;
+            *fullCode |= (reg3 & REG_MASK) << ARG_SHIFT_3;
+            return COMPILED_LINE_INSTRUCTION;
+        }else{
+            return COMPILED_LINE_NOT_OK;
+        }
+        
     }else if(!strcmp(elems[0],"DSP") && n == 2){
         if(elems[1][0] == 'R'){
             uint8_t reg1 = aXX_readDec(elems[1] + 1);

@@ -14,5 +14,6 @@ int e64_execute(vm_64* vm);
 uint64_t e64_num1(uint64_t inst);
 uint8_t e64_reg1(uint64_t inst);
 uint8_t e64_reg2(uint64_t inst);
+uint8_t e64_reg3(uint64_t inst);
 #endif
 
