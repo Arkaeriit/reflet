@@ -37,13 +37,15 @@ codeHead* l64_initList();
 void l64_addList(codeHead* cH,char* texte, uint8_t label);
 code* l64_getList(codeHead* cH,uint64_t index);
 //
-bool l64_isLabelThere(codeHead* lB,const char* labelName, uint64_t* indx);
-label_tag* l64_autoGetLabel(codeHead* lB, const char* labelName);
-int l64_addLabel(codeHead* lB, const char* labelNamen, uint64_t position);
-void l64_addCall(codeHead* lB, const char* labelName, uint64_t position);
+typedef codeHead labelHead;
+bool l64_isLabelThere(labelHead* lB,const char* labelName, uint64_t* indx);
+label_tag* l64_autoGetLabel(labelHead* lB, const char* labelName);
+int l64_addLabel(labelHead* lB, const char* labelNamen, uint64_t position);
+void l64_addCall(labelHead* lB, const char* labelName, uint64_t position);
 //
 
-int l64_addFile(codeHead* cH,FILE* fin);
+int l64_addFile(codeHead* cH, labelHead* lB, FILE* fin);
+int l64_branching(codeHead* cH, labelHead* lB);
 void l64_link(FILE** fin,FILE* fout,int nFiles);
 
 #endif

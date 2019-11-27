@@ -39,6 +39,7 @@ typedef uint32_t OBJECT_MW_TYPE;
 #define LINK_OK 0
 #define LINK_ERROR_DOUBLE_DEFINITION 1
 #define LABEL_OK 0
+#define LINK_UNDEFINED_LABEL 1
 
 
 //Compilation constants
@@ -50,6 +51,7 @@ typedef uint32_t OBJECT_MW_TYPE;
 
 
 //Execution constants
+#define OPP 0x3FF /*Mask to get the opperand*/
 #define REG1 0xFC00 /*Mask to get the 1st register*/
 #define REG2 0x3F0000 /*Mask to get the 2nd register*/
 #define REG3 0xFC00000 /*Mask to get the 3rd register*/

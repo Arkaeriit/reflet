@@ -17,7 +17,7 @@ int e64_execute(vm_64* vm){
     uint8_t reg1,reg2,reg3; //variable to store the registers' numbers.
     for(uint64_t i=0;i<vm->nombreInstruction;i++){
         uint64_t inst = vm->code[i];
-        uint16_t opperand = inst & 0x3FF;
+        uint16_t opperand = inst & OPP;
         //printf("%lx %x %x %lx\n",inst,opperand,e64_reg1(inst),e64_num1(inst)); //debug
         switch(opperand){
             case MOV_RN :

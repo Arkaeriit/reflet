@@ -60,7 +60,7 @@ code* l64_getList(codeHead* cH,uint64_t index){
  *      true if the label we search is on the list
  *      false if it is not
  */
-bool l64_isLabelThere(codeHead* lB,const char* labelName,uint64_t* index){
+bool l64_isLabelThere(labelHead* lB,const char* labelName,uint64_t* index){
     code* elem = lB->next;
     for(uint64_t i=0; i<lB->size; i++){
         if(!strcmp(labelName,elem->tag->name)){
@@ -81,7 +81,7 @@ bool l64_isLabelThere(codeHead* lB,const char* labelName,uint64_t* index){
  *  return :
  *      the tag of the label
  */
-label_tag* l64_autoGetLabel(codeHead* lB, const char* labelName){
+label_tag* l64_autoGetLabel(labelHead* lB, const char* labelName){
     uint64_t index;
     if(l64_isLabelThere(lB, labelName, &index))
         return l64_getList(lB,index)->tag;
@@ -104,7 +104,7 @@ label_tag* l64_autoGetLabel(codeHead* lB, const char* labelName){
  *      LINK_ERROR_DOUBLE_DEFINITION if a label with the same name is already placed
  *      LABEL_OK otherwise
  */
-int l64_addLabel(codeHead* lB,const char* labelName, uint64_t position){
+int l64_addLabel(labelHead* lB,const char* labelName, uint64_t position){
     label_tag* tag = l64_autoGetLabel(lB, labelName);
     if(tag->alreadyPlaced){
         return LINK_ERROR_DOUBLE_DEFINITION;
@@ -121,7 +121,7 @@ int l64_addLabel(codeHead* lB,const char* labelName, uint64_t position){
  *      labelName : the name of the label
  *      position : the position from where the label is called
  */
-void l64_addCall(codeHead* lB, const char* labelName, uint64_t position){
+void l64_addCall(labelHead* lB, const char* labelName, uint64_t position){
     label_tag* tag = l64_autoGetLabel(lB, labelName);
     tag->numberOfCalls++;
     tag->places[tag->numberOfCalls] = position;
@@ -131,12 +131,13 @@ void l64_addCall(codeHead* lB, const char* labelName, uint64_t position){
  * Add a file to the list representing all the code.
  *  Arguments : 
  *      cH : the list
+ *      lB : the list with info concerning the labels
  *      fin : a pointer to the file we must add
  *  return :
  *      LINK_OK if everything went well
  *      an error code otherwise
  */
-int l64_addFile(codeHead* cH, FILE* fin){
+int l64_addFile(codeHead* cH, labelHead* lB, FILE* fin){
     OBJECT_MW_TYPE magicWord;
     fread(&magicWord, 1, OBJECT_MW_SIZE ,fin);
     if(magicWord != OBJECT_MW){
@@ -149,7 +150,19 @@ int l64_addFile(codeHead* cH, FILE* fin){
             fread(instruction, 1, sizeof(uint64_t), fin);
             l64_addList(cH, instruction, 'i');
         }else if(bufferStart == 'j'){
-            //todo
+            char* labelName = malloc(sizeof(char) * SIZELINE);
+            char* opperand = malloc(sizeof(uint64_t)); //The start of the line of machine code
+            fread(&bufferStart, 1, 1, fin);
+            fread(opperand, 1, 2, fin);
+            fread(labelName, 1, SIZELINE, fin);
+            if(bufferStart == 'd'){
+                l64_addLabel(lB, labelName, cH->size);
+            }else if(bufferStart == 'j'){
+                l64_addCall(lB, labelName, cH->size);
+                l64_addList(cH, opperand, 'j');
+            }else{
+                return LINK_INVALID_LABEL;
+            }
         }else{
             return LINK_INVALID_LABEL;
         }
@@ -157,13 +170,37 @@ int l64_addFile(codeHead* cH, FILE* fin){
     return LINK_OK;
 }
 
+/*
+ * Complete all the left alone lines about branching in an about-to-be-linked code.
+ *  Arguments :
+ *      cH : the list with the machine code
+ *      lB : the list with the labels
+ *  return :
+ *      LINK_OK if everything went well
+ *      an error code otherwise
+ */
+int l64_branching(codeHead* cH, labelHead* lB){
+    for(uint64_t i=0; i<lB->size; i++){
+        label_tag* tag = l64_getList(cH, i)->tag;
+        if(!tag->alreadyPlaced){
+            return LINK_UNDEFINED_LABEL;
+        }
+        for(uint64_t i=0; i<tag->numberOfCalls; i++){
+            uint64_t* texte = (uint64_t*) l64_getList(cH, tag->places[i])->texte; //The line of code that need completion
+            *texte |= (tag->position << ARG_SHIFT_1);
+        }
+    }
+    return LINK_OK;
+}
+
 void l64_link(FILE** fin,FILE* fout, int nFiles){
     codeHead* cH = l64_initList();
+    labelHead* lB = l64_initList();
     for(int i=0; i<nFiles; i++){
-        l64_addFile(cH,fin[i]);
+        l64_addFile(cH, lB, fin[i]);
     }
 
-    //TODO : take care of branchings
+    l64_branching(cH, lB);
     
     BINARY_MW_TYPE magicWord = BINARY_MW;
     fwrite(&magicWord, 1, BINARY_MW_SIZE ,fout);
