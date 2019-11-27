@@ -13,7 +13,7 @@
  *      fout : pointer to the object file
  */
 void a64_assemble(FILE* fin,FILE* fout){
-    uint64_t magicWord = OBJECT_MW; //Writing the magic word
+    OBJECT_MW_TYPE magicWord = OBJECT_MW; //Writing the magic word
     fwrite(&magicWord, 1, OBJECT_MW_SIZE , fout);
     char* line = malloc(SIZELINE);
     char** elems = malloc(sizeof(char*) * 150); //We will never get 150 words

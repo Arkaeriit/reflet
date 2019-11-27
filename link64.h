@@ -28,7 +28,7 @@ code* l64_getList(codeHead* cH,uint64_t index);
 //
 
 int l64_addFile(codeHead* cH,FILE* fin);
-void l64_link(FILE** fin,FILE* fout);
+void l64_link(FILE** fin,FILE* fout,int nFiles);
 
 #endif
 

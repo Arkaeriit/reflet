@@ -26,6 +26,7 @@ void l64_addList(codeHead* cH,char* texte, uint8_t label){
     elem->next = malloc(sizeof(struct code_struct)); //We assume that the next element of a line is allocated but not initialized
     elem->texte = texte;
     elem->label = label;
+    cH->size++;
 }
 
 /*
@@ -37,12 +38,12 @@ void l64_addList(codeHead* cH,char* texte, uint8_t label){
  *      the structure representing the list. We can get the text by searching return->texte
  */
 code* l64_getList(codeHead* cH,uint64_t index){
-    if(index > cH->size || index < 1){
-        printf("Erreur, mauvais indexage");
+    if(index > cH->size || index < 0){
+        printf("Erreur, mauvais indexage\n");
         exit(EXIT_FAILURE);
     }
     struct code_struct* ret = cH->next;
-    for(int i=1;i<index;i++){
+    for(int i=0;i<index;i++){
         ret=ret->next;
     }
     return ret;
@@ -58,7 +59,7 @@ code* l64_getList(codeHead* cH,uint64_t index){
  *      an error code otherwise
  */
 int l64_addFile(codeHead* cH, FILE* fin){
-    uint64_t magicWord;
+    OBJECT_MW_TYPE magicWord;
     fread(&magicWord, 1, OBJECT_MW_SIZE ,fin);
     if(magicWord != OBJECT_MW){
         return LINK_INVALID_FILE;
@@ -78,5 +79,19 @@ int l64_addFile(codeHead* cH, FILE* fin){
     return LINK_OK;
 }
 
-void l64_link(FILE** fin,FILE* fout){}
+void l64_link(FILE** fin,FILE* fout, int nFiles){
+    codeHead* cH = l64_initList();
+    for(int i=0; i<nFiles; i++){
+        l64_addFile(cH,fin[i]);
+    }
+
+    //TODO : take care of branchings
     
+    BINARY_MW_TYPE magicWord = BINARY_MW;
+    fwrite(&magicWord, 1, BINARY_MW_SIZE ,fout);
+    for(uint64_t i=0; i<cH->size;i++){
+        code* line = l64_getList(cH,i);
+        fwrite(line->texte, 1, sizeof(uint64_t), fout);
+    }
+}
+

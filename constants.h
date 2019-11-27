@@ -13,9 +13,11 @@
 //Magic words
 #define BINARY_MW_SIZE 4
 #define BINARY_MW 0x4D565341 /*ASVM*/
+typedef uint32_t BINARY_MW_TYPE;
 #define BINARY_32_MW 0x32335341 /*AS32*/
 #define OBJECT_MW_SIZE 4
 #define OBJECT_MW 0x424F5341 /*ASOB*/
+typedef uint32_t OBJECT_MW_TYPE;
 
 
 //Error codes

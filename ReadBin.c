@@ -19,7 +19,7 @@ infofile rb_analyze(const char* filename){
         return ret;
     }
     FILE* fp = fopen(filename,"r");
-    uint64_t bufferReadStart; //buffer to read the magic word
+    BINARY_MW_TYPE bufferReadStart = 0; //buffer to read the magic word
     fread(&bufferReadStart,1, BINARY_MW_SIZE ,fp);
     fclose(fp);
     if(bufferReadStart == BINARY_MW ){
@@ -53,12 +53,12 @@ infofile rb_analyze(const char* filename){
 int rb_init64(vm_64* vm, const char* filename, uint32_t fileSize){
     vm->registers = malloc(sizeof(uint64_t) * 64);
     FILE* fp = fopen(filename,"r");
-    uint16_t a; //useless value
-    fread(&a, BINARY_32_MW ,1,fp); //the magic word is ignored
+    BINARY_MW_TYPE a = 0; //useless value to store the magic word
+    fread(&a, BINARY_MW_SIZE ,1,fp); //the magic word is ignored
     vm->flags = 0;
-    vm->nombreInstruction = (fileSize- BINARY_MW_SIZE ) / 8;
+    vm->nombreInstruction = (fileSize- BINARY_MW_SIZE ) / sizeof(uint64_t);
     vm->code = malloc(sizeof(uint64_t) * vm->nombreInstruction);
-    if(fread(vm->code,8,vm->nombreInstruction,fp) == vm->nombreInstruction){
+    if(fread(vm->code,sizeof(uint64_t),vm->nombreInstruction,fp) == vm->nombreInstruction){
         fclose(fp);
         return READ_OK;
     }

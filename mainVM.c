@@ -7,7 +7,10 @@ the vm and interprete a binary file.        |
 #include "Exec64.h"
 
 int main(int argc,char** argv){
-    char* filename = "test.bin";
+    if(argc < 2){
+        return 1;
+    }
+    char* filename = argv[1];
     
     infofile ifo = rb_analyze(filename);
     if(ifo.flagCorrect){

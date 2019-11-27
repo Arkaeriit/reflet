@@ -36,7 +36,8 @@ int main(int argc,char** argv){
         a64_assemble(fin,fout);
     }else if(!strcmp(*(argv+1),"link") && argc > 3){
         FILE **fin,*fout;
-        fin = malloc(sizeof(argc - 3));
+        int nFiles = argc - 3;
+        fin = malloc(sizeof(FILE*) * nFiles);
         for(int i=0; i<argc-3; i++){
             fin[i] = fopen(*(argv+2+i),"r");
             if(fin == NULL){
@@ -44,7 +45,8 @@ int main(int argc,char** argv){
                 return 2;
             }
         }
-        l64_link(fin,fout);
+        fout = fopen(argv[argc-1],"w");
+        l64_link(fin,fout,nFiles);
     }else{
         quickHelp();
         return 1;
