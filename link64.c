@@ -150,11 +150,11 @@ int l64_addFile(codeHead* cH, labelHead* lB, FILE* fin){
             fread(instruction, 1, sizeof(uint64_t), fin);
             l64_addList(cH, instruction, 'i');
         }else if(bufferStart == 'j'){
-            char* labelName = malloc(sizeof(char) * SIZELINE);
+            char* labelName = malloc(sizeof(char) * MAX_SIZE_LABEL);
             char* opperand = malloc(sizeof(uint64_t)); //The start of the line of machine code
             fread(&bufferStart, 1, 1, fin);
             fread(opperand, 1, 2, fin);
-            fread(labelName, 1, SIZELINE, fin);
+            fread(labelName, 1, MAX_SIZE_LABEL, fin);
             if(bufferStart == 'd'){
                 l64_addLabel(lB, labelName, cH->size);
             }else if(bufferStart == 'j'){

@@ -28,5 +28,9 @@
 
 #define DSP_R 0x3FF
 
+#define LAB 0x000
+#define JMP 0x100
+
+
 #endif
 

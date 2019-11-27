@@ -43,11 +43,11 @@ typedef uint32_t OBJECT_MW_TYPE;
 
 
 //Compilation constants
-#define SIZELINE 255 /*Size of a line of object code that will be read*/
 #define NUM1_MASK 0xFFFFFFFFFFFF /*assert the max size of a number*/
 #define REG_MASK 0x3F /*assert the max size of a register*/
 #define MAX_SIZE_LABEL 150 /*Max number of char in a label name*/
 #define MAX_CALL_NUMBER 1000 /*Maximun number of position from where a label can be called*/
+#define SIZELINE MAX_SIZE_LABEL + 3 /*Size of a line of object code that will be read*/ /*It is the longest name a label can habe + a indicating byte + 2 opperand bytes*/
 
 
 //Execution constants
@@ -55,6 +55,7 @@ typedef uint32_t OBJECT_MW_TYPE;
 #define REG1 0xFC00 /*Mask to get the 1st register*/
 #define REG2 0x3F0000 /*Mask to get the 2nd register*/
 #define REG3 0xFC00000 /*Mask to get the 3rd register*/
+#define NUM0 0xFFFFFFFFFFFFFC00/*Mask to get the numeric value if there is 0*/
 #define NUM1 0xFFFFFFFFFFFF0000/*Mask to get the numeric value if there is only 1 register*/
 
 

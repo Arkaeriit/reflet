@@ -18,7 +18,7 @@ void a64_assemble(FILE* fin,FILE* fout){
     char* line = malloc(SIZELINE);
     uint64_t lineNumber = 1;
     char** elems = malloc(sizeof(char*) * 150); //We will never get 150 words
-    fgets(line,255,fin);
+    fgets(line,SIZELINE,fin);
     while(line != NULL && strlen(line) > 2){
         uint8_t n = aXX_preprocessLine(line,elems);
         uint8_t a = a64_compileLine(elems,n,line);
@@ -27,7 +27,7 @@ void a64_assemble(FILE* fin,FILE* fout){
             fwrite(line,8,1,fout);
         }else if(a == COMPILED_LINE_BRANCH){
             fprintf(fout,"j");
-            fwrite(line,200,1,fout);
+            fwrite(line, SIZELINE,1,fout);
         }else{
             fprintf(stderr,"Error line %" PRIx64 ":\n",lineNumber);
             return;
@@ -51,7 +51,7 @@ void a64_assemble(FILE* fin,FILE* fout){
  *      COMPILED_LINE_INSTRUCTION if there is an error
  */
 uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
-    memset(ret,0,strlen(ret));
+    memset(ret, 0, SIZELINE);
     uint64_t* fullCode = (uint64_t*) ret; //representing the output as a 64 bit number
     if(!strcmp(elems[0],"MOV") && n == 3){
         if(elems[1][0] == 'R'){
@@ -101,6 +101,23 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
             fprintf(stderr,"    Wrong argument for DSP operation.\n");
             return COMPILED_LINE_NOT_OK;
         }
+    }else if(!strcmp(elems[0],"LAB")){
+        if(n != 2){
+            fprintf(stderr,"    Wrong argument for marking a label.\n");
+            return COMPILED_LINE_NOT_OK;
+        }
+        *ret = 'd';
+        strcpy(ret + 3,elems[1]); //We add the name of the label 3 bytes into the instruction
+        return COMPILED_LINE_BRANCH;
+    }else if(!strcmp(elems[0],"JMP")){
+        if(n != 2){
+            fprintf(stderr,"    Wrong argument for JMP operation.\n");
+            return COMPILED_LINE_NOT_OK;
+        }
+        *ret = 'j';
+        *((uint16_t*) (ret+1)) = JMP; //We define the opperand
+        strcpy(ret + 3,elems[1]); //We add the name of the label 3 bytes into the instruction
+        return COMPILED_LINE_BRANCH;
     }else{
         fprintf(stderr,"    Unknown operation.\n");
         return COMPILED_LINE_NOT_OK;

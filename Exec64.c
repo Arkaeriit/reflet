@@ -15,7 +15,8 @@
  */
 int e64_execute(vm_64* vm){
     uint8_t reg1,reg2,reg3; //variable to store the registers' numbers.
-    for(uint64_t i=0;i<vm->nombreInstruction;i++){
+    uint64_t i = 0; //Index of the position of the line of machine code that must be read
+    while(i < vm->nombreInstruction){
         uint64_t inst = vm->code[i];
         uint16_t opperand = inst & OPP;
         //printf("%lx %x %x %lx\n",inst,opperand,e64_reg1(inst),e64_num1(inst)); //debug
@@ -108,19 +109,30 @@ int e64_execute(vm_64* vm){
                 reg1 = e64_reg1(inst);
                 printf("%" PRIu64 "\n",vm->registers[reg1]);
                 break;
+            case JMP : 
+                i = e64_num0(inst); /*The jump pu us in the place we were the instruction before the label. The i++ will put us where we want to be.*/
+                break;
             default:
                 fprintf(stderr,"Error, invalid Opperand : %" PRIx16 "\nInstruction : %" PRIx64 "\n",opperand,inst);
                 return EXECUTE_UNKNOWN_OPPERAND;
         }
+        i++;
     }
     return EXECUTE_OK;
+}
+
+/*
+ * Get the numeric argument of an instruction if the instruction take 0 regster as argument
+ */
+uint64_t e64_num0(uint64_t inst){
+    return (inst & NUM0) >> ARG_SHIFT_1;
 }
 
 /*
  * Get the numeric argument of an instruction if the instruction take 1 regster as argument
  */
 uint64_t e64_num1(uint64_t inst){
-    return (inst & NUM1) >> 16;
+    return (inst & NUM1) >> ARG_SHIFT_2;
 }
 
 /*
