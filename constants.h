@@ -6,6 +6,8 @@
 #ifndef CONSTANT
 #define CONSTANT
 
+#include <inttypes.h>
+
 //Opperand for the 64 bits mode
 #include "opperand64.h"
 

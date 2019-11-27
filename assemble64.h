@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include "assembleXX.h"
 #include "constants.h"
+#include "assemble64math.h"
 
 
 void a64_assemble(FILE* fin,FILE* fout);

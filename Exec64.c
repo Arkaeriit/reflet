@@ -44,6 +44,66 @@ int e64_execute(vm_64* vm){
                 reg3 = e64_reg3(inst);           
                 vm->registers[reg1] = vm->registers[reg2] + vm->registers[reg3];
                 break;
+            case SUB_RN :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] -= e64_num1(inst);
+                break;
+            case SUB_RR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg1] -= vm->registers[reg2];
+                break;
+            case SUB_RRR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                reg3 = e64_reg3(inst);           
+                vm->registers[reg1] = vm->registers[reg2] - vm->registers[reg3];
+                break;
+            case TIM_RN :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] *= e64_num1(inst);
+                break;
+            case TIM_RR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg1] *= vm->registers[reg2];
+                break;
+            case TIM_RRR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                reg3 = e64_reg3(inst);           
+                vm->registers[reg1] = vm->registers[reg2] * vm->registers[reg3];
+                break;
+            case DIV_RN :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] /= e64_num1(inst);
+                break;
+            case DIV_RR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg1] /= vm->registers[reg2];
+                break;
+            case DIV_RRR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                reg3 = e64_reg3(inst);           
+                vm->registers[reg1] = vm->registers[reg2] / vm->registers[reg3];
+                break;
+            case MOD_RN :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] %= e64_num1(inst);
+                break;
+            case MOD_RR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg1] %= vm->registers[reg2];
+                break;
+            case MOD_RRR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                reg3 = e64_reg3(inst);           
+                vm->registers[reg1] = vm->registers[reg2] % vm->registers[reg3];
+                break;
             case DSP_R :
                 reg1 = e64_reg1(inst);
                 printf("%" PRIu64 "\n",vm->registers[reg1]);
