@@ -102,22 +102,17 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
             return COMPILED_LINE_NOT_OK;
         }
     }else if(!strcmp(elems[0],"LAB")){
-        if(n != 2){
-            fprintf(stderr,"    Wrong argument for marking a label.\n");
-            return COMPILED_LINE_NOT_OK;
-        }
-        *ret = 'd';
-        strcpy(ret + 3,elems[1]); //We add the name of the label 3 bytes into the instruction
-        return COMPILED_LINE_BRANCH;
+        return a64j_lab( elems, n, ret);
     }else if(!strcmp(elems[0],"JMP")){
-        if(n != 2){
-            fprintf(stderr,"    Wrong argument for JMP operation.\n");
-            return COMPILED_LINE_NOT_OK;
-        }
-        *ret = 'j';
-        *((uint16_t*) (ret+1)) = JMP; //We define the opperand
-        strcpy(ret + 3,elems[1]); //We add the name of the label 3 bytes into the instruction
-        return COMPILED_LINE_BRANCH;
+        return a64j_jmp(elems, n, ret);
+    }else if(!strcmp(elems[0],"JZ")){
+        return a64j_jz(elems, n, ret);
+    }else if(!strcmp(elems[0],"JB")){
+        return a64j_jb(elems, n, ret);
+    }else if(!strcmp(elems[0],"JSE")){
+        return a64j_jse(elems, n, ret);
+    }else if(!strcmp(elems[0],"CMP")){
+        return a64j_cmp(elems, n, fullCode);
     }else{
         fprintf(stderr,"    Unknown operation.\n");
         return COMPILED_LINE_NOT_OK;

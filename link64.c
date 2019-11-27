@@ -123,8 +123,8 @@ int l64_addLabel(labelHead* lB,const char* labelName, uint64_t position){
  */
 void l64_addCall(labelHead* lB, const char* labelName, uint64_t position){
     label_tag* tag = l64_autoGetLabel(lB, labelName);
-    tag->numberOfCalls++;
     tag->places[tag->numberOfCalls] = position;
+    tag->numberOfCalls++;
 }
 
 /*
@@ -181,7 +181,7 @@ int l64_addFile(codeHead* cH, labelHead* lB, FILE* fin){
  */
 int l64_branching(codeHead* cH, labelHead* lB){
     for(uint64_t i=0; i<lB->size; i++){
-        label_tag* tag = l64_getList(cH, i)->tag;
+        label_tag* tag = l64_getList(lB, i)->tag;
         if(!tag->alreadyPlaced){
             return LINK_UNDEFINED_LABEL;
         }

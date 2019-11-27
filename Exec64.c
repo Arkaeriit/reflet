@@ -105,12 +105,40 @@ int e64_execute(vm_64* vm){
                 reg3 = e64_reg3(inst);           
                 vm->registers[reg1] = vm->registers[reg2] % vm->registers[reg3];
                 break;
+            case CMP_RN :
+                reg1 = e64_reg1(inst);
+                e64_cmp(vm->flags, vm->registers[reg1], e64_num1(inst));
+                break;
+            case CMP_RR : 
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                e64_cmp(vm->flags, vm->registers[reg1], vm->registers[reg2]);
+                break;
             case DSP_R :
                 reg1 = e64_reg1(inst);
                 printf("%" PRIu64 "\n",vm->registers[reg1]);
                 break;
             case JMP : 
-                i = e64_num0(inst); /*The jump pu us in the place we were the instruction before the label. The i++ will put us where we want to be.*/
+                i = e64_num0(inst); /*The jump pu us in the place we were after the label. The i-- compensates the i++ and will put us where we want to be.*/
+                i--;
+                break;
+            case JZ :
+                if(vm->flags[FLAG_ZERO]){
+                    i = e64_num0(inst);
+                    i--;
+                }
+                break;
+            case JB :
+                if(vm->flags[FLAG_BIGGER]){
+                    i = e64_num0(inst);
+                    i--;
+                }
+                break;
+            case JSE :
+                if(vm->flags[FLAG_SMALLER_OR_EQUAL]){
+                    i = e64_num0(inst);
+                    i--;
+                }
                 break;
             default:
                 fprintf(stderr,"Error, invalid Opperand : %" PRIx16 "\nInstruction : %" PRIx64 "\n",opperand,inst);
@@ -156,3 +184,16 @@ uint8_t e64_reg3(uint64_t inst){
     return (uint8_t) ((inst & REG3) >> ARG_SHIFT_3);
 }
 
+/*
+ * Update the flags of the VM when comparing two numbers
+ *  Arguments : 
+ *      flags : a pointer to the flags
+ *      num1 : first number to compare
+ *      num2 : second number to compare
+ */
+void e64_cmp(bool* flags, uint64_t num1, uint64_t num2){
+    flags[FLAG_ZERO] = (num1 == num2);
+    flags[FLAG_BIGGER] = (num1 > num2);
+    flags[FLAG_SMALLER_OR_EQUAL] = (num1 <= num2);
+}
+   

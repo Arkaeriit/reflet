@@ -55,7 +55,9 @@ int rb_init64(vm_64* vm, const char* filename, uint32_t fileSize){
     FILE* fp = fopen(filename,"r");
     BINARY_MW_TYPE a = 0; //useless value to store the magic word
     fread(&a, BINARY_MW_SIZE ,1,fp); //the magic word is ignored
-    vm->flags = 0;
+    vm->flags = malloc(sizeof(bool) * FLAGS_NUMBER);
+    for(int i=0; i<FLAGS_NUMBER; i++)
+        vm->flags[i] = false;
     vm->nombreInstruction = (fileSize- BINARY_MW_SIZE ) / sizeof(uint64_t);
     vm->code = malloc(sizeof(uint64_t) * vm->nombreInstruction);
     if(fread(vm->code,sizeof(uint64_t),vm->nombreInstruction,fp) == vm->nombreInstruction){

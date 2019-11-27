@@ -25,11 +25,16 @@
 #define MOD_RRR 0x314
 
 
+#define CMP_RN 0x320
+#define CMP_RR 0x321
 
 #define DSP_R 0x3FF
 
 #define LAB 0x000
 #define JMP 0x100
+#define JZ 0x101
+#define JB 0x102
+#define JSE 0x103
 
 
 #endif

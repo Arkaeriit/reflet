@@ -64,5 +64,12 @@ typedef uint32_t OBJECT_MW_TYPE;
 #define ARG_SHIFT_2 16
 #define ARG_SHIFT_3 22
 
+//Flags constants
+#define FLAGS_NUMBER 3
+#define FLAG_ZERO 0
+#define FLAG_BIGGER 1
+#define FLAG_SMALLER_OR_EQUAL 2
+
+
 #endif
 
