@@ -1,5 +1,18 @@
-#include "link64.h"
+/*--------------------------------------------------------------------\
+||This file contain the function used to link various object files    |
+|into a single binary file. It's main task is to put the instruction  |
+|one after an other and handle lables used for function call or other |
+|branching. If the next line is a simple instruction it will be a     |
+|'i' followed by 64 bits of instruction. If it is the declaration     |
+|of a new label it will be a 'j' folowed by a 'd' followed by two     |
+|blank bytes followed by a the name of the label on 150 bytes. If     |
+|it is a branching or a function call it will be a 'j' followed       |
+|by a 'j' followed by two bytes used to know the opperand of the      |
+|reulting instruction, followed by the name of the label where to     |
+|jump.                                                                |
+\--------------------------------------------------------------------*/
 
+#include "link64.h"
 
 /*
  * Initialise a list where we put the code from all object files.

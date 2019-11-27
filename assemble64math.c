@@ -1,3 +1,7 @@
+/*--------------------------------------------\
+|This file contained functions used to compile|
+|various mathematical opperation.             |
+\--------------------------------------------*/
 
 #include "assemble64math.h"
 
