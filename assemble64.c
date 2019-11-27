@@ -21,18 +21,19 @@ void a64_assemble(FILE* fin,FILE* fout){
     fgets(line,SIZELINE,fin);
     while(line != NULL && strlen(line) > 2){
         uint8_t n = aXX_preprocessLine(line,elems);
-        uint8_t a = a64_compileLine(elems,n,line);
-        if(a == COMPILED_LINE_INSTRUCTION){
-            fprintf(fout,"i");
-            fwrite(line,8,1,fout);
-        }else if(a == COMPILED_LINE_BRANCH){
-            fprintf(fout,"j");
-            fwrite(line, SIZELINE,1,fout);
-        }else{
-            fprintf(stderr,"Error line %" PRIx64 ":\n",lineNumber);
-            return;
+        if(n){ //no point in compiling if there is no elements
+            uint8_t a = a64_compileLine(elems,n,line);
+            if(a == COMPILED_LINE_INSTRUCTION){
+                fprintf(fout,"i");
+                fwrite(line,8,1,fout);
+            }else if(a == COMPILED_LINE_BRANCH){
+                fprintf(fout,"j");
+                fwrite(line, SIZELINE,1,fout);
+            }else{
+                fprintf(stderr,"Error line %" PRIx64 ":\n",lineNumber);
+                return;
+            }
         }
-        
         aXX_freeElems(n,elems);
         fgets(line,SIZELINE,fin);
         lineNumber++;

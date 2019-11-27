@@ -42,3 +42,12 @@ clean :
 	rm -f asvm
 	rm -f asasm
 
+#instalation
+install :
+	mv -f asvm /usr/local/bin/asvm
+	mv -f asasm /usr/local/bin/asasm
+
+uninstall :
+	rm -f /usr/local/bin/asvm
+	rm -f /usr/local/bin/asasm
+

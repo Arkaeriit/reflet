@@ -70,6 +70,8 @@ typedef uint32_t OBJECT_MW_TYPE;
 #define FLAG_BIGGER 1
 #define FLAG_SMALLER_OR_EQUAL 2
 
+//misc constants
+#define REGISTERS_NUMBER 64
 
 #endif
 

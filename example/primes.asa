@@ -1,0 +1,44 @@
+;This program calculate the 10000 first primes numbers
+;When I wrote this propram the vm was at it's early steps,
+;this is why there is no proper function calls and the conditions are a bit wierd.
+;Nonetheless it shows that the vm can be used to run "usefull" programs.
+MOV R0 1 ; The number at hand
+DSP R0 ; We know that 1 is prime ,duh
+MOV R1 1 ; The number of already calculated primes numbers
+LAB primeLoop
+ADD R0 1
+MOV R3 R0 ;We prepare the call of isPrime
+JMP isPrime
+LAB RetIsPrime ;There is no functions yet so we have to set the return label manualy
+CMP R4 1
+JZ primed
+LAB RetPrimed
+CMP R1 10000
+JZ end
+JMP primeLoop
+  
+  
+LAB isPrime ;return 1 in R4 if R3 is prime and return 0 otherwise
+MOV R5 1 ; loop counter
+LAB isPrimeLoop
+ADD R5 1
+CMP R5 R3 ; prime
+JZ Prime 
+MOD R4 R3 R5 ;is it divisable
+CMP R4 0 ;is it 0 ?
+JZ notPrime
+JMP isPrimeLoop
+LAB Prime
+MOV R4 1
+JMP RetIsPrime
+LAB notPrime
+JMP RetIsPrime ; already 0 in R4
+  
+LAB primed ;print and update the counter if there is a prime number
+DSP R0 ; we print the numbers
+ADD R1 1 ; one more prime
+JMP RetPrimed
+  
+LAB end
+MOV R0 R0
+ 

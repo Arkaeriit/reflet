@@ -81,10 +81,11 @@ uint8_t aXX_preprocessLine(char* line,char** list){
 uint64_t aXX_readHex(char* number){
     uint64_t ret = 0;
     for(uint8_t i=0; i<strlen(number); i++){
-        if( 48 <= number[i] && number[i] <= 57) //a digit between 0 and 9
-            ret = ret + ((number[i] - 48) << (4 * i));
-        else if(65 <= number[i] && number[i] <= 70) //a digit between A ans F
-            ret = ret + ((number[i] - 55) << (4 * i));
+        char curentDigit = number[strlen(number) - i];
+        if( 48 <= curentDigit && curentDigit <= 57) //a digit between 0 and 9
+            ret = ret + ((curentDigit - 48) << (4 * i));
+        else if(65 <= curentDigit && curentDigit <= 70) //a digit between A ans F
+            ret = ret + ((curentDigit - 55) << (4 * i));
     }
     return ret;
 }

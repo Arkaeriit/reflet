@@ -12,8 +12,8 @@
 typedef struct vm_64_struct {
     uint64_t nombreInstruction;
     uint64_t* code;
-    bool* flags;
-    uint64_t* registers;
+    bool flags[FLAGS_NUMBER];
+    uint64_t registers[REGISTERS_NUMBER];
 } vm_64;
 
 //Sert à la fonction rb_analyze
