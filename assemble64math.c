@@ -40,6 +40,7 @@ uint8_t a64m_add(char** elems,uint8_t n,uint64_t* fullCode){
         *fullCode |= (reg3 & REG_MASK) << ARG_SHIFT_3;
         return COMPILED_LINE_INSTRUCTION;
     }else{
+        fprintf(stderr,"    Wrong argument for ADD operation.\n"); 
         return COMPILED_LINE_NOT_OK;
     }
 }
@@ -83,6 +84,7 @@ uint8_t a64m_sub(char** elems,uint8_t n,uint64_t* fullCode){
         *fullCode |= (reg3 & REG_MASK) << ARG_SHIFT_3;
         return COMPILED_LINE_INSTRUCTION;
     }else{
+        fprintf(stderr,"    Wrong argument for SUB operation.\n"); 
         return COMPILED_LINE_NOT_OK;
     }
 }
@@ -126,6 +128,7 @@ uint8_t a64m_tim(char** elems,uint8_t n,uint64_t* fullCode){
         *fullCode |= (reg3 & REG_MASK) << ARG_SHIFT_3;
         return COMPILED_LINE_INSTRUCTION;
     }else{
+        fprintf(stderr,"    Wrong argument for TIM operation.\n"); 
         return COMPILED_LINE_NOT_OK;
     }
 }
@@ -169,6 +172,7 @@ uint8_t a64m_div(char** elems,uint8_t n,uint64_t* fullCode){
         *fullCode |= (reg3 & REG_MASK) << ARG_SHIFT_3;
         return COMPILED_LINE_INSTRUCTION;
     }else{
+        fprintf(stderr,"    Wrong argument for DIV operation.\n"); 
         return COMPILED_LINE_NOT_OK;
     }
 }
@@ -212,6 +216,7 @@ uint8_t a64m_mod(char** elems,uint8_t n,uint64_t* fullCode){
         *fullCode |= (reg3 & REG_MASK) << ARG_SHIFT_3;
         return COMPILED_LINE_INSTRUCTION;
     }else{
+        fprintf(stderr,"    Wrong argument for MOD operation.\n"); 
         return COMPILED_LINE_NOT_OK;
     }
 }

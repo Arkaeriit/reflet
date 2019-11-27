@@ -78,6 +78,7 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
                 return COMPILED_LINE_INSTRUCTION;
             }
         }else{
+            fprintf(stderr,"    Wrong argument for MOV operation.\n");
             return COMPILED_LINE_NOT_OK;
         }
     }else if(!strcmp(elems[0],"ADD")){
@@ -97,12 +98,14 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
             *fullCode |= (reg1 & REG_MASK ) << ARG_SHIFT_1 ; //We set the register
             return COMPILED_LINE_INSTRUCTION;
         }else{
+            fprintf(stderr,"    Wrong argument for DSP operation.\n");
             return COMPILED_LINE_NOT_OK;
         }
     }else{
+        fprintf(stderr,"    Unknown operation.\n");
         return COMPILED_LINE_NOT_OK;
     }
+    fprintf(stderr,"    Unreadable line.\n");
     return COMPILED_LINE_NOT_OK;
 }
-
 
