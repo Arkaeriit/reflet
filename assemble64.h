@@ -9,9 +9,6 @@
 #include "assembleXX.h"
 #include "constants.h"
 
-//mask for the data
-#define NUM1_MASK 0xFFFFFFFFFFFF
-#define REG_MASK 0x3F
 
 void a64_assemble(FILE* fin,FILE* fout);
 uint8_t a64_compileLine(char** elems,uint8_t n,char* ret);

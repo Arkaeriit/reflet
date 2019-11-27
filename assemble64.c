@@ -53,20 +53,25 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
     if(!strcmp(elems[0],"MOV") && n == 3){
         if(elems[1][0] == 'R'){
             if(elems[2][0] == 'R'){ //A register
-                //todo
+                uint8_t reg1 = aXX_readDec(elems[1] + 1); //The +1 is used to prevent readDec from reading the R
+                uint8_t reg2 = aXX_readDec(elems[2] + 1);
+                *fullCode = MOV_RR;
+                *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1; //We set the result register
+                *fullCode |= (reg2 & REG_MASK) << ARG_SHIFT_2; //We set the input register
+                return COMPILED_LINE_INSTRUCTION;
             }else if(elems[2][0] == 'X'){ //An hexadecimal number
-                uint8_t reg = aXX_readDec(elems[1] + 1);
+                uint8_t reg1 = aXX_readDec(elems[1] + 1);
                 uint64_t num = aXX_readHex(elems[2] + 1);
                 *fullCode = MOV_RN; //We set the opperand
-                *fullCode |= (reg & REG_MASK ) << 10; //We set the register
-                *fullCode |= (num & NUM1_MASK ) << 16; //We set the data
+                *fullCode |= (reg1 & REG_MASK ) << ARG_SHIFT_1; //We set the register
+                *fullCode |= (num & NUM1_MASK ) << ARG_SHIFT_2; //We set the data
                 return COMPILED_LINE_INSTRUCTION;
             }else{ //A decimal number
-                uint8_t reg = aXX_readDec(elems[1] + 1);
+                uint8_t reg1 = aXX_readDec(elems[1] + 1);
                 uint64_t num = aXX_readDec(elems[2]);
                 *fullCode = MOV_RN; //We set the opperand
-                *fullCode |= (reg & REG_MASK ) << 10; //We set the register
-                *fullCode |= (num & NUM1_MASK ) << 16; //We set the data
+                *fullCode |= (reg1 & REG_MASK ) << ARG_SHIFT_1 ; //We set the register
+                *fullCode |= (num & NUM1_MASK ) << ARG_SHIFT_2 ; //We set the data
                 return COMPILED_LINE_INSTRUCTION;
             }
         }else{
@@ -74,9 +79,9 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
         }
     }else if(!strcmp(elems[0],"DSP") && n == 2){
         if(elems[1][0] == 'R'){
-            uint8_t reg = aXX_readDec(elems[1] + 1);
+            uint8_t reg1 = aXX_readDec(elems[1] + 1);
             *fullCode = DSP_R; //We set the opperand
-            *fullCode |= (reg & REG_MASK ) << 10; //We set the register
+            *fullCode |= (reg1 & REG_MASK ) << ARG_SHIFT_1 ; //We set the register
             return COMPILED_LINE_INSTRUCTION;
         }else{
             return COMPILED_LINE_NOT_OK;
