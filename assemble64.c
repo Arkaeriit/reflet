@@ -102,6 +102,26 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
             fprintf(stderr,"    Wrong argument for DSP operation.\n");
             return COMPILED_LINE_NOT_OK;
         }
+    }else if(!strcmp(elems[0],"PUSH")){
+        if(n != 2 || elems[1][0] != 'R'){
+            fprintf(stderr,"    Wrong argument for PUSH operation.\n");
+            return COMPILED_LINE_NOT_OK;
+        }
+        uint8_t reg1 = aXX_readDec(elems[1] + 1);
+        *fullCode = PUSH;
+        *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+        return COMPILED_LINE_INSTRUCTION;
+    }else if(!strcmp(elems[0],"PULL")){
+        if(n != 2 || elems[1][0] != 'R'){
+            fprintf(stderr,"    Wrong argument for PULL operation.\n");
+            return COMPILED_LINE_NOT_OK;
+        }
+        uint8_t reg1 = aXX_readDec(elems[1] + 1);
+        *fullCode = PULL;
+        *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+        return COMPILED_LINE_INSTRUCTION;
+    }else if(!strcmp(elems[0],"PUSH")){
+
     }else if(!strcmp(elems[0],"LAB")){
         return a64j_lab( elems, n, ret);
     }else if(!strcmp(elems[0],"JMP")){

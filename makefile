@@ -1,10 +1,11 @@
-FLAGS = -Wall -g
+#FLAGS = -Wall -g -Og #for debugging
+FLAGS = -Wall -O3 #for normal use
 
 all : asvm asasm
 
 #The VM
-asvm : mainVM.o ReadBin.o Exec64.o
-	gcc mainVM.o ReadBin.o Exec64.o $(FLAGS) -o asvm
+asvm : mainVM.o ReadBin.o Exec64.o stack.o
+	gcc mainVM.o ReadBin.o Exec64.o stack.o $(FLAGS) -o asvm
 
 mainVM.o : mainVM.c ReadBin.h
 	gcc -c mainVM.c $(FLAGS) -o mainVM.o
@@ -14,6 +15,9 @@ ReadBin.o : ReadBin.c ReadBin.h
 
 Exec64.o : Exec64.c Exec64.h ReadBin.h
 	gcc -c Exec64.c $(FLAGS) -o Exec64.o
+
+stack.o : stack.c stack.h
+	gcc -c stack.c $(FLAGS) -o stack.o
 
 #Assembler and linker
 asasm : mainASM.o assemble64.o assembleXX.o link64.o assemble64math.o assemble64jump.o

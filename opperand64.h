@@ -28,6 +28,9 @@
 #define CMP_RN 0x320
 #define CMP_RR 0x321
 
+#define PUSH 0x323
+#define PULL 0x324
+
 #define DSP_R 0x3FF
 
 #define LAB 0x000

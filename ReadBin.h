@@ -7,13 +7,16 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "constants.h"
-#include "stdbool.h"
+#include "stack.h"
+#include <stdbool.h>
 
 typedef struct vm_64_struct {
     uint64_t nombreInstruction;
     uint64_t* code;
     bool flags[FLAGS_NUMBER];
     uint64_t registers[REGISTERS_NUMBER];
+    stack* registersStack;
+    stack* functionsStack;
 } vm_64;
 
 //Sert à la fonction rb_analyze
