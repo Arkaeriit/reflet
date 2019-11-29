@@ -39,6 +39,9 @@
 #define JB 0x102
 #define JSE 0x103
 
+#define FUNC 0x000
+#define CALL 0x110
+#define RET 0x111
 
 #endif
 

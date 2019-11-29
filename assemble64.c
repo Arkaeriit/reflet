@@ -122,7 +122,7 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
         return COMPILED_LINE_INSTRUCTION;
     }else if(!strcmp(elems[0],"PUSH")){
 
-    }else if(!strcmp(elems[0],"LAB")){
+    }else if(!strcmp(elems[0],"LAB") || !strcmp(elems[0],"FUNC")){
         return a64j_lab( elems, n, ret);
     }else if(!strcmp(elems[0],"JMP")){
         return a64j_jmp(elems, n, ret);
@@ -134,6 +134,10 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
         return a64j_jse(elems, n, ret);
     }else if(!strcmp(elems[0],"CMP")){
         return a64j_cmp(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"CALL")){
+        return a64j_call(elems, n, ret);
+    }else if(!strcmp(elems[0],"RET")){
+        return a64j_ret(elems, n, fullCode);
     }else{
         fprintf(stderr,"    Unknown operation.\n");
         return COMPILED_LINE_NOT_OK;

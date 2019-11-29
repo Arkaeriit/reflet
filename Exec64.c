@@ -148,6 +148,14 @@ int e64_execute(vm_64* vm){
                     i--;
                 }
                 break;
+            case CALL :
+                st_push(vm->functionsStack, i);
+                i = e64_num0(inst);
+                i--;
+                break;
+            case RET :
+                i = st_pull(vm->functionsStack); /*There is no i-- here because we saved the posithion from where we made th function call so we need the i++ to move on*/
+                break;
             default:
                 fprintf(stderr,"Error, invalid Opperand : %" PRIx16 "\nInstruction : %" PRIx64 "\n",opperand,inst);
                 return EXECUTE_UNKNOWN_OPPERAND;

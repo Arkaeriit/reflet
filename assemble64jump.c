@@ -143,3 +143,43 @@ uint8_t a64j_jse(char** elems,uint8_t n,char* ret){
     return COMPILED_LINE_BRANCH;
 }
 
+/*
+ * compile a line of assembly language coding for a function call
+ * Arguments:
+ *      elems : the result of aXX_preprocessLine
+ *      n : the size of elems
+ *      fullCode : the compiled instruction
+ * Return :
+ *      COMPILED_LINE_BRANCH if the compilation of the line went well
+ *      COMPILED_LINE_NOT_OK if there is an error
+ */
+uint8_t a64j_call(char** elems,uint8_t n,char* ret){
+    if(n != 2){
+        fprintf(stderr,"    Wrong argument for function call.\n");
+        return COMPILED_LINE_NOT_OK;
+    }
+    *ret = 'j';
+    *((uint16_t*) (ret+1)) = CALL; //We define the opperand
+    strcpy(ret + 3,elems[1]); //We add the name of the label 3 bytes into the instruction
+    return COMPILED_LINE_BRANCH;
+}
+
+/*
+ * compile a line of assembly language coding for a function return
+ * Arguments:
+ *      elems : the result of aXX_preprocessLine
+ *      n : the size of elems
+ *      fullCode : the compiled instruction
+ * Return :
+ *      COMPILED_LINE_INSTRUCTION if the compilation of the line went well
+ *      COMPILED_LINE_NOT_OK if there is an error
+ */
+uint8_t a64j_ret(char** elems,uint8_t n,uint64_t* fullCode){
+    if(n != 1){
+        fprintf(stderr,"    Wrong argument for RET operation.\n");
+        return COMPILED_LINE_NOT_OK;
+    }
+    *fullCode = RET;
+    return COMPILED_LINE_INSTRUCTION;
+}
+

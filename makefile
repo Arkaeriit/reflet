@@ -1,5 +1,5 @@
-#FLAGS = -Wall -g -Og #for debugging
-FLAGS = -Wall -O3 #for normal use
+FLAGS = -Wall -g -Og #for debugging
+#FLAGS = -Wall -O3 #for normal use
 
 all : asvm asasm
 
