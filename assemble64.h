@@ -10,6 +10,7 @@
 #include "constants.h"
 #include "assemble64math.h"
 #include "assemble64jump.h"
+#include "assemble64memory.h"
 
 
 void a64_assemble(FILE* fin,FILE* fout);

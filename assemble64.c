@@ -138,6 +138,12 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
         return a64j_call(elems, n, ret);
     }else if(!strcmp(elems[0],"RET")){
         return a64j_ret(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"FREE")){
+        return a64m_free(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"ASK")){
+        return a64m_ask(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"ASK_BYTE")){
+        return a64m_ask_byte(elems, n, fullCode);
     }else{
         fprintf(stderr,"    Unknown operation.\n");
         return COMPILED_LINE_NOT_OK;

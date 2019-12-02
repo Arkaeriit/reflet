@@ -122,6 +122,28 @@ int e64_execute(vm_64* vm){
                 reg1 = e64_reg1(inst);
                 vm->registers[reg1] = st_pull(vm->registersStack);
                 break;
+            case FREE :
+                reg1 = e64_reg1(inst);
+                free((uint64_t*) vm->registers[reg1]);
+                break;
+            case ASK_RR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg1] = (uint64_t) malloc(sizeof(uint64_t) * vm->registers[reg2]);
+                break;
+            case ASK_RN :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] = (uint64_t) malloc(sizeof(uint64_t) * e64_num1(inst));
+                break;
+            case ASK_BYTE_RR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg1] = (uint64_t) malloc(vm->registers[reg2]);
+                break;
+            case ASK_BYTE_RN :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] = (uint64_t) malloc(e64_num1(inst));
+                break;
             case DSP_R :
                 reg1 = e64_reg1(inst);
                 printf("%" PRIu64 "\n",vm->registers[reg1]);

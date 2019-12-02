@@ -20,8 +20,8 @@ stack.o : stack.c stack.h
 	gcc -c stack.c $(FLAGS) -o stack.o
 
 #Assembler and linker
-asasm : mainASM.o assemble64.o assembleXX.o link64.o assemble64math.o assemble64jump.o
-	gcc mainASM.o assemble64.o assembleXX.o link64.o assemble64math.o assemble64jump.o $(FLAGS) -o asasm
+asasm : mainASM.o assemble64.o assembleXX.o link64.o assemble64math.o assemble64jump.o assemble64memory.o
+	gcc mainASM.o assemble64.o assembleXX.o link64.o assemble64math.o assemble64jump.o assemble64memory.o $(FLAGS) -o asasm
 
 mainASM.o : mainASM.c mainASM.h
 	gcc -c mainASM.c $(FLAGS) -o mainASM.o
@@ -34,11 +34,15 @@ assemble64math.o : assemble64math.c assemble64math.h
 
 assemble64jump.o : assemble64jump.c assemble64jump.h
 	gcc -c assemble64jump.c $(FLAGS) -o assemble64jump.o
+
 assembleXX.o : assembleXX.c assembleXX.h
 	gcc -c assembleXX.c $(FLAGS) -o assembleXX.o
 
 link64.o : link64.c link64.h
 	gcc -c link64.c $(FLAGS) -o link64.o
+
+assemble64memory.o : assemble64memory.h assemble64memory.c
+	gcc -c assemble64memory.c $(FLAGS) -o assemble64memory.o
 
 #misc
 clean : 

@@ -31,6 +31,12 @@
 #define PUSH 0x323
 #define PULL 0x324
 
+#define FREE 0x325
+#define ASK_RR 0x326
+#define ASK_RN 0x327
+#define ASK_BYTE_RR 0x328
+#define ASK_BYTE_RN 0x329
+
 #define DSP_R 0x3FF
 
 #define LAB 0x000
