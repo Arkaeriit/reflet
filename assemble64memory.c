@@ -74,3 +74,87 @@ uint8_t a64m_ask_byte(char** elems, uint8_t n, uint64_t* fullCode){
     }
 }
 
+/*
+ * compile a line of assembly language coding for a str opperation
+ * Arguments:
+ *      elems : the result of aXX_preprocessLine
+ *      n : the size of elems
+ *      fullCode : the compiled instruction
+ * Return :
+ *      COMPILED_LINE_NOT_OK if the compilation of the line went well
+ *      COMPILED_LINE_INSTRUCTION if there is an error
+ */
+uint8_t a64m_str(char** elems, uint8_t n, uint64_t* fullCode){
+    uint8_t config = a64_analyzeLine(elems, n);
+    if(config == COMPILE_RR){
+        a64_createMachineCode(STR, elems, n, fullCode);
+        return COMPILED_LINE_INSTRUCTION;
+    }else{
+        fprintf(stderr,"    Wrong argument for ASK_BYTE operation.\n"); 
+        return COMPILED_LINE_NOT_OK;
+    }
+}
+
+/*
+ * compile a line of assembly language coding for a ldr opperation
+ * Arguments:
+ *      elems : the result of aXX_preprocessLine
+ *      n : the size of elems
+ *      fullCode : the compiled instruction
+ * Return :
+ *      COMPILED_LINE_NOT_OK if the compilation of the line went well
+ *      COMPILED_LINE_INSTRUCTION if there is an error
+ */
+uint8_t a64m_ldr(char** elems, uint8_t n, uint64_t* fullCode){
+    uint8_t config = a64_analyzeLine(elems, n);
+    if(config == COMPILE_RR){
+        a64_createMachineCode(LDR, elems, n, fullCode);
+        return COMPILED_LINE_INSTRUCTION;
+    }else{
+        fprintf(stderr,"    Wrong argument for ASK_BYTE operation.\n"); 
+        return COMPILED_LINE_NOT_OK;
+    }
+}
+
+/*
+ * compile a line of assembly language coding for a str_byte opperation
+ * Arguments:
+ *      elems : the result of aXX_preprocessLine
+ *      n : the size of elems
+ *      fullCode : the compiled instruction
+ * Return :
+ *      COMPILED_LINE_NOT_OK if the compilation of the line went well
+ *      COMPILED_LINE_INSTRUCTION if there is an error
+ */
+uint8_t a64m_str_byte(char** elems, uint8_t n, uint64_t* fullCode){
+    uint8_t config = a64_analyzeLine(elems, n);
+    if(config == COMPILE_RR){
+        a64_createMachineCode(STR_BYTE, elems, n, fullCode);
+        return COMPILED_LINE_INSTRUCTION;
+    }else{
+        fprintf(stderr,"    Wrong argument for ASK_BYTE operation.\n"); 
+        return COMPILED_LINE_NOT_OK;
+    }
+}
+
+/*
+ * compile a line of assembly language coding for a ldr_byte opperation
+ * Arguments:
+ *      elems : the result of aXX_preprocessLine
+ *      n : the size of elems
+ *      fullCode : the compiled instruction
+ * Return :
+ *      COMPILED_LINE_NOT_OK if the compilation of the line went well
+ *      COMPILED_LINE_INSTRUCTION if there is an error
+ */
+uint8_t a64m_ldr_byte(char** elems, uint8_t n, uint64_t* fullCode){
+    uint8_t config = a64_analyzeLine(elems, n);
+    if(config == COMPILE_RR){
+        a64_createMachineCode(LDR_BYTE, elems, n, fullCode);
+        return COMPILED_LINE_INSTRUCTION;
+    }else{
+        fprintf(stderr,"    Wrong argument for ASK_BYTE operation.\n"); 
+        return COMPILED_LINE_NOT_OK;
+    }
+}
+

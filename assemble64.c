@@ -125,6 +125,14 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
         return a64m_ask(elems, n, fullCode);
     }else if(!strcmp(elems[0],"ASK_BYTE")){
         return a64m_ask_byte(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"STR")){
+        return a64m_str(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"LDR")){
+        return a64m_ldr(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"STR_BYTE")){
+        return a64m_str_byte(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"LDR_BYTE")){
+        return a64m_ldr_byte(elems, n, fullCode);
     }else{
         fprintf(stderr,"    Unknown operation.\n");
         return COMPILED_LINE_NOT_OK;
@@ -184,13 +192,14 @@ uint8_t a64_createMachineCode(uint64_t opperand, char** elems, uint8_t n, uint64
         case COMPILE_R :
             reg1 = aXX_readDec(elems[1] + 1);
             *fullCode = opperand;
-            *fullCode |= reg1;
+            *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
             break;
         case COMPILE_RR :
             reg1 = aXX_readDec(elems[1] + 1);
             reg2 = aXX_readDec(elems[2] + 1);
             *fullCode = opperand;
             *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+            *fullCode |= (reg2 & REG_MASK) << ARG_SHIFT_2;
             break;
         case COMPILE_RRR :
             reg1 = aXX_readDec(elems[1] + 1);

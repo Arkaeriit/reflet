@@ -8,6 +8,10 @@
 uint8_t a64m_free(char** elems, uint8_t n, uint64_t* fullCode);
 uint8_t a64m_ask(char** elems, uint8_t n, uint64_t* fullCode);
 uint8_t a64m_ask_byte(char** elems, uint8_t n, uint64_t* fullCode);
+uint8_t a64m_str(char** elems, uint8_t n, uint64_t* fullCode);
+uint8_t a64m_ldr(char** elems, uint8_t n, uint64_t* fullCode);
+uint8_t a64m_str_byte(char** elems, uint8_t n, uint64_t* fullCode);
+uint8_t a64m_ldr_byte(char** elems, uint8_t n, uint64_t* fullCode);
 
 #endif
 

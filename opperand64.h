@@ -36,6 +36,10 @@
 #define ASK_RN 0x327
 #define ASK_BYTE_RR 0x328
 #define ASK_BYTE_RN 0x329
+#define STR 0x32A
+#define LDR 0x32B
+#define STR_BYTE 0x32C
+#define LDR_BYTE 0x32D
 
 #define DSP_R 0x3FF
 

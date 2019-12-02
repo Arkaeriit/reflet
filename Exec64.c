@@ -144,6 +144,27 @@ int e64_execute(vm_64* vm){
                 reg1 = e64_reg1(inst);
                 vm->registers[reg1] = (uint64_t) malloc(e64_num1(inst));
                 break;
+            case STR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                *((uint64_t*) vm->registers[reg1]) = vm->registers[reg2];
+                break;
+            case LDR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg2] = *((uint64_t*) vm->registers[reg1]);
+                break;
+            case STR_BYTE :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                *((uint64_t*) vm->registers[reg1]) = vm->registers[reg2] & 0xFF;
+                break;
+            case LDR_BYTE :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg2] = *((uint64_t*) vm->registers[reg1]);
+                vm->registers[reg2] &= 0xFF;
+                break;
             case DSP_R :
                 reg1 = e64_reg1(inst);
                 printf("%" PRIu64 "\n",vm->registers[reg1]);
