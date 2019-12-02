@@ -54,7 +54,13 @@ void a64_assemble(FILE* fin,FILE* fout){
 uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
     memset(ret, 0, SIZELINE);
     uint64_t* fullCode = (uint64_t*) ret; //representing the output as a 64 bit number
-    if(!strcmp(elems[0],"MOV") && n == 3){
+    if(!strcmp(elems[0],"NIL")){
+        a64_createMachineCode(NIL, NULL, 1, fullCode);
+        return COMPILED_LINE_INSTRUCTION;
+    }else if(!strcmp(elems[0],"QUIT")){
+        a64_createMachineCode(QUIT, NULL, 1, fullCode);
+        return COMPILED_LINE_INSTRUCTION;
+    }else if(!strcmp(elems[0],"MOV") && n == 3){
         uint8_t config = a64_analyzeLine(elems, n);
         if(config == COMPILE_RR){
             a64_createMachineCode(MOV_RR, elems, 3, fullCode);
@@ -186,42 +192,42 @@ uint8_t a64_createMachineCode(uint64_t opperand, char** elems, uint8_t n, uint64
         uint8_t reg1, reg2, reg3;
         uint64_t num1;
         switch(config){
-        case COMPILE_NOPE :
-            *fullCode = opperand;
-            break;
-        case COMPILE_R :
-            reg1 = aXX_readDec(elems[1] + 1);
-            *fullCode = opperand;
-            *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
-            break;
-        case COMPILE_RR :
-            reg1 = aXX_readDec(elems[1] + 1);
-            reg2 = aXX_readDec(elems[2] + 1);
-            *fullCode = opperand;
-            *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
-            *fullCode |= (reg2 & REG_MASK) << ARG_SHIFT_2;
-            break;
-        case COMPILE_RRR :
-            reg1 = aXX_readDec(elems[1] + 1);
-            reg2 = aXX_readDec(elems[2] + 1);
-            reg3 = aXX_readDec(elems[3] + 1);
-            *fullCode = opperand;
-            *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
-            *fullCode |= (reg2 & REG_MASK) << ARG_SHIFT_2;
-            *fullCode |= (reg3 & REG_MASK) << ARG_SHIFT_3;
-            break;
-        case COMPILE_RN :
-            reg1 = aXX_readDec(elems[1] + 1);
-            *fullCode = opperand;
-            *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
-            if(elems[2][0] == 'X')
-                num1 = aXX_readHex(elems[2] + 1);
-            else
-                num1 = aXX_readDec(elems[2]);
-            *fullCode |= (num1 & NUM1_MASK) << ARG_SHIFT_2;
-            break;
-        default :
-            return COMPILED_LINE_NOT_OK;
+            case COMPILE_NOPE :
+                *fullCode = opperand;
+                break;
+            case COMPILE_R :
+                reg1 = aXX_readDec(elems[1] + 1);
+                *fullCode = opperand;
+                *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+                break;
+            case COMPILE_RR :
+                reg1 = aXX_readDec(elems[1] + 1);
+                reg2 = aXX_readDec(elems[2] + 1);
+                *fullCode = opperand;
+                *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+                *fullCode |= (reg2 & REG_MASK) << ARG_SHIFT_2;
+                break;
+            case COMPILE_RRR :
+                reg1 = aXX_readDec(elems[1] + 1);
+                reg2 = aXX_readDec(elems[2] + 1);
+                reg3 = aXX_readDec(elems[3] + 1);
+                *fullCode = opperand;
+                *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+                *fullCode |= (reg2 & REG_MASK) << ARG_SHIFT_2;
+                *fullCode |= (reg3 & REG_MASK) << ARG_SHIFT_3;
+                break;
+            case COMPILE_RN :
+                reg1 = aXX_readDec(elems[1] + 1);
+                *fullCode = opperand;
+                *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+                if(elems[2][0] == 'X')
+                    num1 = aXX_readHex(elems[2] + 1);
+                else
+                    num1 = aXX_readDec(elems[2]);
+                *fullCode |= (num1 & NUM1_MASK) << ARG_SHIFT_2;
+                break;
+            default :
+                return COMPILED_LINE_NOT_OK;
         }
         }else{
             return COMPILED_LINE_NOT_OK;

@@ -21,6 +21,11 @@ int e64_execute(vm_64* vm){
         uint16_t opperand = inst & OPP;
         //printf("%lx %x %x %lx\n",inst,opperand,e64_reg1(inst),e64_num1(inst)); //debug
         switch(opperand){
+            case NIL :
+                break;
+            case QUIT :
+                i = vm->nombreInstruction;
+                break;
             case MOV_RN :
                 reg1 = e64_reg1(inst);
                 vm->registers[reg1] = e64_num1(inst);

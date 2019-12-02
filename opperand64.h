@@ -1,6 +1,9 @@
 #ifndef OPPERAND
 #define OPPERAND
 
+#define NIL 0x000
+#define QUIT 0x001
+
 #define MOV_RN 0x300
 #define MOV_RR 0x301
 
