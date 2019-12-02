@@ -60,7 +60,7 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
             a64_createMachineCode(MOV_RR, elems, 3, fullCode);
             return COMPILED_LINE_INSTRUCTION;
         }else if(config == COMPILE_RN){
-            a64_createMachineCode(MOV_RR, elems, 3, fullCode);
+            a64_createMachineCode(MOV_RN, elems, 3, fullCode);
             return COMPILED_LINE_INSTRUCTION;            
         }else{
             fprintf(stderr,"    Wrong argument for MOV operation.\n");
@@ -149,13 +149,13 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
 uint8_t a64_analyzeLine(char** elems, uint8_t n){
     if(n == 1){
         return COMPILE_NOPE;
-    }else if(n == 1 && elems[1][0] == 'R'){
-        return COMPILE_R;
-    }else if(n == 2 && elems[1][0] == 'R' && elems[2][0]){
-        return COMPILE_RR;
     }else if(n == 2 && elems[1][0] == 'R'){
+        return COMPILE_R;
+    }else if(n == 3 && elems[1][0] == 'R' && elems[2][0] == 'R'){
+        return COMPILE_RR;
+    }else if(n == 3 && elems[1][0] == 'R'){
         return COMPILE_RN;
-    }else if(n == 3 && elems[1][0] == 'R' && elems[2][0] && elems[3][0] == 'R'){
+    }else if(n == 4 && elems[1][0] == 'R' && elems[2][0] == 'R' && elems[3][0] == 'R'){
         return COMPILE_RRR;
     }else{
         return COMPILED_LINE_NOT_OK;
