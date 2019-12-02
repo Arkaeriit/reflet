@@ -55,29 +55,13 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
     memset(ret, 0, SIZELINE);
     uint64_t* fullCode = (uint64_t*) ret; //representing the output as a 64 bit number
     if(!strcmp(elems[0],"MOV") && n == 3){
-        if(elems[1][0] == 'R'){
-            if(elems[2][0] == 'R'){ //A register
-                uint8_t reg1 = aXX_readDec(elems[1] + 1); //The +1 is used to prevent readDec from reading the R
-                uint8_t reg2 = aXX_readDec(elems[2] + 1);
-                *fullCode = MOV_RR;
-                *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1; //We set the result register
-                *fullCode |= (reg2 & REG_MASK) << ARG_SHIFT_2; //We set the input register
-                return COMPILED_LINE_INSTRUCTION;
-            }else if(elems[2][0] == 'X'){ //An hexadecimal number
-                uint8_t reg1 = aXX_readDec(elems[1] + 1);
-                uint64_t num = aXX_readHex(elems[2] + 1);
-                *fullCode = MOV_RN; //We set the opperand
-                *fullCode |= (reg1 & REG_MASK ) << ARG_SHIFT_1; //We set the register
-                *fullCode |= (num & NUM1_MASK ) << ARG_SHIFT_2; //We set the data
-                return COMPILED_LINE_INSTRUCTION;
-            }else{ //A decimal number
-                uint8_t reg1 = aXX_readDec(elems[1] + 1);
-                uint64_t num = aXX_readDec(elems[2]);
-                *fullCode = MOV_RN; //We set the opperand
-                *fullCode |= (reg1 & REG_MASK ) << ARG_SHIFT_1 ; //We set the register
-                *fullCode |= (num & NUM1_MASK ) << ARG_SHIFT_2 ; //We set the data
-                return COMPILED_LINE_INSTRUCTION;
-            }
+        uint8_t config = a64_analyzeLine(elems, n);
+        if(config == COMPILE_RR){
+            a64_createMachineCode(MOV_RR, elems, 3, fullCode);
+            return COMPILED_LINE_INSTRUCTION;
+        }else if(config == COMPILE_RN){
+            a64_createMachineCode(MOV_RR, elems, 3, fullCode);
+            return COMPILED_LINE_INSTRUCTION;            
         }else{
             fprintf(stderr,"    Wrong argument for MOV operation.\n");
             return COMPILED_LINE_NOT_OK;
@@ -92,36 +76,33 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
         return a64m_div(elems, n, fullCode);
     }else if(!strcmp(elems[0],"MOD")){
         return a64m_mod(elems, n, fullCode);
-    }else if(!strcmp(elems[0],"DSP") && n == 2){
-        if(elems[1][0] == 'R'){
-            uint8_t reg1 = aXX_readDec(elems[1] + 1);
-            *fullCode = DSP_R; //We set the opperand
-            *fullCode |= (reg1 & REG_MASK ) << ARG_SHIFT_1 ; //We set the register
+    }else if(!strcmp(elems[0],"DSP")){
+        uint8_t config = a64_analyzeLine(elems, n);
+        if(config == COMPILE_R){
+            a64_createMachineCode(DSP_R, elems, 2, fullCode);
             return COMPILED_LINE_INSTRUCTION;
         }else{
             fprintf(stderr,"    Wrong argument for DSP operation.\n");
             return COMPILED_LINE_NOT_OK;
         }
     }else if(!strcmp(elems[0],"PUSH")){
-        if(n != 2 || elems[1][0] != 'R'){
+        uint8_t config = a64_analyzeLine(elems, n);
+        if(config == COMPILE_R){
+            a64_createMachineCode(PUSH, elems, 2, fullCode);
+            return COMPILED_LINE_INSTRUCTION;
+        }else{
             fprintf(stderr,"    Wrong argument for PUSH operation.\n");
             return COMPILED_LINE_NOT_OK;
         }
-        uint8_t reg1 = aXX_readDec(elems[1] + 1);
-        *fullCode = PUSH;
-        *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
-        return COMPILED_LINE_INSTRUCTION;
     }else if(!strcmp(elems[0],"PULL")){
-        if(n != 2 || elems[1][0] != 'R'){
+        uint8_t config = a64_analyzeLine(elems, n);
+        if(config == COMPILE_R){
+            a64_createMachineCode(PULL, elems, 2, fullCode);
+            return COMPILED_LINE_INSTRUCTION;
+        }else{
             fprintf(stderr,"    Wrong argument for PULL operation.\n");
             return COMPILED_LINE_NOT_OK;
         }
-        uint8_t reg1 = aXX_readDec(elems[1] + 1);
-        *fullCode = PULL;
-        *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
-        return COMPILED_LINE_INSTRUCTION;
-    }else if(!strcmp(elems[0],"PUSH")){
-
     }else if(!strcmp(elems[0],"LAB") || !strcmp(elems[0],"FUNC")){
         return a64j_lab( elems, n, ret);
     }else if(!strcmp(elems[0],"JMP")){
@@ -150,5 +131,92 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
     }
     fprintf(stderr,"    Unreadable line.\n");
     return COMPILED_LINE_NOT_OK;
+}
+
+/*
+ * Read the line of code and says how what kind of arguments we have
+ *  Arguments :
+ *      elems : a pointer to the elements of the line of code
+ *      n : the numbers of element
+ *  return : 
+ *      COMPILE_NOPE : if there is no arguments to the operation
+ *      COMPILE_R : if there is a single register as argument
+ *      COMPILE_RR : if there is two registers as argument
+ *      COMPILE_RRR : if there is three registers as argument
+ *      COMPILE_RN : if there is a register followed by a number an argument
+ *      COMPILED_LINE_NOT_OK if there is an error
+ */
+uint8_t a64_analyzeLine(char** elems, uint8_t n){
+    if(n == 1){
+        return COMPILE_NOPE;
+    }else if(n == 1 && elems[1][0] == 'R'){
+        return COMPILE_R;
+    }else if(n == 2 && elems[1][0] == 'R' && elems[2][0]){
+        return COMPILE_RR;
+    }else if(n == 2 && elems[1][0] == 'R'){
+        return COMPILE_RN;
+    }else if(n == 3 && elems[1][0] == 'R' && elems[2][0] && elems[3][0] == 'R'){
+        return COMPILE_RRR;
+    }else{
+        return COMPILED_LINE_NOT_OK;
+    }
+}
+
+/*
+ * Create a machine code from an opperand and the argument
+ *  Arguments :
+ *      opperand : the opperand of the line of machine code
+ *      elems : the arguments of the operation
+ *      n : the number of arguments
+ *      fullCode : a pointer to the position of the machinecode
+ *  return :
+ *      the same thing as a64_analyzeLine
+ */
+uint8_t a64_createMachineCode(uint64_t opperand, char** elems, uint8_t n, uint64_t* fullCode){
+    uint8_t config = a64_analyzeLine(elems, n);
+    if(config){
+        uint8_t reg1, reg2, reg3;
+        uint64_t num1;
+        switch(config){
+        case COMPILE_NOPE :
+            *fullCode = opperand;
+            break;
+        case COMPILE_R :
+            reg1 = aXX_readDec(elems[1] + 1);
+            *fullCode = opperand;
+            *fullCode |= reg1;
+            break;
+        case COMPILE_RR :
+            reg1 = aXX_readDec(elems[1] + 1);
+            reg2 = aXX_readDec(elems[2] + 1);
+            *fullCode = opperand;
+            *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+            break;
+        case COMPILE_RRR :
+            reg1 = aXX_readDec(elems[1] + 1);
+            reg2 = aXX_readDec(elems[2] + 1);
+            reg3 = aXX_readDec(elems[3] + 1);
+            *fullCode = opperand;
+            *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+            *fullCode |= (reg2 & REG_MASK) << ARG_SHIFT_2;
+            *fullCode |= (reg3 & REG_MASK) << ARG_SHIFT_3;
+            break;
+        case COMPILE_RN :
+            reg1 = aXX_readDec(elems[1] + 1);
+            *fullCode = opperand;
+            *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+            if(elems[2][0] == 'X')
+                num1 = aXX_readHex(elems[2] + 1);
+            else
+                num1 = aXX_readDec(elems[2]);
+            *fullCode |= (num1 & NUM1_MASK) << ARG_SHIFT_2;
+            break;
+        default :
+            return COMPILED_LINE_NOT_OK;
+        }
+        }else{
+            return COMPILED_LINE_NOT_OK;
+        }
+    return config;
 }
 

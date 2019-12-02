@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include "assembleXX.h"
+#include "assemble64.h"
 
 uint8_t a64m_free(char** elems, uint8_t n, uint64_t* fullCode);
 uint8_t a64m_ask(char** elems, uint8_t n, uint64_t* fullCode);

@@ -27,6 +27,11 @@ typedef uint32_t OBJECT_MW_TYPE;
 #define COMPILED_LINE_NOT_OK 0
 #define COMPILED_LINE_INSTRUCTION 1
 #define COMPILED_LINE_BRANCH 2
+#define COMPILE_NOPE 1
+#define COMPILE_R 2
+#define COMPILE_RR 3
+#define COMPILE_RN 4
+#define COMPILE_RRR 5
 //Interpreter
 #define EXECUTE_OK 0
 #define EXECUTE_UNKNOWN_OPPERAND 1
