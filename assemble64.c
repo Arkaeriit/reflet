@@ -8,11 +8,14 @@
 /*
  * This function take a file containing assembly code for the asvm
  * and compile it insto an asvm object file
- * Arguments :
+ *  Arguments :
  *      fin : pointer to the assembly code file
  *      fout : pointer to the object file
+ *  return :
+ *      COMPILATION_OK if everything went well
+ *      COMPILATION_ERROR otherwise
  */
-void a64_assemble(FILE* fin,FILE* fout){
+uint8_t a64_assemble(FILE* fin,FILE* fout){
     OBJECT_MW_TYPE magicWord = OBJECT_MW; //Writing the magic word
     fwrite(&magicWord, 1, OBJECT_MW_SIZE , fout);
     char* line = malloc(SIZELINE);
@@ -21,7 +24,8 @@ void a64_assemble(FILE* fin,FILE* fout){
     fgets(line,SIZELINE,fin);
     while(line != NULL && strlen(line) > 2){
         uint8_t n = aXX_preprocessLine(line,elems);
-        if(n){ //no point in compiling if there is no elements
+        if(n) //no point in compiling if there is no elements
+        if(strlen(elems[0]) > 0){ //no point in compiling if there is no opperand
             uint8_t a = a64_compileLine(elems,n,line);
             if(a == COMPILED_LINE_INSTRUCTION){
                 fprintf(fout,"i");
@@ -31,13 +35,14 @@ void a64_assemble(FILE* fin,FILE* fout){
                 fwrite(line, SIZELINE,1,fout);
             }else{
                 fprintf(stderr,"Error line %" PRIx64 ":\n",lineNumber);
-                return;
+                return COMPILATION_ERROR;
             }
         }
         aXX_freeElems(n,elems);
         fgets(line,SIZELINE,fin);
         lineNumber++;
     } 
+    return COMPILATION_OK;
 }
 
 /*

@@ -32,9 +32,13 @@ typedef uint32_t OBJECT_MW_TYPE;
 #define COMPILE_RR 3
 #define COMPILE_RN 4
 #define COMPILE_RRR 5
+#define COMPILATION_ERROR 1
+#define COMPILATION_OK 0
 //Interpreter
 #define EXECUTE_OK 0
 #define EXECUTE_UNKNOWN_OPPERAND 1
+#define EXECUTE_INVALID_FILE 2
+#define EXECUTE_ERROR_VM 3
 //binary file reader
 #define READ_OK 0
 #define READ_NOT_OK 1

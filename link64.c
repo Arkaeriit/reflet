@@ -196,6 +196,7 @@ int l64_branching(codeHead* cH, labelHead* lB){
     for(uint64_t i=0; i<lB->size; i++){
         label_tag* tag = l64_getList(lB, i)->tag;
         if(!tag->alreadyPlaced){
+            fprintf(stderr, "Error : the label %s is called but not defined.\n",tag->name);
             return LINK_UNDEFINED_LABEL;
         }
         for(uint64_t i=0; i<tag->numberOfCalls; i++){
@@ -206,14 +207,26 @@ int l64_branching(codeHead* cH, labelHead* lB){
     return LINK_OK;
 }
 
-void l64_link(FILE** fin,FILE* fout, int nFiles){
+/*
+ * Link object files toogether
+ *  Arguments :
+ *      fin : an array of input files
+ *      fout : the output file
+ *      nFiles : the size of fin
+ */
+int l64_link(FILE** fin,FILE* fout, int nFiles){
     codeHead* cH = l64_initList();
     labelHead* lB = l64_initList();
     for(int i=0; i<nFiles; i++){
-        l64_addFile(cH, lB, fin[i]);
+        if(l64_addFile(cH, lB, fin[i]) != LINK_OK){
+            fprintf(stderr, "Error : invalid object file(s).\n");
+            return LINK_INVALID_FILE;
+        }
     }
 
-    l64_branching(cH, lB);
+    if(l64_branching(cH, lB) != LINK_OK){
+        return LINK_UNDEFINED_LABEL;
+    }
     
     BINARY_MW_TYPE magicWord = BINARY_MW;
     fwrite(&magicWord, 1, BINARY_MW_SIZE ,fout);
@@ -221,5 +234,6 @@ void l64_link(FILE** fin,FILE* fout, int nFiles){
         code* line = l64_getList(cH,i);
         fwrite(line->texte, 1, sizeof(uint64_t), fout);
     }
+    return LINK_OK;
 }
 

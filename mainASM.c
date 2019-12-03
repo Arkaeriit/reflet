@@ -33,7 +33,7 @@ int main(int argc,char** argv){
             fprintf(stderr,"Error : can not write on file %s.\n",*(argv+3));
             return 2;
         }
-        a64_assemble(fin,fout);
+        return a64_assemble(fin,fout);
     }else if(!strcmp(*(argv+1),"link") && argc > 3){
         FILE **fin,*fout;
         int nFiles = argc - 3;
@@ -46,7 +46,7 @@ int main(int argc,char** argv){
             }
         }
         fout = fopen(argv[argc-1],"w");
-        l64_link(fin,fout,nFiles);
+        return l64_link(fin,fout,nFiles);
     }else{
         quickHelp();
         return 1;

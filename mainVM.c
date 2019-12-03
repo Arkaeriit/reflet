@@ -18,14 +18,14 @@ int main(int argc,char** argv){
             vm_64 vm;
             if(rb_init64(&vm,filename,ifo.fileSize)){
                 fprintf(stderr,"Error while initialising the VM.\n");
-                return 2;
+                return EXECUTE_ERROR_VM;
             }
-            e64_execute(&vm);
+            return e64_execute(&vm);
         }
     }else{
         fprintf(stderr,"Error : %s is not a valid file\n",filename);
-        return 1;
+        return EXECUTE_INVALID_FILE;
     }
-    return 0;
+    return EXECUTE_ERROR_VM;
 }
 

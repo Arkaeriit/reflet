@@ -46,7 +46,7 @@ void l64_addCall(labelHead* lB, const char* labelName, uint64_t position);
 
 int l64_addFile(codeHead* cH, labelHead* lB, FILE* fin);
 int l64_branching(codeHead* cH, labelHead* lB);
-void l64_link(FILE** fin,FILE* fout,int nFiles);
+int l64_link(FILE** fin,FILE* fout,int nFiles);
 
 #endif
 

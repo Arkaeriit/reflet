@@ -13,7 +13,7 @@
 #include "assemble64memory.h"
 
 
-void a64_assemble(FILE* fin,FILE* fout);
+uint8_t a64_assemble(FILE* fin,FILE* fout);
 uint8_t a64_compileLine(char** elems,uint8_t n,char* ret);
 
 uint8_t a64_analyzeLine(char** elems, uint8_t n);
