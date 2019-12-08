@@ -32,7 +32,10 @@ uint8_t a64_assemble(FILE* fin,FILE* fout){
                 fwrite(line,8,1,fout);
             }else if(a == COMPILED_LINE_BRANCH){
                 fprintf(fout,"j");
-                fwrite(line, SIZELINE,1,fout);
+                fwrite(line, SIZELINE_LABEL,1,fout);
+            }else if(a == COMPILED_LINE_DATA){
+                fprintf(fout,"d");
+                fwrite(line, SIZELINE, 1, fout);
             }else{
                 fprintf(stderr,"Error line %" PRIx64 ":\n",lineNumber);
                 return COMPILATION_ERROR;
@@ -144,6 +147,8 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
         return a64m_str_byte(elems, n, fullCode);
     }else if(!strcmp(elems[0],"LDR_BYTE")){
         return a64m_ldr_byte(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"DATA")){
+        return a64m_data(elems, n ,ret);
     }else{
         fprintf(stderr,"    Unknown operation.\n");
         return COMPILED_LINE_NOT_OK;

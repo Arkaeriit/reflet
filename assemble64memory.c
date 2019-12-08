@@ -158,3 +158,86 @@ uint8_t a64m_ldr_byte(char** elems, uint8_t n, uint64_t* fullCode){
     }
 }
 
+/*
+ * Let us read a line of data from an assembly.
+ *  Aruguments :
+ *      elems : the arguments of the line of assembly
+ *      n : the size of elems
+ *      ret : where we will put the precompiled result
+ *  return :
+ *      COMPILED_LINE_DATA if everything went well
+ */
+uint8_t a64m_data(char** elems, uint8_t n, char* ret){
+    bool* isString = malloc(sizeof(bool) * n);
+    n = a64m_concatStrings(elems, n, isString);
+    *ret = 'd';
+    *((uint16_t*) (ret+1)) = DATA;
+    strcpy(ret + 3,elems[1]);
+    char* pointerString = ret + SIZELINE_LABEL;
+    for(uint8_t i=2; i<n; i++){ //We start at 2 because the first element is the opperand and the second is the label name
+        if(isString[i]){
+            memcpy(pointerString,elems[i],strlen(elems[i])); //We add the string to the rest of the data
+            pointerString += strlen(elems[i]);
+            elems[i] = elems[i] - 1; //Since we cut the " from the string we have to get it back in order to free the pointer
+        }else{
+            uint8_t num;
+            if(elems[i][0] == 'X')
+                num = aXX_readHex(elems[i] + 1);
+            else
+                num = aXX_readDec(elems[i]);
+            *pointerString = num;
+            pointerString ++;
+        }
+    }
+    return COMPILED_LINE_DATA;
+}
+ 
+/*
+ * When we want to set data we want to concatenate string entered as input.
+ *  Arguments :
+ *      elems : the arguments of the line of assembly
+ *      n : the size of elems
+ *      isString : an array of boolean stating if each 
+ *                 elements of the new elems is a string
+ *  return :
+ *      the size of elem after all concatenation
+ */
+uint8_t a64m_concatStrings(char** elems, uint8_t n,bool* isString){
+    char* space = " ";
+    char** elemsRet = malloc(sizeof(char*) * 100); //overkill amount of args
+    uint8_t ret = 2; //We start at 1 because we don't touch the opperand nor the name of the data label
+    elemsRet[0] = elems[0];
+    elemsRet[1] = elems[1];
+    bool flagString = false; //indicate if we entered a string
+    int startString; //indicate the start of the current string
+    for(int i=2; i<n; i++){
+        if(!flagString){
+            isString[ret] = false; //we assume that the element is not a string
+            if(elems[i][0] == '"'){
+                flagString = true;
+                elems[i] = elems[i] + 1; //We dont want the " in the final product
+                startString = i;
+                isString[ret] = true; // if it is a string we correct ourselves
+            }
+            elemsRet[ret] = elems[i];
+            ret++; //each time we have a new argument while not on the string ther is something new in the returnd elements
+        }
+        if(flagString){
+            if(i != startString){ //if we are not in the same elems as the start of the line we concatenate the arguments
+                strcat(elemsRet[ret],space);
+                strcat(elemsRet[ret],elems[i]);
+            }
+            char* stringToComplete = elemsRet[ret-1];
+            if(stringToComplete[strlen(stringToComplete) - 1] == '"'){
+                elemsRet[ret - 1][strlen(elemsRet[ret-1]) - 1] = 0; //We dont want the " in the final product
+                flagString = false;
+            }
+        }
+    }
+    for(int i=0; i<ret; i++){ //at the end we put the new array in the old one
+        elems[i] = elemsRet[i];
+    }
+    free(elemsRet);
+    return ret;
+}
+
