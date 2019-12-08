@@ -241,3 +241,32 @@ uint8_t a64m_concatStrings(char** elems, uint8_t n,bool* isString){
     return ret;
 }
 
+/*
+ * compile a line of assembly language coding for a LDR_DATA opperation
+ * Arguments:
+ *      elems : the result of aXX_preprocessLine
+ *      n : the size of elems
+ *      fullCode : the compiled instruction
+ * Return :
+ *      COMPILED_LINE_NOT_OK if the compilation had an error
+ *      COMPILED_LINE_DATA if there is no error
+ */
+uint8_t a64m_ldr_data(char** elems, uint8_t n, char* ret){
+    if(n != 3){
+        fprintf(stderr,"    Wrong argument for LDR_DATA operation.\n");
+        return COMPILED_LINE_NOT_OK;
+    }
+    *ret = 'l';
+    *((uint16_t*) (ret+1)) = LDR_DATA; //We define the opperand
+    strcpy(ret + 3,elems[1]); //We add the name of the label 3 bytes into the instruction
+    uint8_t reg;
+    if(elems[2][0] == 'R'){
+        reg = aXX_readDec(elems[2] + 1);
+    }else{
+        fprintf(stderr,"    Wrong argument for LLDR_DATA opperation.\n");
+        return COMPILED_LINE_NOT_OK;
+    }
+    memcpy(ret + SIZELINE_LABEL, &reg, 1);
+    return COMPILED_LINE_DATA;
+}
+

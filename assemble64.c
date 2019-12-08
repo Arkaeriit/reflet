@@ -149,6 +149,8 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
         return a64m_ldr_byte(elems, n, fullCode);
     }else if(!strcmp(elems[0],"DATA")){
         return a64m_data(elems, n ,ret);
+    }else if(!strcmp(elems[0],"LDR_DATA")){
+        return a64m_ldr_data(elems, n, ret);
     }else{
         fprintf(stderr,"    Unknown operation.\n");
         return COMPILED_LINE_NOT_OK;

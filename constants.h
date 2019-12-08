@@ -58,7 +58,8 @@ typedef uint32_t OBJECT_MW_TYPE;
 #define MAX_SIZE_LABEL 150 /*Max number of char in a label name*/
 #define MAX_CALL_NUMBER 1000 /*Maximun number of position from where a label can be called*/
 #define SIZELINE_LABEL MAX_SIZE_LABEL + 3 /*Size of a line of object code used for label*/ /*It is the longest name a label can habe + a indicating byte + 2 opperand bytes*/
-#define SIZELINE SIZELINE_LABEL + 1024 /*Max size for lablel, data or code*/
+#define SIZE_DATA 1024
+#define SIZELINE SIZELINE_LABEL + SIZE_DATA /*Max size for lablel, data or code*/
 
 
 //Execution constants

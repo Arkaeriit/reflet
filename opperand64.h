@@ -44,6 +44,7 @@
 #define STR_BYTE 0x32C
 #define LDR_BYTE 0x32D
 #define DATA 0x32E
+#define LDR_DATA 0x32E
 
 #define DSP_R 0x3FF
 
