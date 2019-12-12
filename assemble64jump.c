@@ -102,6 +102,27 @@ uint8_t a64j_jz(char** elems,uint8_t n,char* ret){
 }
 
 /*
+ * compile a line of assembly language coding for a conditional jump about inequality
+ * Arguments:
+ *      elems : the result of aXX_preprocessLine
+ *      n : the size of elems
+ *      fullCode : the compiled instruction
+ * Return :
+ *      COMPILED_LINE_BRANCH if the compilation of the line went well
+ *      COMPILED_LINE_NOT_OK if there is an error
+ */
+uint8_t a64j_jnz(char** elems,uint8_t n,char* ret){
+    if(n != 2){
+        fprintf(stderr,"    Wrong argument for JMP operation.\n");
+        return COMPILED_LINE_NOT_OK;
+    }
+    *ret = 'j';
+    *((uint16_t*) (ret+1)) = JNZ; //We define the opperand
+    strcpy(ret + 3,elems[1]); //We add the name of the label 3 bytes into the instruction
+    return COMPILED_LINE_BRANCH;
+}
+
+/*
  * compile a line of assembly language coding for a conditional jump (if x>y)
  * Arguments:
  *      elems : the result of aXX_preprocessLine

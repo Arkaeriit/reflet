@@ -22,7 +22,7 @@ uint8_t a64_assemble(FILE* fin,FILE* fout){
     uint64_t lineNumber = 1;
     char** elems = malloc(sizeof(char*) * 150); //We will never get 150 words
     fgets(line,SIZELINE,fin);
-    while(line != NULL && strlen(line) > 2){
+    while(!feof(fin)){
         uint8_t n = aXX_preprocessLine(line,elems);
         if(n) //no point in compiling if there is no elements
         if(strlen(elems[0]) > 0){ //no point in compiling if there is no opperand
@@ -123,6 +123,8 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
         return a64j_jmp(elems, n, ret);
     }else if(!strcmp(elems[0],"JZ")){
         return a64j_jz(elems, n, ret);
+    }else if(!strcmp(elems[0],"JNZ")){
+        return a64j_jnz(elems, n, ret);
     }else if(!strcmp(elems[0],"JB")){
         return a64j_jb(elems, n, ret);
     }else if(!strcmp(elems[0],"JSE")){
@@ -152,7 +154,7 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
     }else if(!strcmp(elems[0],"LDR_DATA")){
         return a64m_ldr_data(elems, n, ret);
     }else{
-        fprintf(stderr,"    Unknown operation.\n");
+        fprintf(stderr,"    Unknown operation : %s.\n",elems[0]);
         return COMPILED_LINE_NOT_OK;
     }
     fprintf(stderr,"    Unreadable line.\n");

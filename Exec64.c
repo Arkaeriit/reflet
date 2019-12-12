@@ -188,6 +188,12 @@ int e64_execute(vm_64* vm){
                     i--;
                 }
                 break;
+            case JNZ :
+                if(!vm->flags[FLAG_ZERO]){
+                    i = e64_num0(inst);
+                    i--;
+                }
+                break;
             case JB :
                 if(vm->flags[FLAG_BIGGER]){
                     i = e64_num0(inst);

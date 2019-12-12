@@ -51,8 +51,9 @@
 #define LAB 0x000
 #define JMP 0x100
 #define JZ 0x101
-#define JB 0x102
-#define JSE 0x103
+#define JNZ 0x102
+#define JB 0x103
+#define JSE 0x106
 
 #define FUNC 0x000
 #define CALL 0x110
