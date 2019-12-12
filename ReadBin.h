@@ -22,6 +22,8 @@ typedef struct vm_64_struct {
     data_t* data;
 } vm_64;
 
+#include "mainVM.h"
+
 //Sert à la fonction rb_analyze
 typedef struct infofile_struct {
     bool flagCorrect; //indique si le binaire peut être lisible
@@ -31,7 +33,7 @@ typedef struct infofile_struct {
 
 infofile rb_analyze(const char* filename);
 
-int rb_init64(vm_64* vm,const char* filename,uint32_t fileSize);
+int rb_init64(vm_64* vm,const char* filename,uint32_t fileSize,args vmArgs);
 
 #endif
 

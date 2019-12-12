@@ -46,26 +46,32 @@ infofile rb_analyze(const char* filename){
  *      vm : the pointer to the vm we want to initialize
  *      filename : the name of the file whre the machinecode for the VM is stored
  *      fileSize : size of the file
+ *      vmArgs : the arguments passed to the vm
  *  return :
  *      READ_OK if everything if OK
  *      READ_NOT_OK if the file can't be read
  */
-int rb_init64(vm_64* vm, const char* filename, uint32_t fileSize){
+int rb_init64(vm_64* vm, const char* filename, uint32_t fileSize, args vmArgs){
     FILE* fp = fopen(filename,"r");
     BINARY_MW_TYPE a = 0; //useless value to store the magic word
     fread(&a, BINARY_MW_SIZE ,1,fp); //the magic word is ignored
+    //stack init
     vm->registersStack = st_init();
     vm->functionsStack = st_init();
+    st_push(vm->registersStack, vmArgs.argc);
+    for(int i=0; i<vmArgs.argc; i++)
+        st_push(vm->registersStack, (uint64_t) vmArgs.argv[i]);
+    //flags init
     for(int i=0; i<FLAGS_NUMBER; i++)
         vm->flags[i] = false;
-    
+    //data init
     uint64_t nbData;
     fread(&nbData, 1, sizeof(uint64_t), fp);
     if(nbData)
         vm->data = malloc(sizeof(data_t) * nbData);
     for(uint64_t i=0; i<nbData; i++)
         fread(vm->data[i], 1, SIZE_DATA, fp);
-
+    //code init
     vm->nombreInstruction = (fileSize- BINARY_MW_SIZE ) / sizeof(uint64_t);
     vm->nombreInstruction -= 1 + nbData * INST_PER_DATA;
     vm->code = malloc(sizeof(uint64_t) * vm->nombreInstruction);

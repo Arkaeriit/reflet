@@ -7,7 +7,7 @@ all : asvm asasm
 asvm : mainVM.o ReadBin.o Exec64.o stack.o
 	gcc mainVM.o ReadBin.o Exec64.o stack.o $(FLAGS) -o asvm
 
-mainVM.o : mainVM.c ReadBin.h
+mainVM.o : mainVM.c mainVM.h
 	gcc -c mainVM.c $(FLAGS) -o mainVM.o
 
 ReadBin.o : ReadBin.c ReadBin.h
