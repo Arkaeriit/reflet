@@ -10,6 +10,8 @@
 #include "stack.h"
 #include <stdbool.h>
 
+typedef char data_t[SIZE_DATA];
+
 typedef struct vm_64_struct {
     uint64_t nombreInstruction;
     uint64_t* code;
@@ -17,6 +19,7 @@ typedef struct vm_64_struct {
     uint64_t registers[REGISTERS_NUMBER];
     stack* registersStack;
     stack* functionsStack;
+    data_t* data;
 } vm_64;
 
 //Sert à la fonction rb_analyze

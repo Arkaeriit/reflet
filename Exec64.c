@@ -170,6 +170,10 @@ int e64_execute(vm_64* vm){
                 vm->registers[reg2] = *((uint64_t*) vm->registers[reg1]);
                 vm->registers[reg2] &= 0xFF;
                 break;
+            case LDR_DATA :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] = (uint64_t) vm->data[e64_num1(inst)];
+                break;
             case DSP_R :
                 reg1 = e64_reg1(inst);
                 printf("%" PRIu64 "\n",vm->registers[reg1]);

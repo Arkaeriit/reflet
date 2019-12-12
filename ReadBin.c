@@ -58,7 +58,16 @@ int rb_init64(vm_64* vm, const char* filename, uint32_t fileSize){
     vm->functionsStack = st_init();
     for(int i=0; i<FLAGS_NUMBER; i++)
         vm->flags[i] = false;
+    
+    uint64_t nbData;
+    fread(&nbData, 1, sizeof(uint64_t), fp);
+    if(nbData)
+        vm->data = malloc(sizeof(data_t) * nbData);
+    for(uint64_t i=0; i<nbData; i++)
+        fread(vm->data[i], 1, SIZE_DATA, fp);
+
     vm->nombreInstruction = (fileSize- BINARY_MW_SIZE ) / sizeof(uint64_t);
+    vm->nombreInstruction -= 1 + nbData * INST_PER_DATA;
     vm->code = malloc(sizeof(uint64_t) * vm->nombreInstruction);
     if(fread(vm->code,sizeof(uint64_t),vm->nombreInstruction,fp) == vm->nombreInstruction){
         fclose(fp);
