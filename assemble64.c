@@ -66,7 +66,15 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
         a64_createMachineCode(NIL, NULL, 1, fullCode);
         return COMPILED_LINE_INSTRUCTION;
     }else if(!strcmp(elems[0],"QUIT")){
-        a64_createMachineCode(QUIT, NULL, 1, fullCode);
+        uint8_t config = a64_analyzeLine(elems, n);
+        if(config == COMPILE_NOPE){
+            a64_createMachineCode(QUIT, NULL, 1, fullCode);
+        }else if(config == COMPILE_N){
+            a64_createMachineCode(QUIT, elems, 2, fullCode);
+        }else{
+            fprintf(stderr, "    Worng arguments for QUIT opperation.\n");
+            return COMPILED_LINE_NOT_OK;
+        }
         return COMPILED_LINE_INSTRUCTION;
     }else if(!strcmp(elems[0],"MOV") && n == 3){
         uint8_t config = a64_analyzeLine(elems, n);
@@ -190,6 +198,7 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
  *  return : 
  *      COMPILE_NOPE : if there is no arguments to the operation
  *      COMPILE_R : if there is a single register as argument
+ *      COMPILE_N : if there is a single number as argument
  *      COMPILE_RR : if there is two registers as argument
  *      COMPILE_RRR : if there is three registers as argument
  *      COMPILE_RN : if there is a register followed by a number an argument
@@ -200,6 +209,8 @@ uint8_t a64_analyzeLine(char** elems, uint8_t n){
         return COMPILE_NOPE;
     }else if(n == 2 && elems[1][0] == 'R'){
         return COMPILE_R;
+    }else if(n == 2){
+        return COMPILE_N;
     }else if(n == 3 && elems[1][0] == 'R' && elems[2][0] == 'R'){
         return COMPILE_RR;
     }else if(n == 3 && elems[1][0] == 'R'){
@@ -234,6 +245,14 @@ uint8_t a64_createMachineCode(uint64_t opperand, char** elems, uint8_t n, uint64
                 reg1 = aXX_readDec(elems[1] + 1);
                 *fullCode = opperand;
                 *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+                break;
+            case COMPILE_N :
+                *fullCode = opperand;
+                if(elems[1][0] == 'X')
+                    num1 = aXX_readHex(elems[1] + 1);
+                else
+                    num1 = aXX_readDec(elems[2]);
+                *fullCode |= (num1 & NUM0_MASK) << ARG_SHIFT_1;
                 break;
             case COMPILE_RR :
                 reg1 = aXX_readDec(elems[1] + 1);

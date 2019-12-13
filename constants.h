@@ -30,9 +30,10 @@ typedef uint32_t OBJECT_MW_TYPE;
 #define COMPILED_LINE_DATA 3
 #define COMPILE_NOPE 1
 #define COMPILE_R 2
-#define COMPILE_RR 3
-#define COMPILE_RN 4
-#define COMPILE_RRR 5
+#define COMPILE_N 3
+#define COMPILE_RR 4
+#define COMPILE_RN 5
+#define COMPILE_RRR 6
 #define COMPILATION_ERROR 1
 #define COMPILATION_OK 0
 //Interpreter
@@ -53,6 +54,7 @@ typedef uint32_t OBJECT_MW_TYPE;
 
 
 //Compilation constants
+#define NUM0_MASK 0xFFFFFFFFFFFFFC00 /*assert the max size of a number*/
 #define NUM1_MASK 0xFFFFFFFFFFFF /*assert the max size of a number*/
 #define REG_MASK 0x3F /*assert the max size of a register*/
 #define MAX_SIZE_LABEL 150 /*Max number of char in a label name*/

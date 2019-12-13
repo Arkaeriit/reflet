@@ -24,8 +24,7 @@ int e64_execute(vm_64* vm){
             case NIL :
                 break;
             case QUIT :
-                i = vm->nombreInstruction;
-                break;
+                return e64_num0(inst);
             case MOV_RN :
                 reg1 = e64_reg1(inst);
                 vm->registers[reg1] = e64_num1(inst);
