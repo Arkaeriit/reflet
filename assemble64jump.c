@@ -134,11 +134,53 @@ uint8_t a64j_jnz(char** elems,uint8_t n,char* ret){
  */
 uint8_t a64j_jb(char** elems,uint8_t n,char* ret){
     if(n != 2){
-        fprintf(stderr,"    Wrong argument for JMP operation.\n");
+        fprintf(stderr,"    Wrong argument for JB operation.\n");
         return COMPILED_LINE_NOT_OK;
     }
     *ret = 'j';
     *((uint16_t*) (ret+1)) = JB; //We define the opperand
+    strcpy(ret + 3,elems[1]); //We add the name of the label 3 bytes into the instruction
+    return COMPILED_LINE_BRANCH;
+}
+
+/*
+ * compile a line of assembly language coding for a conditional jump (if x>=y)
+ * Arguments:
+ *      elems : the result of aXX_preprocessLine
+ *      n : the size of elems
+ *      fullCode : the compiled instruction
+ * Return :
+ *      COMPILED_LINE_BRANCH if the compilation of the line went well
+ *      COMPILED_LINE_NOT_OK if there is an error
+ */
+uint8_t a64j_jbe(char** elems,uint8_t n,char* ret){
+    if(n != 2){
+        fprintf(stderr,"    Wrong argument for JBE operation.\n");
+        return COMPILED_LINE_NOT_OK;
+    }
+    *ret = 'j';
+    *((uint16_t*) (ret+1)) = JBE; //We define the opperand
+    strcpy(ret + 3,elems[1]); //We add the name of the label 3 bytes into the instruction
+    return COMPILED_LINE_BRANCH;
+}
+
+/*
+ * compile a line of assembly language coding for a conditional jump (x<y)
+ * Arguments:
+ *      elems : the result of aXX_preprocessLine
+ *      n : the size of elems
+ *      fullCode : the compiled instruction
+ * Return :
+ *      COMPILED_LINE_BRANCH if the compilation of the line went well
+ *      COMPILED_LINE_NOT_OK if there is an error
+ */
+uint8_t a64j_js(char** elems,uint8_t n,char* ret){
+    if(n != 2){
+        fprintf(stderr,"    Wrong argument for JS operation.\n");
+        return COMPILED_LINE_NOT_OK;
+    }
+    *ret = 'j';
+    *((uint16_t*) (ret+1)) = JS; //We define the opperand
     strcpy(ret + 3,elems[1]); //We add the name of the label 3 bytes into the instruction
     return COMPILED_LINE_BRANCH;
 }
@@ -155,7 +197,7 @@ uint8_t a64j_jb(char** elems,uint8_t n,char* ret){
  */
 uint8_t a64j_jse(char** elems,uint8_t n,char* ret){
     if(n != 2){
-        fprintf(stderr,"    Wrong argument for JMP operation.\n");
+        fprintf(stderr,"    Wrong argument for JSE operation.\n");
         return COMPILED_LINE_NOT_OK;
     }
     *ret = 'j';

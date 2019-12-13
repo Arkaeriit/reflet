@@ -110,6 +110,64 @@ int e64_execute(vm_64* vm){
                 reg3 = e64_reg3(inst);           
                 vm->registers[reg1] = vm->registers[reg2] % vm->registers[reg3];
                 break;
+            case AND_RN :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] &= e64_num1(inst);
+                break;
+            case AND_RR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg1] &= vm->registers[reg2];
+                break;
+            case AND_RRR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                reg3 = e64_reg3(inst);           
+                vm->registers[reg1] = vm->registers[reg2] & vm->registers[reg3];
+                break;
+            case OR_RN :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] |= e64_num1(inst);
+                break;
+            case OR_RR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg1] |= vm->registers[reg2];
+                break;
+            case OR_RRR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                reg3 = e64_reg3(inst);           
+                vm->registers[reg1] = vm->registers[reg2] | vm->registers[reg3];
+                break;
+            case XOR_RN :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] ^= e64_num1(inst);
+                break;
+            case XOR_RR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg1] ^= vm->registers[reg2];
+                break;
+            case XOR_RRR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                reg3 = e64_reg3(inst);           
+                vm->registers[reg1] = vm->registers[reg2] ^ vm->registers[reg3];
+                break;
+            case NOT_RN :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] = !e64_num1(inst);
+                break;
+            case NOT_RR :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg1] = !vm->registers[reg2];
+                break;
+            case NOT_R :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] = !vm->registers[reg1];
+                break;
             case CMP_RN :
                 reg1 = e64_reg1(inst);
                 e64_cmp(vm->flags, vm->registers[reg1], e64_num1(inst));
@@ -123,7 +181,7 @@ int e64_execute(vm_64* vm){
                 reg1 = e64_reg1(inst);
                 st_push(vm->registersStack, vm->registers[reg1]);
                 break;
-            case PULL :
+            case POP :
                 reg1 = e64_reg1(inst);
                 vm->registers[reg1] = st_pull(vm->registersStack);
                 break;
@@ -157,7 +215,7 @@ int e64_execute(vm_64* vm){
             case LDR :
                 reg1 = e64_reg1(inst);
                 reg2 = e64_reg2(inst);
-                vm->registers[reg2] = *((uint64_t*) vm->registers[reg1]);
+                vm->registers[reg1] = *((uint64_t*) vm->registers[reg2]);
                 break;
             case STR_BYTE :
                 reg1 = e64_reg1(inst);
@@ -167,12 +225,16 @@ int e64_execute(vm_64* vm){
             case LDR_BYTE :
                 reg1 = e64_reg1(inst);
                 reg2 = e64_reg2(inst);
-                vm->registers[reg2] = *((uint64_t*) vm->registers[reg1]);
+                vm->registers[reg1] = *((uint64_t*) vm->registers[reg2]);
                 vm->registers[reg2] &= 0xFF;
                 break;
             case LDR_DATA :
                 reg1 = e64_reg1(inst);
                 vm->registers[reg1] = (uint64_t) vm->data[e64_num1(inst)];
+                break;
+            case PCHAR :
+                reg1 = e64_reg1(inst);
+                putchar(vm->registers[reg1]);
                 break;
             case DSP_R :
                 reg1 = e64_reg1(inst);
@@ -200,8 +262,20 @@ int e64_execute(vm_64* vm){
                     i--;
                 }
                 break;
+            case JBE :
+                if(!vm->flags[FLAG_SMALLER]){
+                    i = e64_num0(inst);
+                    i--;
+                }
+                break;
+            case JS :
+                if(vm->flags[FLAG_SMALLER]){
+                    i = e64_num0(inst);
+                    i--;
+                }
+                break;
             case JSE :
-                if(vm->flags[FLAG_SMALLER_OR_EQUAL]){
+                if(!vm->flags[FLAG_BIGGER]){
                     i = e64_num0(inst);
                     i--;
                 }
@@ -268,6 +342,6 @@ uint8_t e64_reg3(uint64_t inst){
 void e64_cmp(bool* flags, uint64_t num1, uint64_t num2){
     flags[FLAG_ZERO] = (num1 == num2);
     flags[FLAG_BIGGER] = (num1 > num2);
-    flags[FLAG_SMALLER_OR_EQUAL] = (num1 <= num2);
+    flags[FLAG_SMALLER] = (num1 < num2);
 }
    

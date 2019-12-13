@@ -27,12 +27,28 @@
 #define MOD_RR 0x313
 #define MOD_RRR 0x314
 
+#define AND_RN 0x316
+#define AND_RR 0x317
+#define AND_RRR 0x318
 
-#define CMP_RN 0x320
-#define CMP_RR 0x321
+#define OR_RN 0x31A
+#define OR_RR 0x21B
+#define OR_RRR 0x31C
 
-#define PUSH 0x323
-#define PULL 0x324
+#define XOR_RN 0x31E
+#define XOR_RR 0x31F
+#define XOR_RRR 0x320
+
+#define NOT_RN 0x322
+#define NOT_RR 0x323
+#define NOT_R 0x324
+
+
+#define CMP_RN 0x330
+#define CMP_RR 0x331
+
+#define PUSH 0x333
+#define POP 0x334
 
 #define FREE 0x325
 #define ASK_RR 0x326
@@ -46,6 +62,7 @@
 #define DATA 0x32E /*Note : not used*/
 #define LDR_DATA 0x32E
 
+#define PCHAR 0x3FE
 #define DSP_R 0x3FF
 
 #define LAB 0x000
@@ -53,6 +70,8 @@
 #define JZ 0x101
 #define JNZ 0x102
 #define JB 0x103
+#define JBE 0x104
+#define JS 0x105
 #define JSE 0x106
 
 #define FUNC 0x000

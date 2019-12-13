@@ -58,9 +58,9 @@ int rb_init64(vm_64* vm, const char* filename, uint32_t fileSize, args vmArgs){
     //stack init
     vm->registersStack = st_init();
     vm->functionsStack = st_init();
-    st_push(vm->registersStack, vmArgs.argc);
-    for(int i=0; i<vmArgs.argc; i++)
+    for(int i=vmArgs.argc - 1; i>=0; i--)
         st_push(vm->registersStack, (uint64_t) vmArgs.argv[i]);
+    st_push(vm->registersStack, vmArgs.argc);
     //flags init
     for(int i=0; i<FLAGS_NUMBER; i++)
         vm->flags[i] = false;

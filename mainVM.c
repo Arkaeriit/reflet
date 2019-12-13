@@ -7,7 +7,7 @@ the vm and interprete a binary file.        |
 
 int main(int argc,char** argv){
     if(argc < 2){
-        fprintf(stderr, "Not enough arguments.\nUsage : asvm [file] <arguments>...\n");
+        fprintf(stderr, "Not enough arguments.\nUsage : asvm [file] [arguments]...\n");
         return 1;
     }
     char* filename = argv[1];

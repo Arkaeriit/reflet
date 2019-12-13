@@ -9,6 +9,8 @@ uint8_t a64j_jmp(char** elems,uint8_t n,char* ret);
 uint8_t a64j_jz(char** elems,uint8_t n,char* ret);
 uint8_t a64j_jnz(char** elems,uint8_t n,char* ret);
 uint8_t a64j_jb(char** elems,uint8_t n,char* ret);
+uint8_t a64j_jbe(char** elems,uint8_t n,char* ret);
+uint8_t a64j_js(char** elems,uint8_t n,char* ret);
 uint8_t a64j_jse(char** elems,uint8_t n,char* ret);
 
 uint8_t a64j_call(char** elems,uint8_t n,char* ret);
