@@ -235,6 +235,10 @@ int e64_execute(vm_64* vm){
                 reg1 = e64_reg1(inst);
                 putchar(vm->registers[reg1]);
                 break;
+            case SPRINT :
+                reg1 = e64_reg1(inst);
+                printf("%s", (char*) vm->registers[reg1]);
+                break;
             case DSP_R :
                 reg1 = e64_reg1(inst);
                 printf("%" PRIu64 "\n",vm->registers[reg1]);

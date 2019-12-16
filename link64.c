@@ -139,7 +139,7 @@ int l64_addLabel(labelHead* lB,const char* labelName, uint64_t position){
  *      LABEL_OK otherwise
  */
 int l64_addData(dataHead* dT,const char* labelName, char* content){
-    l64_addLabel(dT, labelName, dT->size + 1);
+    l64_addLabel(dT, labelName, dT->size);
     label_tag* tag = l64_autoGetLabel(dT, labelName);
     tag->content = content;
     return LABEL_OK;

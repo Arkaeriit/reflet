@@ -224,8 +224,8 @@ uint8_t a64m_concatStrings(char** elems, uint8_t n,bool* isString){
         }
         if(flagString){
             if(i != startString){ //if we are not in the same elems as the start of the line we concatenate the arguments
-                strcat(elemsRet[ret],space);
-                strcat(elemsRet[ret],elems[i]);
+                strcat(elemsRet[ret-1],space);
+                strcat(elemsRet[ret-1],elems[i]);
             }
             char* stringToComplete = elemsRet[ret-1];
             if(stringToComplete[strlen(stringToComplete) - 1] == '"'){

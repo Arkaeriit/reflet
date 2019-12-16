@@ -62,7 +62,8 @@
 #define DATA 0x32E /*Note : not used*/
 #define LDR_DATA 0x32E
 
-#define PCHAR 0x3FE
+#define PCHAR 0x3FD
+#define SPRINT 0x3FE
 #define DSP_R 0x3FF
 
 #define LAB 0x000

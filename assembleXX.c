@@ -15,7 +15,7 @@
  *      elems : the list
  */
 void aXX_freeElems(uint8_t n,char** elems){
-    for(uint8_t i=0; i<n; i++)
+    for(uint8_t i=0; i<n-1; i++)
         free(elems[i]);
 }
 

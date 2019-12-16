@@ -115,6 +115,15 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
             fprintf(stderr,"    Wrong argument for DSP operation.\n");
             return COMPILED_LINE_NOT_OK;
         }
+    }else if(!strcmp(elems[0],"SPRINT")){
+        uint8_t config = a64_analyzeLine(elems, n);
+        if(config == COMPILE_R){
+            a64_createMachineCode(SPRINT, elems, 2, fullCode);
+            return COMPILED_LINE_INSTRUCTION;
+        }else{
+            fprintf(stderr, "    Wrong argument for SPRINT.\n");
+            return COMPILED_LINE_NOT_OK;
+        }
     }else if(!strcmp(elems[0],"DSP")){
         uint8_t config = a64_analyzeLine(elems, n);
         if(config == COMPILE_R){
