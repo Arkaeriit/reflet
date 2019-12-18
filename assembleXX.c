@@ -100,9 +100,10 @@ uint64_t aXX_readDec(char* number){
     uint64_t digit = 1;
     for(uint8_t i=1; i<=strlen(number); i++){
         char curentDigit = number[strlen(number) - i];
-        if( 48 <= curentDigit && curentDigit <= 57) //a digit between 0 and 9
+        if( 48 <= curentDigit && curentDigit <= 57){ //a digit between 0 and 9
             ret = ret + (curentDigit - 48) * digit;
-        digit = digit * 10;
+            digit = digit * 10;
+        }
     }
     return ret;
 }

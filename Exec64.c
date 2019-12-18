@@ -231,9 +231,88 @@ int e64_execute(vm_64* vm){
                 reg1 = e64_reg1(inst);
                 vm->registers[reg1] = (uint64_t) vm->data[e64_num1(inst)];
                 break;
+            case OPEN :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                reg3 = e64_reg3(inst);
+                switch(reg3){
+                    case 0 :
+                        vm->registers[reg1] = (uint64_t) fopen((char*) vm->registers[reg2], "r");
+                        break;
+                    case 1 :
+                        vm->registers[reg1] = (uint64_t) fopen((char*) vm->registers[reg2], "w");
+                        break;
+                    case 2 :
+                        vm->registers[reg1] = (uint64_t) fopen((char*) vm->registers[reg2], "a");
+                        break;
+                }
+                break;
+            case CLOSE :
+                reg1 = e64_reg1(inst);
+                fclose((FILE*) vm->registers[reg1]);
+                break;
+            case STDIN :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] = (uint64_t) stdin;
+                break;
+            case STDOUT :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] = (uint64_t) stdout;
+                break;
+            case STDERR :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] = (uint64_t) stderr;
+                break;
+            case GCHAR :
+                reg1 = e64_reg1(inst);
+                vm->registers[reg1] = getchar();
+                break;
             case PCHAR :
                 reg1 = e64_reg1(inst);
-                putchar(vm->registers[reg1]);
+                putchar(vm->registers[reg1] & 0xFF);
+                break;
+            case WRITE :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                reg3 = e64_reg3(inst);
+                fwrite((char*) vm->registers[reg2], 1, vm->registers[reg3], (FILE*) vm->registers[reg1]);
+                break;
+            case READ :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                reg3 = e64_reg3(inst);
+                fread((char*) vm->registers[reg1], 1, vm->registers[reg3], (FILE*) vm->registers[reg2]);
+                break;
+            case READ_LINE :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                reg3 = e64_reg3(inst);
+                fgets((char*) vm->registers[reg1], vm->registers[reg3], (FILE*) vm->registers[reg2]);
+                break;
+            case STRLEN :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg1] = strlen((char*) vm->registers[reg2]);
+                break;
+            case STRCMP :  
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                uint64_t cmp = strcmp((char*) vm->registers[reg1], (char*) vm->registers[reg2]);
+                e64_cmp(vm->flags, cmp, 0); 
+                break;
+            case EOFCMP :
+                reg1 = e64_reg1(inst);
+                e64_cmp(vm->flags, feof((FILE*) vm->registers[reg1]), 0);
+                break;
+            case STN :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg1] = e64_stn((char*) vm->registers[reg2]);
+                break;
+            case NTS :
+                reg1 = e64_reg1(inst);
+                reg2 = e64_reg2(inst);
+                vm->registers[reg1] = (uint64_t) e64_nts(vm->registers[reg2]);
                 break;
             case SPRINT :
                 reg1 = e64_reg1(inst);
@@ -347,4 +426,37 @@ void e64_cmp(bool* flags, uint64_t num1, uint64_t num2){
     flags[FLAG_BIGGER] = (num1 > num2);
     flags[FLAG_SMALLER] = (num1 < num2);
 }
-   
+
+/*
+ * Convert a string to a number
+ *  Arguments:
+ *      string : the string representing a number
+ *  return:
+ *      a number equal to what is writen in the string
+ */
+uint64_t e64_stn(char* string){
+    uint64_t ret = 0;
+    uint64_t digit = 1;
+    for(uint8_t i=1; i<=strlen(string); i++){
+        char curentDigit = string[strlen(string) - i];
+        if( 48 <= curentDigit && curentDigit <= 57){
+            ret = ret + (curentDigit - 48) * digit;
+            digit = digit * 10;
+        }
+    }
+    return ret;
+}
+
+/*
+ * Convert a number to a string
+ *  Arguments:
+ *      number: a unsigned number
+ *  return:
+ *      a pointer to a string where the number is writen
+ */
+char* e64_nts(uint64_t number){
+    char* ret = malloc(sizeof(char) * 20);
+    sprintf(ret, "%" PRIu64 "\n", number);
+    return ret;
+}
+

@@ -62,7 +62,22 @@
 #define DATA 0x32E /*Note : not used*/
 #define LDR_DATA 0x32E
 
-#define PCHAR 0x3FD
+#define OPEN 0x3E0
+#define CLOSE 0x3E1
+#define STDIN 0x3E2
+#define STDOUT 0x3E3
+#define STDERR 0x3E4
+#define GCHAR 0x3E5
+#define PCHAR 0x3E6
+#define WRITE 0x3E7
+#define READ 0x3E8
+#define READ_LINE 0x3E9
+#define STRLEN 0x3EA
+#define STRCMP 0x3EB
+#define EOFCMP 0x3EC
+#define STN 0x3ED
+#define NTS 0x3EE
+
 #define SPRINT 0x3FE
 #define DSP_R 0x3FF
 

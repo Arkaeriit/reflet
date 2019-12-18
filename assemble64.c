@@ -30,9 +30,11 @@ uint8_t a64_assemble(FILE* fin,FILE* fout){
             if(a == COMPILED_LINE_INSTRUCTION){
                 fprintf(fout,"i");
                 fwrite(line,8,1,fout);
+                aXX_freeElems(n,elems);
             }else if(a == COMPILED_LINE_BRANCH){
                 fprintf(fout,"j");
                 fwrite(line, SIZELINE_LABEL,1,fout);
+                aXX_freeElems(n,elems);
             }else if(a == COMPILED_LINE_DATA){
                 fprintf(fout,"d");
                 fwrite(line, SIZELINE, 1, fout);
@@ -41,7 +43,6 @@ uint8_t a64_assemble(FILE* fin,FILE* fout){
                 return COMPILATION_ERROR;
             }
         }
-        aXX_freeElems(n,elems);
         fgets(line,SIZELINE,fin);
         lineNumber++;
     } 
@@ -106,15 +107,36 @@ uint8_t a64_compileLine(char** elems,uint8_t n,char* ret){
         return a64m_xor(elems, n, fullCode);
     }else if(!strcmp(elems[0],"NOT")){
         return a64m_not(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"OPEN")){
+        return a64f_open(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"CLOSE")){
+        return a64f_close(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"STDIN")){
+        return a64f_stdin(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"STDOUT")){
+        return a64f_stdout(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"STDERR")){
+        return a64f_stderr(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"GCHAR")){
+        return a64f_gchar(elems, n, fullCode);
     }else if(!strcmp(elems[0],"PCHAR")){
-        uint8_t config = a64_analyzeLine(elems, n);
-        if(config == COMPILE_R){
-            a64_createMachineCode(PCHAR, elems, 2, fullCode);
-            return COMPILED_LINE_INSTRUCTION;
-        }else{
-            fprintf(stderr,"    Wrong argument for DSP operation.\n");
-            return COMPILED_LINE_NOT_OK;
-        }
+        return a64f_pchar(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"WRITE")){
+        return a64f_write(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"READ")){
+        return a64f_read(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"READ_LINE")){
+        return a64f_readline(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"STRLEN")){
+        return a64f_strlen(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"STRCMP")){
+        return a64f_strcmp(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"EOFCMP")){
+        return a64f_eofcmp(elems, n, fullCode);
+    }else if(!strcmp(elems[0],"STN")){
+        return a64f_stn(elems, n,  fullCode);
+    }else if(!strcmp(elems[0],"NTS")){
+        return a64f_nts(elems, n,  fullCode);
     }else if(!strcmp(elems[0],"SPRINT")){
         uint8_t config = a64_analyzeLine(elems, n);
         if(config == COMPILE_R){
