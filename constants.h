@@ -34,6 +34,7 @@ typedef uint32_t OBJECT_MW_TYPE;
 #define COMPILE_RR 4
 #define COMPILE_RN 5
 #define COMPILE_RRR 6
+#define COMPILE_RRN 7
 #define COMPILATION_ERROR 1
 #define COMPILATION_OK 0
 //Interpreter
@@ -56,6 +57,7 @@ typedef uint32_t OBJECT_MW_TYPE;
 //Compilation constants
 #define NUM0_MASK 0xFFFFFFFFFFFFFC00 /*assert the max size of a number*/
 #define NUM1_MASK 0xFFFFFFFFFFFF /*assert the max size of a number*/
+#define NUM2_MASK 0xFFFFFFFFF/*assert the max size of a number*/
 #define REG_MASK 0x3F /*assert the max size of a register*/
 #define MAX_SIZE_LABEL 150 /*Max number of char in a label name*/
 #define MAX_CALL_NUMBER 1000 /*Maximun number of position from where a label can be called*/
@@ -72,6 +74,7 @@ typedef uint32_t OBJECT_MW_TYPE;
 #define REG3 0xFC00000 /*Mask to get the 3rd register*/
 #define NUM0 0xFFFFFFFFFFFFFC00/*Mask to get the numeric value if there is 0*/
 #define NUM1 0xFFFFFFFFFFFF0000/*Mask to get the numeric value if there is only 1 register*/
+#define NUM2 0xFFFFFFFFFFF00000/*Mask to get the numeric value if there is only 1 register*/
 
 
 //Compilation and execution constants

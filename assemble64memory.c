@@ -90,7 +90,7 @@ uint8_t a64m_str(char** elems, uint8_t n, uint64_t* fullCode){
         a64_createMachineCode(STR, elems, n, fullCode);
         return COMPILED_LINE_INSTRUCTION;
     }else{
-        fprintf(stderr,"    Wrong argument for ASK_BYTE operation.\n"); 
+        fprintf(stderr,"    Wrong argument for STR operation.\n"); 
         return COMPILED_LINE_NOT_OK;
     }
 }
@@ -111,7 +111,7 @@ uint8_t a64m_ldr(char** elems, uint8_t n, uint64_t* fullCode){
         a64_createMachineCode(LDR, elems, n, fullCode);
         return COMPILED_LINE_INSTRUCTION;
     }else{
-        fprintf(stderr,"    Wrong argument for ASK_BYTE operation.\n"); 
+        fprintf(stderr,"    Wrong argument for LDR operation.\n"); 
         return COMPILED_LINE_NOT_OK;
     }
 }
@@ -132,7 +132,7 @@ uint8_t a64m_str_byte(char** elems, uint8_t n, uint64_t* fullCode){
         a64_createMachineCode(STR_BYTE, elems, n, fullCode);
         return COMPILED_LINE_INSTRUCTION;
     }else{
-        fprintf(stderr,"    Wrong argument for ASK_BYTE operation.\n"); 
+        fprintf(stderr,"    Wrong argument for STR_BYTE operation.\n"); 
         return COMPILED_LINE_NOT_OK;
     }
 }
@@ -153,7 +153,7 @@ uint8_t a64m_ldr_byte(char** elems, uint8_t n, uint64_t* fullCode){
         a64_createMachineCode(LDR_BYTE, elems, n, fullCode);
         return COMPILED_LINE_INSTRUCTION;
     }else{
-        fprintf(stderr,"    Wrong argument for ASK_BYTE operation.\n"); 
+        fprintf(stderr,"    Wrong argument for LDR_BYTE operation.\n"); 
         return COMPILED_LINE_NOT_OK;
     }
 }
@@ -263,7 +263,7 @@ uint8_t a64m_ldr_data(char** elems, uint8_t n, char* ret){
     if(elems[2][0] == 'R'){
         reg = aXX_readDec(elems[2] + 1);
     }else{
-        fprintf(stderr,"    Wrong argument for LLDR_DATA opperation.\n");
+        fprintf(stderr,"    Wrong argument for LDR_DATA opperation.\n");
         return COMPILED_LINE_NOT_OK;
     }
     memcpy(ret + SIZELINE_LABEL, &reg, 1);

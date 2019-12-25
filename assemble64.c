@@ -39,7 +39,7 @@ uint8_t a64_assemble(FILE* fin,FILE* fout){
                 fprintf(fout,"d");
                 fwrite(line, SIZELINE, 1, fout);
             }else{
-                fprintf(stderr,"Error line %" PRIx64 ":\n",lineNumber);
+                fprintf(stderr,"Error line %" PRIu64 ":\n",lineNumber);
                 return COMPILATION_ERROR;
             }
         }
@@ -248,6 +248,8 @@ uint8_t a64_analyzeLine(char** elems, uint8_t n){
         return COMPILE_RN;
     }else if(n == 4 && elems[1][0] == 'R' && elems[2][0] == 'R' && elems[3][0] == 'R'){
         return COMPILE_RRR;
+    }else if(n == 4 && elems[1][0] == 'R' && elems[2][0] == 'R'){
+        return COMPILE_RRN;
     }else{
         return COMPILED_LINE_NOT_OK;
     }
@@ -310,6 +312,18 @@ uint8_t a64_createMachineCode(uint64_t opperand, char** elems, uint8_t n, uint64
                 else
                     num1 = aXX_readDec(elems[2]);
                 *fullCode |= (num1 & NUM1_MASK) << ARG_SHIFT_2;
+                break;
+            case COMPILE_RRN :
+                reg1 = aXX_readDec(elems[1] + 1);
+                reg2 = aXX_readDec(elems[2] + 1);
+                *fullCode = opperand;
+                if(elems[2][0] == 'X')
+                    num1 = aXX_readHex(elems[3] + 1);
+                else
+                    num1 = aXX_readDec(elems[3]);
+                *fullCode |= (reg1 & REG_MASK) << ARG_SHIFT_1;
+                *fullCode |= (reg2 & REG_MASK) << ARG_SHIFT_2;
+                *fullCode |= (num1 & NUM2_MASK) << ARG_SHIFT_3;
                 break;
             default :
                 return COMPILED_LINE_NOT_OK;

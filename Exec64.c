@@ -225,7 +225,7 @@ int e64_execute(vm_64* vm){
                 reg1 = e64_reg1(inst);
                 reg2 = e64_reg2(inst);
                 vm->registers[reg1] = *((uint64_t*) vm->registers[reg2]);
-                vm->registers[reg2] &= 0xFF;
+                vm->registers[reg1] &= 0xFF;
                 break;
             case LDR_DATA :
                 reg1 = e64_reg1(inst);
@@ -234,8 +234,8 @@ int e64_execute(vm_64* vm){
             case OPEN :
                 reg1 = e64_reg1(inst);
                 reg2 = e64_reg2(inst);
-                reg3 = e64_reg3(inst);
-                switch(reg3){
+                uint64_t num = e64_num2(inst);
+                switch(num){
                     case 0 :
                         vm->registers[reg1] = (uint64_t) fopen((char*) vm->registers[reg2], "r");
                         break;
@@ -302,7 +302,7 @@ int e64_execute(vm_64* vm){
                 break;
             case EOFCMP :
                 reg1 = e64_reg1(inst);
-                e64_cmp(vm->flags, feof((FILE*) vm->registers[reg1]), 0);
+                e64_cmp(vm->flags, !feof((FILE*) vm->registers[reg1]), 0);
                 break;
             case STN :
                 reg1 = e64_reg1(inst);
@@ -394,6 +394,13 @@ uint64_t e64_num1(uint64_t inst){
 }
 
 /*
+ * Get the numeric argument of an instruction if the instruction take 2 regster as argument
+ */
+uint64_t e64_num2(uint64_t inst){
+    return (inst & NUM2) >> ARG_SHIFT_3;
+}
+
+/*
  * Return the 1rst register argument of an instruction.
  */
 uint8_t e64_reg1(uint64_t inst){
@@ -456,7 +463,7 @@ uint64_t e64_stn(char* string){
  */
 char* e64_nts(uint64_t number){
     char* ret = malloc(sizeof(char) * 20);
-    sprintf(ret, "%" PRIu64 "\n", number);
+    sprintf(ret, "%" PRIu64 "", number);
     return ret;
 }
 

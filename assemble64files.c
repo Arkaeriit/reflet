@@ -7,7 +7,7 @@
 
 uint8_t a64f_open(char** elems, uint8_t n, uint64_t* fullCode){
     uint8_t config = a64_analyzeLine(elems, n);
-    if(config == COMPILE_RRR){
+    if(config == COMPILE_RRN){
         a64_createMachineCode(OPEN, elems, n, fullCode);
         return COMPILED_LINE_INSTRUCTION;
     }
