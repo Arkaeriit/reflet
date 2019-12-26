@@ -219,7 +219,7 @@ int e64_execute(vm_64* vm){
             case STR_BYTE :
                 reg1 = e64_reg1(inst);
                 reg2 = e64_reg2(inst);
-                *((uint64_t*) vm->registers[reg1]) = vm->registers[reg2] & 0xFF;
+                *((uint8_t*) vm->registers[reg1]) = (uint8_t) (vm->registers[reg2] & 0xFF);
                 break;
             case LDR_BYTE :
                 reg1 = e64_reg1(inst);
