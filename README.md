@@ -41,7 +41,7 @@ Example of a hello world program:
 DATA hello "Hello, world!" 10 0 ; We initialize a string with a newline character at the end
 
 LAB start ; the start of the program
-    LDR_DATA R0 hello ; we put a pointer to the data into R0
+    LDR_DATA hello R0 ; we put a pointer to the data into R0
     SPRINT R0 ; we print the string
 ```
 Each pack of data must have a unique label and must not be larger than 1 kiB. When you load a pack of data you can modify it afterward and the modification will be global.
