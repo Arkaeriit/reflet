@@ -37,8 +37,9 @@ FREE R0 ; free the memory
 ##### Data
 Some times you need to defines constants for your programs. For that, you can define data that will be loaded int the asvm at the beginning of the execution. Data are identified with a label you can use to access it.
 Example of a hello world program:
-DATA hello "Hello, world!" 10 0 ; We initialize a string with a newline character at the end
 ```
+DATA hello "Hello, world!" 10 0 ; We initialize a string with a newline character at the end
+
 LAB start ; the start of the program
     LDR_DATA R0 hello ; we put a pointer to the data into R0
     SPRINT R0 ; we print the string
