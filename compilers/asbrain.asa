@@ -89,6 +89,7 @@ DATA labOutASM "_OUT" 10 0 ; used for exiting brackets labels
 LAB start
     DATA inputFile "in.brk" 0
     DATA outputFile "out.asa" 0
+    ;DATA outputFile "/dev/stdout" 0
     LDR_DATA standaloneNameASM R4 
     LDR_DATA inputFile R20
     LDR_DATA outputFile R21
