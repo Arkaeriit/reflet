@@ -24,18 +24,16 @@ typedef struct label_tab_struct {
  */
 typedef struct code_struct {
     struct code_struct* next;
-    uint8_t label; //a branching or an other instruction
     label_tag* tag; //only used in the chain used to store the labels
+    uint8_t label;
     char* texte;
 } code;
 
 typedef struct codeHead_struct {
     uint64_t size;
     struct code_struct* next;
+    struct code_struct* last; //a quick reference to the last element
 } codeHead;
-
-typedef codeHead dataHead;
-typedef codeHead labelHead;
 
 codeHead* l64_initList();
 void l64_addList(codeHead* cH,char* texte, uint8_t label);

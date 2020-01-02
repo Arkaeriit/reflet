@@ -13,7 +13,7 @@ Where program is the program compiled for the asvm and arguments are the optiona
 #### AS assembly
 For now, the best way to write code for the asvm is by using the assembly language for the asvm.
 In this language, each line starts with an opcode mnemonic followed by label, number or registers as arguments.
-You can place comments at the end of each lines after a semicolon. 
+You can place comments at the end of each line after a semicolon. 
 ##### Registers
 The asvm dispose of 64 registers (R0 to R63) you can access and use as arguments in instructions. Each register contains a 64-bits number. In an instruction, if you want to access the content of a register you must write an "R" followed by the number of the register. 
 Example :
@@ -136,7 +136,7 @@ STR | register1 | register2 | - | store the content of register2 into the memory
 LDR | register1 | register2 | - | put the data at address register2 into register1
 STR_BYTE | register1 | register2 | - | store the first byte of the content of register2 into the memory at address register1
 LDR_BYTE | register1 | register2 | - | put the first byte of the data at address register2 into register1
-DATA | label | content | ... | consider content as data and label it with label
+DATA | label | content | - | consider content as data and label it with label
 LDR_DATA | label | register | - | put a pointer to the data labeled label into register
 OPEN | register1 | register2  | 0 | put in register1 a file descriptor of a file named after the string pointed by register2, the file is in reading mode
 OPEN | register1 | register2  | 1 | put in register1 a file descriptor of a file named after the string pointed by register2, the file is in write mode
@@ -158,6 +158,7 @@ STN | register1 | register2 | - | convert the string pointed by register2 into a
 SPRINT | register | - | - | print the string at the address register
 DSP | register | - | - | print the content of register as a decimal numeric value and add a new line char, used for debugging
 LAB | label | - | - | label a place in the code to jump to it
+JMP | label | - | - | jump to the place labeled label
 JZ | label | - | - | jump to the place labeled label if the result of the last comparison is an equality
 JNZ | label | - | - | jump to the place labeled label if the result of the last comparison is an inequality
 JB | label | - | - | jump to the place labeled label if the first number in the last comparison is bigger than the second

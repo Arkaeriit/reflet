@@ -52,11 +52,13 @@ clean :
 	rm -f *.o
 	rm -f asvm
 	rm -f asasm
+	rm -f *.aso
+	rm -f *.asb
 
 #instalation
 install :
-	mv -f asvm /usr/local/bin/asvm
-	mv -f asasm /usr/local/bin/asasm
+	cp -f asvm /usr/local/bin/asvm
+	cp -f asasm /usr/local/bin/asasm
 
 uninstall :
 	rm -f /usr/local/bin/asvm
