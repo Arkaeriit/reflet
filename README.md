@@ -1,4 +1,8 @@
 # ASVM
+This project is abandoned and replaced with the ASRM.
+
+
+
 The asvm is a virtual machine that can run programs compiled for it. It is designed to make portable programs that are not too slow.
 
 ## User manual
