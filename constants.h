@@ -15,10 +15,13 @@
 //Magic words
 #define BINARY_MW_SIZE 4
 #define BINARY_MW 0x4D565341 /*ASVM*/
+#define BINARY_MW_STRING "ASVM"
 typedef uint32_t BINARY_MW_TYPE;
 #define BINARY_32_MW 0x32335341 /*AS32*/
+#define BINARY_32_MW_STRING "AS32"
 #define OBJECT_MW_SIZE 4
 #define OBJECT_MW 0x424F5341 /*ASOB*/
+#define OBJECT_MW_STRING "ASOB"
 typedef uint32_t OBJECT_MW_TYPE;
 
 
@@ -60,7 +63,7 @@ typedef uint32_t OBJECT_MW_TYPE;
 #define NUM2_MASK 0xFFFFFFFFF/*assert the max size of a number*/
 #define REG_MASK 0x3F /*assert the max size of a register*/
 #define MAX_SIZE_LABEL 150 /*Max number of char in a label name*/
-#define MAX_CALL_NUMBER 1000 /*Maximun number of position from where a label can be called*/
+#define MAX_CALL_NUMBER 1000000 /*Maximun number of position from where a label can be called*/
 #define SIZELINE_LABEL MAX_SIZE_LABEL + 3 /*Size of a line of object code used for label*/ /*It is the longest name a label can habe + a indicating byte + 2 opperand bytes*/
 #define SIZE_DATA 1024
 #define SIZELINE SIZELINE_LABEL + SIZE_DATA /*Max size for lablel, data or code*/

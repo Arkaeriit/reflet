@@ -1,6 +1,7 @@
 #ifndef OPPERAND
 #define OPPERAND
 
+//Basic opperands
 #define NIL 0x000
 #define QUIT 0x001
 
@@ -50,6 +51,7 @@
 #define PUSH 0x333
 #define POP 0x334
 
+//Memory management
 #define FREE 0x325
 #define ASK_RR 0x326
 #define ASK_RN 0x327
@@ -62,6 +64,16 @@
 #define DATA 0x32E /*Note : not used*/
 #define LDR_DATA 0x32E
 
+//ABTFS partitions
+#define A_IMG_OPEN 0x3D0
+#define A_IMG_CLOSE 0x3D1
+#define A_IMG_CREATE 0x3D2
+#define A_NFILES 0x3D3
+#define A_FSIZE 0x3D4
+#define A_READ 0x3D5
+#define A_WRITE 0x3D6
+
+//File and Cstrings
 #define OPEN 0x3E0
 #define CLOSE 0x3E1
 #define STDIN 0x3E2
@@ -81,6 +93,7 @@
 #define SPRINT 0x3FE
 #define DSP_R 0x3FF
 
+//Flow control
 #define LAB 0x000
 #define JMP 0x100
 #define JZ 0x101

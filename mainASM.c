@@ -6,6 +6,8 @@
 #include "mainASM.h"
 
 int main(int argc,char** argv){
+    if(argc < 2)
+        return 1;
     if(!strcmp(*(argv+1),"compile") && argc > 2){
         FILE *fin,*fout;
         fin = fopen(*(argv+2),"r");

@@ -38,6 +38,7 @@ uint8_t a64_assemble(FILE* fin,FILE* fout){
             }else if(a == COMPILED_LINE_DATA){
                 fprintf(fout,"d");
                 fwrite(line, SIZELINE, 1, fout);
+                aXX_freeElems(n,elems);
             }else{
                 fprintf(stderr,"Error line %" PRIu64 ":\n",lineNumber);
                 return COMPILATION_ERROR;
@@ -46,6 +47,10 @@ uint8_t a64_assemble(FILE* fin,FILE* fout){
         fgets(line,SIZELINE,fin);
         lineNumber++;
     } 
+    free(elems);
+    free(line);
+    fclose(fin);
+    fclose(fout);
     return COMPILATION_OK;
 }
 

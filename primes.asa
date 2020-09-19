@@ -1,0 +1,44 @@
+;This program calculate the 10000 first primes numbers
+;Even if the VM is only at it's first steps it can still be a
+;good example of how to use it.
+
+LAB start
+    MOV R0 1 ; The number at hand
+    DSP R0 ; We know that 1 is prime ,duh
+    MOV R1 1 ; The number of already calculated primes numbers
+        LAB primeLoop ; the main loop
+        ADD R0 1 ; we seek the next number
+        MOV R3 R0 ;We prepare the call of isPrime
+        CALL isPrime
+        CMP R4 1 ;we check if isPrime returned a one
+        CALL primed ;we call that function which print R0 if it is prime and increment the count of discoverd prime numbers
+        CMP R1 10000 ;We check if we got all te numbers we want
+        JZ end
+        JMP primeLoop ;we rerun the loop
+    LAB end
+    QUIT
+  
+  
+FUNC isPrime ;return 1 in R4 if R3 is prime and return 0 otherwise
+    MOV R5 1 ; loop counter
+        LAB isPrimeLoop ;we loop until we find a number that can divide R3
+        ADD R5 1
+        CMP R5 R3 ; if we got all the way to R3 it means that R3 is prime
+        JZ Prime 
+        MOD R4 R3 R5 ;is it divisable
+        CMP R4 0 ; if the rest of the eucledean division is 0 R3 is not a prime number 
+        JZ notPrime
+        JMP isPrimeLoop
+    LAB Prime ;we put one into 0 if we got a prime number
+    MOV R4 1
+    RET
+    LAB notPrime
+    RET ; already 0 in R4
+  
+FUNC primed ;print and update the counter if there is a prime number
+    JNZ ENDprimed
+    DSP R0 ; we print the numbers
+    ADD R1 1 ; one more prime
+    LAB ENDprimed    
+    RET 
+

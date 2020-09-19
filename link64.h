@@ -8,6 +8,10 @@
 #include <inttypes.h>
 #include "constants.h"
 
+/*
+ * these two structs are ment to represnent the data dans positions
+ * in the code we must link as an arraylist
+ */
 //this struct is used as the link in the chain representing label for jumps
 typedef struct label_tab_struct {
     char* name; 
@@ -18,14 +22,23 @@ typedef struct label_tab_struct {
     char* content; //used for adding data labels
 } label_tag;
 
+typedef struct labelHead_struct {
+    uint64_t size;
+    label_tag** labels;
+} labelHead;
+
+typedef labelHead dataHead;
+
+labelHead* l64_initLabel();
+label_tag* l64_newLabel(labelHead* lB);
+label_tag* l64_getLabel(labelHead* lB, uint64_t index);
 /*
  * These two struct are ment to represent the code we must link as
  * a linked list.
  */
 typedef struct code_struct {
     struct code_struct* next;
-    label_tag* tag; //only used in the chain used to store the labels
-    uint8_t label;
+    char label;
     char* texte;
 } code;
 
@@ -52,6 +65,9 @@ int l64_addFile(codeHead* cH, labelHead* lB, dataHead* dT, FILE* fin);
 int l64_branching(codeHead* cH, labelHead* lB, uint64_t shift);
 void l64_writingData(dataHead* dT, FILE* fout);
 int l64_link(FILE** fin,FILE* fout,int nFiles);
+
+bool l64_sameString(const char* string1, const char* string2);
+size_t l64_strlen(const char* string1);
 
 #endif
 
