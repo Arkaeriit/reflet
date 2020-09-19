@@ -1,6 +1,0 @@
-DATA hello "Hello, world!" 10 0 ; We initialise a string with a newline character at the end
-
-LAB start ; the start of the program
-    LDR_DATA hello R0 ; we put a pointer to the data into R0
-    SPRINT R0 ; we print the string
-

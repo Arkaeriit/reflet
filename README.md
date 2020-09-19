@@ -1,179 +1,57 @@
-# ASVM
-The asvm is a virtual machine that can run programs compiled for it. It is designed to make portable programs that are not too slow.
+# ASRM
+A RISC ISA.
 
-## User manual
-### Running a program 
-To run a program simply do
-```
-asvm program arguments...
-```
-Where program is the program compiled for the asvm and arguments are the optional arguments for the program
+# This repository
+This repository contains a simulator for an ASRM processor (WIP), an assembler to create ASRM machine code (to do), and a Verilog implementation of an ASRM processor (to do).
 
-### Programming for the asvm
-#### AS assembly
-For now, the best way to write code for the asvm is by using the assembly language for the asvm.
-In this language, each line starts with an opcode mnemonic followed by label, number or registers as arguments.
-You can place comments at the end of each line after a semicolon. 
-##### Registers
-The asvm dispose of 64 registers (R0 to R63) you can access and use as arguments in instructions. Each register contains a 64-bits number. In an instruction, if you want to access the content of a register you must write an "R" followed by the number of the register. 
-Example :
+# The architecture
+ASRM is a RISC ISA. Each instruction is coded on a single byte and composed of a 4 or 5-bit operand, followed by an optional 4-bit register. This ISA can be used with a processor with words of any size superior to 3 bits.
 
-`MOV R1 R0` copies the content of R0 into R1
-##### Numbers
-Numbers can be either entered as decimal numbers or hexadecimal numbers. To enter decimal number simply write it. To enter a hexadecimal number write "X" followed by the number.
-Example :
-```
-MOV R0 150 ;put the value 150 into R0
-ADD R1 XFC ;add 252 to the value of R1
-```
-##### Dynamic memory allocation
-64 registers are not enough to store all the data you need. To solve this issue you can dynamically allocate some of your computer memory to the asvm.
-```
-ASK_BYTE R0 2 ; ask for two bytes of memory and put a pointer to this two bytes into R0
-STR_BYTE R0 R1 ; put the first byte of R1 into the memory we asked for
-LDR_BYTE R2 R0 ; put the data we stored in memory back into R2
-FREE R0 ; free the memory
-```
-##### Data
-Some times you need to defines constants for your programs. For that, you can define data that will be loaded int the asvm at the beginning of the execution. Data are identified with a label you can use to access it.
-Example of a hello world program:
-```
-DATA hello "Hello, world!" 10 0 ; We initialize a string with a newline character at the end
+Most operations are made between one of the 12 general-purpose registers and an implicit working register.
 
-LAB start ; the start of the program
-    LDR_DATA hello R0 ; we put a pointer to the data into R0
-    SPRINT R0 ; we print the string
-```
-Each pack of data must have a unique label and must not be larger than 1 kiB. When you load a pack of data you can modify it afterward and the modification will be global.
-When you define a data pack you can either use numbers below 255 or strings of characters delimited by double-quotes. In those strings, you cannot use escaped characters, tabs, double quotes or semicolon.
-##### Labels
-Labels can be used to note special positions in the code and be able to jump to it.
-Example:
-```
-LAB loop ; We set the label
-    SPRINT R0 ; We print a string
-    JMP loop  ; we go back to the label
-```
-##### Conditions
-Conditional statements are made in two steps.
-In the first step, you must compare two values.
-CMP R0 R1 ; We compare the content of R0 and R1
-CMP R0 35 ; We compare the content of R0 and the number 25
-In the second step, we do a jump if the comparison is what we expect.
-Example:
-```
-CMP R0 25 ; We compare the content of R0 and 25
-JBE la ; We go to the label if the content of R0 is equal or bigger than 25
-```
-##### Functions
-Functions are a special kind of label. You can jump to them when you call them and you can go back from where you came at the end of the function when there is a RET instruction.
-Example:
-```
-LAB start ; Beginning of the program
-CALL pr ; We call the pr function
-QUIT ; We end the program
+## Registers
+An ASRM processor got 16 registers.
+### The working register
+R0 or WR is the working register.  This is the most important register, most operations will either copy its value into another register modify its content. Its use is never explicitly mentioned in the instructions as it is assumed that it is used most of the time. Its reset value is 0.
+### General purpose registers
+R1 to r12 are the 12 general-purpose registers. They are meant to store values used to interact with the working register. Their reset values are 0.
+### Comparison register
+R13 or CR is the comparison register. This register is updated by logical operations and its Boolean value is used for conditional jumps. Its reset value is every bit set to 1.
+### Program counter
+R14 or PC is the program counter. It contains the address of the current address. It can also be used to jump to a specific code address when forcefully modified by the user. Its reset value is 4.
+### Link register
+R15 or LR is the link register. It is updated when doing a jump instruction to contain the address of the jump. Its reset value is 0.
 
-FUNC pr ; We label the start of the function
-    SPRINT  R0 ; We print the string pointed by R0
-    RET ; We exit the function 
+## Instructions
+Here is a list of the instruction of an ASRM processor. 
+|Mnemonic|Operand|Followed by|Effect|
+|--|--|--|--|
+| slp | 0b00000 | Any 3 bits | Does nothing, wait for the next instruction |
+| set | 0x1 | A 4 bits number | Put the number in the working register|
+| read | 0x2 | A register | Copies the value in the argument register into the working register |
+| cpy | 0x3 | A register | Copies the value of the working register into the argument register |
+| add | 0x4 | A register | Add the value in the working directory to the value in the argument register and put the result in the working register |
+| sub | 0x5 | A register | Subtract to the value in the working directory the value in the argument register and put the result in the working register |
+| and | 0x6 | A register | Do a bit-wise and between the working register and the argument register |
+| or | 0x7 | A register | Do a bit-wise or between the working register and the argument register |
+| xor | 0x8 | A register | Do a bitwise xor between the working register and the argument register |
+| not | 0x9 | A register | Put in the working register the bit-wise not of the argument register |
+| lsl | 0xA | A register | Shit the bits in working register to the left n times, where n is the content of the argument register |
+| lsr | 0xB | A register | Shit the bits in working register to the right n times, where n is the content of the argument register |
+| eq | 0xC | A register | If the content of the working register is the same as the one in the argument registers, set all the bits of the comparison register to one. Otherwise, they are set to 0 |
+| les | 0xD | A register | If the content of the working register is less than the one in the argument registers, set all the bits of the comparison register to one. Otherwise, they are set to 0 |
+| str | 0xE | A register with an address | Store the value in the working register to the address given in the argument register |
+| lod | 0xF | A register with an address | Put in the working register the value at the address given in the argument register |
+| jmp | 0x08 | Nothing | Jump to the address in the working register, update the link register while doing so |
+| jif | 0x09 | Nothing | Jump to the address in the working register if the comparison register is not equal to 0, update the link register while doing so |
+| ret | 0x0A | Nothing | Jump to the address just after the address in the link register |
 
-SPRINT R1	; We print the string pointed by R1
-QUIT ; We end the program
-```
-This program will only print the content of R0 and quit while not having to print the content of R1 
-If you are writing a multi-file program you should make sure that every line of code is encapsulated in a function to prevent the program from reaching the end of a file, which might lead to undefined behavior. You should also make sure to end the program with the QUIT opcode.
-2 . 1 . 9 Creating an object file.
-You can create an object file with the asasm program. The standard usage is
-```
-asasm compile <assembly file name> [object file name]
-```
-You can leave out the object file name and if so it will be autogenerated by adding .aso (asvm object file) at the end of the input file or by switching a .asa (asvm assembly file) into .aso. 
-##### List of opcodes and their arguments
-|opcode mnemonic  |   argument 1  |  argument 2  |  arguments 3  |  Description |
-|:---------------:|:-------------:|:------------:|:-------------:|:------------:|
-NIL  | - |- | - | Do nothing, add a padding in the compiled program
-QUIT | - | - | - | Halt the current program
-QUIT | number | - | - | Halt the current program and return the exit code number
-MOV | register | number | - | set the value of register to number
-MOV | register1 | register2 | - | copies the value of register2 to register1
-ADD | register1 | register2 | - | add the value of register2 to register1
-ADD | register | number | - | add the value of number to register
-ADD | register1 | register2 | register3 | put the sum of register2 and register3 in register1
-SUB | register1 | register2 | - | subtract the value of register2 to register1
-SUB | register | number | - | subtract the value of number to register
-SUB | register1 | register2 | register3 | put the difference of register2 and register3 in register1
-TIM | register1 | register2 | - | multiplicate the value of register1 by register1
-TIM | register | number | - | multiplicate the value of register by number
-TIM | register1 | register2 | register3 | put the product of register2 and register3 in register1
-DIV | register1 | register2 | - | divide the value of register1 by register2
-DIV | register | number | - | divide the value of register by number
-DIV| register1 | register2 | register3 | put the division of register2 by register3 in register1
-MOD | register1 | register2 | - | put the rest of the euclidean division of  register1 by register2 in register1
-MOD | register | number | - | put the rest of the euclidean division of  register by number in register
-MOD | register1 | register2 | register3 | put the rest of the euclidean division of  register2 by register3 in register1
-AND | register1 | register2 | - | put the result of the logical and of  register1 by register2 in register1
-AND | register | number | - | put the result of the logical and of  register by number in register
-AND | register1 | register2 | register3 | put the result of the logical and of  register2 by register3 in register1
-OR | register1 | register2 | - | put the result of the logical or of  register1 by register2 in register1
-OR | register | number | - | put the result of the logical or of  register by number in register
-OR | register1 | register2 | register3 | put the result of the logical or of  register2 by register3 in register1
-XOR | register1 | register2 | - | put the result of the logical xor of  register1 by register2 in register1
-XOR | register | number | - | put the result of the logical xor of  register by number in register
-XOR | register1 | register2 | register3 | put the result of the logical xor of  register2 by register3 in register1
-NOT | register1 | register2 | - | put the result of the logical not of register2 in register1
-NOT | register | number | - | put the result of the logical not of number in register
-NOT | - | - | - | put the result of the logical not of register in register
-CMP | register1 | register2 | - | compare register1 and register2 and update comparison flags accordingly
-CMP | register | number | - | compare register and number and update comparison flags accordingly
-PUSH | register | - | - | push the value of register on top of the stack
-POP | register | - | - | pop the value on top of the stack to register
-FREE | register | - | - | free the memory block pointed by the address inside of register
-ASK | register1 | register2 | - | allocate a memory block the size of register2 64-bits integer and put a pointer to it in register1
-ASK | register | number | - | allocate a memory block the size of number 64-bits integer and put a pointer to it in register
-ASK_BYTE | register1 | register2 | - | allocate a memory block the size of register2 bytes and put a pointer to it in register1
-ASK_BYTE | register | number | - | allocate a memory block the size of number bytes and put a pointer to it in register
-STR | register1 | register2 | - | store the content of register2 into the memory at address register1
-LDR | register1 | register2 | - | put the data at address register2 into register1
-STR_BYTE | register1 | register2 | - | store the first byte of the content of register2 into the memory at address register1
-LDR_BYTE | register1 | register2 | - | put the first byte of the data at address register2 into register1
-DATA | label | content | - | consider content as data and label it with label
-LDR_DATA | label | register | - | put a pointer to the data labeled label into register
-OPEN | register1 | register2  | 0 | put in register1 a file descriptor of a file named after the string pointed by register2, the file is in reading mode
-OPEN | register1 | register2  | 1 | put in register1 a file descriptor of a file named after the string pointed by register2, the file is in write mode
-OPEN | register1 | register2  | 2 | put in register1 a file descriptor of a file named after the string pointed by register2, the file is in append mode
-CLOSE | register | - | - | close the file whose descriptor is in register
-STDIN | register | - | - | put a file descriptor for stdin in register
-STDOUT | register | - | - | put a file descriptor for stdout in register
-STDERR | register | - | - | put a file descriptor for stderr in register
-GCHAR | register | - | - | get a char from stdin and put it in register
-PCHAR | register | - | - | print the content of register as if it were a char into stdout
-WRITE | register1 | register2 | register3 | write register3 bytes from the string pointed by register2 to the file pointed by register1
-READ | register1 | register2 | register3 | write register3 bytes from the file pointed by register2 to the memory block pointed by register1
-READ_LINE | register1 | register2 | register3 | write register3  bytes or until a new_line character from the file pointed by register2 to the memory block pointed by register1
-STRLEN | register1 | register2 | - | put the length of the string pointed by register2 into register1
-STRCMP | register1 | register2 | - | compare the strings pointed by register1 and register2 and update comparison flags accordingly
-EOFCMP | register | - | - | look if we reached EOF in the file pointed by register and set the equality flag to positive if it is the case
-NTS | register1 | register2 | - | convert the content of register2 into a string stored into register1
-STN | register1 | register2 | - | convert the string pointed by register2 into a number in register1
-SPRINT | register | - | - | print the string at the address register
-DSP | register | - | - | print the content of register as a decimal numeric value and add a new line char, used for debugging
-LAB | label | - | - | label a place in the code to jump to it
-JMP | label | - | - | jump to the place labeled label
-JZ | label | - | - | jump to the place labeled label if the result of the last comparison is an equality
-JNZ | label | - | - | jump to the place labeled label if the result of the last comparison is an inequality
-JB | label | - | - | jump to the place labeled label if the first number in the last comparison is bigger than the second
-JBE | label | - | - | jump to the place labeled label if the first number in the last comparison is not smaller than the second
-JS | label | - | - | jump to the place labeled label if the first number in the last comparison is smaller than the second
-JSE | label | - | - | jump to the place labeled label if the first number in the last comparison is not bigger than the second
-FUNC | label | - | - | same as LAB but indicate that we are labeling a function
-CALL | label | - | - | call the function named label
-RET | - | - | - | return from the function
-#### Brainfuck
-For now, don't.
-#### Linking object files
-If you want to create a file that can be run by the asvm you must link one or more object files into an executable file.
-Data, labels, and functions will be shared between all the object files.
-To create an asvm executable file do
-```
-asasm link <object file 1 name> <object file 2 name> ... <executable file name>
-```
+## Connection to memory
+To be able to work, an ASRM processor needs a connection to some RAM (or RAM and ROM) where values can be stored and machine code can be read. As this document describes no word size for an ASRM processor, the behavior of the RAM can differ. This means that a piece of machine code working wits a specific  ASRM processor might not work with another processor with different word size or different RAM behavior. For consistency sake, in the simulator and the Verilog implementation in this repository, each address of RAM or ROM is assigned to a word. For example, two consecutive 16-bit words will have two consecutive addresses.
+
+### Value Truncation
+If the word size is greater than 8 bits, only the 8 LSB will be used as machine code when needed. If the word size is less than 8 bits, the values in RAM must be 8 bits, the full 8 bits will be used as instructions but the values will be truncated when loaded into a register.
+
+### Starting address
+Any byte is a valid ASRM instruction. To enable a minimal value of error-correcting, the 4 first byte of a machine code file can be reserved for the "ASRM" magic word. To enable the existence of the magic word, the program starts at the 5th byte.
+
