@@ -7,15 +7,18 @@
 #define CONSTANTS_SIMU
 
 #include <inttypes.h>
-#include <stdbool.h>
 
 #define WORD_SIZE 8
 typedef uint8_t word_t;
 #define RAM_SIZE 256
 #define RAM_WORD_SIZE 8
 typedef uint8_t ram_word_t;
+#define RAM_SIZE_BYTE (sizeof(ram_word_t) * RAM_SIZE)
 
-#define MAGIC_WORD_CHEKING true
+#define NO_MAGIC_WORD_CHECKING 0
+#define MAGIC_WORD_WARNING 1
+#define MAGIC_WORD_ERROR 2
+#define MAGIC_WORD_CHECKING MAGIC_WORD_ERROR
 #define MAGIC_WORD_SIZE 4
 #define MAGIC_WORD "ASRM"
 
