@@ -24,10 +24,11 @@ asrm* load_file(const char* filename){
     } 
     //reading file
     char* ram_char = (char*) ret->ram;
-    int ram_pos = 0;
-    while(!feof(f) && ram_pos < RAM_SIZE_BYTE){
-       ram_char[ram_pos] = (char) fgetc(f);
-       ram_pos++;
+    for(int i=0; i<RAM_SIZE_BYTE; i++){
+        char ch = fgetc(f);
+        if(feof(f))
+            break;
+        ram_char[i] = ch;
     }
     fclose(f);
     //cheaking for errors
