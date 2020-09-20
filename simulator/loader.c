@@ -19,6 +19,7 @@ asrm* load_file(const char* filename){
     FILE* f;
     if((f = fopen(filename, "r")) == NULL){
         fprintf(stderr, "Error, unable to read file %s.\n", filename);
+        asrm_free(ret);
         return NULL;
     } 
     //reading file
@@ -36,6 +37,7 @@ asrm* load_file(const char* filename){
             fprintf(stderr, "Warning: magic word not found.\n");
         if(MAGIC_WORD_CHECKING == MAGIC_WORD_ERROR && !no_error){
             fprintf(stderr, "Error: magic word not founr.\n");
+            asrm_free(ret);
             return NULL;
         }
     }

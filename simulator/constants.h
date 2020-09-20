@@ -25,5 +25,8 @@ typedef uint8_t ram_word_t;
 #define START_CHAR 4
 #define NUMBER_OF_REGISTERS 16
 
+#define RET_INVALID_ARGS 1
+#define RET_NO_VM 2
+
 #endif
 
