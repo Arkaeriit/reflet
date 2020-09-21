@@ -9,7 +9,7 @@
 #include <string.h>
 //opperands
 #define isSlp(instuction) ((instuction & 0xF8) == 0)
-#define SLP  0x0
+#define SLP  0x00
 #define SET  0x1
 #define READ 0x2
 #define CPY  0x3
