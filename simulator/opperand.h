@@ -27,7 +27,10 @@
 #define LOAD 0xF
 #define JMP  0x08
 #define JIF  0x09
-#define RET  0x0A
+#define POP  0x0A
+#define PUSH 0x0B
+#define CALL 0x0C
+#define RET  0x0D
 
 //mnemonics
 #define mnSLP(mn) !(strcmp(mn, "SLP") && strcmp(mn, "slp"))
@@ -48,6 +51,9 @@
 #define mnLOAD(mn) !(strcmp(mn, "LOAD") && strcmp(mn, "load"))
 #define mnJMP(mn) !(strcmp(mn, "JMP") && strcmp(mn, "jmp"))
 #define mnJIF(mn) !(strcmp(mn, "JIF") && strcmp(mn, "jif"))
+#define mnPOP(mn) !(strcmp(mn, "POP") && strcmp(mn, "pop"))
+#define mnPUSH(mn) !(strcmp(mn, "PUSH") && strcmp(mn, "push"))
+#define mnCALL(mn) !(strcmp(mn, "CALL") && strcmp(mn, "call"))
 #define mnRET(mn) !(strcmp(mn, "RET") && strcmp(mn, "ret"))
 
 #endif

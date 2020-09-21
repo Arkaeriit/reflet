@@ -19,8 +19,8 @@ R1 to r12 are the 12 general-purpose registers. They are meant to store values u
 R13 or CR is the comparison register. This register is updated by logical operations and its Boolean value is used for conditional jumps. Its reset value is every bit set to 1.
 ### Program counter
 R14 or PC is the program counter. It contains the address of the current address. It can also be used to jump to a specific code address when forcefully modified by the user. Its reset value is 4.
-### Link register
-R15 or LR is the link register. It is updated when doing a jump instruction to contain the address of the jump. Its reset value is 0.
+### Stack pointer
+R15 or SP is the stack pointer. It is updated when doing pop or push instructions and it point toward an address in RAM. Its reset value is 0 but is should be initialised if you intend to use the stack.
 
 ## Instructions
 Here is a list of the instruction of an ASRM processor. 
@@ -42,9 +42,12 @@ Here is a list of the instruction of an ASRM processor.
 | les | 0xD | A register | If the content of the working register is less than the one in the argument registers, set all the bits of the comparison register to one. Otherwise, they are set to 0 |
 | str | 0xE | A register with an address | Store the value in the working register to the address given in the argument register |
 | lod | 0xF | A register with an address | Put in the working register the value at the address given in the argument register |
-| jmp | 0x08 | Nothing | Jump to the address in the working register, update the link register while doing so |
-| jif | 0x09 | Nothing | Jump to the address in the working register if the comparison register is not equal to 0, update the link register while doing so |
-| ret | 0x0A | Nothing | Jump to the address just after the address in the link register |
+| jmp | 0x08 | Nothing | Jump to the address in the working register, does not affect the stack. |
+| jif | 0x09 | Nothing | Jump to the address in the working register if the comparison register is not equal to 0, does not affect the stack |
+| pop | 0x0A | Nothing | Put the content of the working register on the stack and updates the stack pointer. |
+| push | 0x0B | Nothing | Put the value on top of the stack in the working register and updates the stack pointer.
+| call | 0xC | Nothing | Put the curent address in the stack and jump to the address in the working register. | 
+| ret | 0x0D | Nothing | Jump to the address just after the address on top of the stack. |
 
 ## Connection to memory
 To be able to work, an ASRM processor needs a connection to some RAM (or RAM and ROM) where values can be stored and machine code can be read. As this document describes no word size for an ASRM processor, the behavior of the RAM can differ. This means that a piece of machine code working wits a specific  ASRM processor might not work with another processor with different word size or different RAM behavior. For consistency sake, in the simulator and the Verilog implementation in this repository, each address of RAM or ROM is assigned to a word. For example, two consecutive 16-bit words will have two consecutive addresses.

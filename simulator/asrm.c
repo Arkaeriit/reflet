@@ -51,15 +51,22 @@ static void run_inst(asrm* vm){
             if(isSlp(instruction)){
                 break;
             }else if(instruction == JMP){
-                LR(vm) = PC(vm);
                 PC(vm) = WR(vm);
             }else if(instruction == JIF){
-                if(CR(vm)){
-                    LR(vm) = PC(vm);
+                if(CR(vm))
                     PC(vm) = WR(vm);
-                }
+            }else if(instruction == POP){
+                SP(vm)--;
+                WR(vm) = vm->ram[SP(vm)];
+            }else if(instruction == PUSH){
+                vm->ram[SP(vm)] = WR(vm);
+                SP(vm)++;
+            }else if(instruction == CALL){
+                vm->ram[SP(vm)-1] = PC(vm); //-1 because we already updated the PC and we want to store the address of the call
+                SP(vm)++;
             }else if(instruction == RET){
-                PC(vm) = LR(vm) + 1;
+                SP(vm)--;
+                PC(vm) = vm->ram[SP(vm)];
             }else{
                 fprintf(stderr, "Warning, unknow instruction (%X) at address %X.\n",instruction, PC(vm) - 1);
             }
