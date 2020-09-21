@@ -15,7 +15,7 @@ int main(int argc, char** argv){
             fprintf(stderr, "Unable to set the simulator up.\n");
             return RET_NO_VM;
         }
-        //do stuff here
+        asrm_run(vm);
         asrm_free(vm);
     }else{
         fprintf(stderr, "Error: invalid arguments.\n");

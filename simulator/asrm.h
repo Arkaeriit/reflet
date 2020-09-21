@@ -7,7 +7,9 @@
 #define ASRM
 
 #include "constants.h"
+#include "opperand.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 typedef struct asrm_struct {
     word_t* reg;
@@ -21,7 +23,7 @@ typedef struct asrm_struct {
 
 asrm* asrm_init();
 void asrm_free(asrm* vm);
-
+void asrm_run(asrm* vm);
 
 #endif
 

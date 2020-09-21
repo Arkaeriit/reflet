@@ -10,7 +10,7 @@
 
 #define WORD_SIZE 8
 typedef uint8_t word_t;
-#define RAM_SIZE 256
+#define RAM_SIZE 255
 #define RAM_WORD_SIZE 8
 typedef uint8_t ram_word_t;
 #define RAM_SIZE_BYTE (sizeof(ram_word_t) * RAM_SIZE)
