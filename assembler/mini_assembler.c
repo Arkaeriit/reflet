@@ -5,6 +5,44 @@ static enum processLine_return processLine(const char* line, uint8_t* ret);
 static enum processLine_return preprocessLine(const char* line, char** ret);
 static bool makeInst(uint8_t opperand, bool isRegister, char* arg, uint8_t* ret);
 
+void mini_assembleFile(const char* fileIn, const char* fileOut){
+    FILE* in;
+    FILE* out;
+    if((in = fopen(fileIn, "r")) == NULL){
+        fprintf(stderr, "Error : unable to open file %s.\n", fileIn);
+        exit(RET_UNOPEN_FILE);
+    }
+    if((out = fopen(fileOut, "w")) == NULL){
+        fprintf(stderr, "Error : unable to open file %s.\n", fileOut);
+        exit(RET_UNOPEN_FILE);
+    }
+    char* line = malloc(LINE_BUFF);
+    int lineNumber = 1;
+    bool noErrors = true;
+    while(fgets(line, LINE_BUFF, in) != NULL){
+        uint8_t inst;
+        enum processLine_return pross = processLine(line, &inst);
+        switch(pross){
+            case OK:
+                fputc(inst, out);
+                break;
+            case ERROR:
+                fprintf(stdout, "Error line %i.\n", lineNumber);
+                noErrors = false;
+                break;
+            case NO_CODE:
+                //Nothing to do here
+                break;
+        }
+        lineNumber++;
+    }
+    if(!noErrors)
+        puts("error behavious TODO");
+    free(line);
+    fclose(in);
+    fclose(out);
+}
+
 /*
  * Assemble a line of assembly language into a byte of machine code
  *  Arguments:
