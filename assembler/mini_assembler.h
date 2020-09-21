@@ -14,6 +14,7 @@
 
 void mini_assembleFile(const char* fileIn, const char* fileOut);
 
+#define RET_INVALID_ARGS 1
 #define RET_UNOPEN_FILE 3
 #define LINE_BUFF 10000
 

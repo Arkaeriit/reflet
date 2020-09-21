@@ -6,6 +6,7 @@ static enum processLine_return preprocessLine(const char* line, char** ret);
 static bool makeInst(uint8_t opperand, bool isRegister, char* arg, uint8_t* ret);
 
 void mini_assembleFile(const char* fileIn, const char* fileOut){
+    //opening files
     FILE* in;
     FILE* out;
     if((in = fopen(fileIn, "r")) == NULL){
@@ -16,6 +17,12 @@ void mini_assembleFile(const char* fileIn, const char* fileOut){
         fprintf(stderr, "Error : unable to open file %s.\n", fileOut);
         exit(RET_UNOPEN_FILE);
     }
+    //writing magic word
+    fputc('A', out);
+    fputc('S', out);
+    fputc('R', out);
+    fputc('M', out);
+    //assembling
     char* line = malloc(LINE_BUFF);
     int lineNumber = 1;
     bool noErrors = true;
@@ -38,6 +45,7 @@ void mini_assembleFile(const char* fileIn, const char* fileOut){
     }
     if(!noErrors)
         puts("error behavious TODO");
+    //cleaning
     free(line);
     fclose(in);
     fclose(out);
@@ -133,7 +141,7 @@ static enum processLine_return preprocessLine(const char* line, char** ret){
     for(size_t i=0; i<strlen(line); i++){
         switch(now){
             case 0: //before the first word
-                if(line[i] == ';'){
+                if(line[i] == ';' || line[i] == '\n'){
                     return NO_CODE;
                 }else if(line[i] == ' ' || line[i] == '	'){
                     //do nothing, wait for a word
@@ -143,7 +151,7 @@ static enum processLine_return preprocessLine(const char* line, char** ret){
                 }
                 break;
             case 1: //fist word
-                if(line[i] == ';')
+                if(line[i] == ';' || line[i] == '\n')
                     return OK;
                 else if(line[i] == ' ' || line[i] == '	')
                     now = 2;
@@ -151,7 +159,7 @@ static enum processLine_return preprocessLine(const char* line, char** ret){
                     ret[0][strlen(ret[0])] = line[i];
                 break;
             case 2: //before the second word
-                if(line[i] == ';'){
+                if(line[i] == ';' || line[i] == '\n'){
                     return OK;
                 }else if(line[i] == ' ' || line[i] == '	'){
                     //do nothing, wait for a word
