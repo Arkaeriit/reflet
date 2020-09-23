@@ -28,10 +28,13 @@ typedef uint8_t ram_word_t;
 //Magic numbers
 #define START_CHAR 4
 #define NUMBER_OF_REGISTERS 16
+#define LINE_BUFF 10000 /*Max char in a line of config file*/
 
 //Return value
 #define RET_INVALID_ARGS 1
 #define RET_NO_VM 2
+#define RET_UNOPEN_FILE 3
+#define RET_CONFIG 5
 
 #endif
 
