@@ -51,7 +51,7 @@ void asrm_free(asrm* vm){
  * Run the program in the vm's RAM
  */
 void asrm_run(asrm* vm){
-    while(PC(vm) < RAM_SIZE)
+    while(PC(vm) < vm->config->ram_size)
         run_inst(vm);
 }
 

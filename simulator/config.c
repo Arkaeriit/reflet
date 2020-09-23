@@ -36,26 +36,26 @@ void applyConfig(asrm* vm, const char* configFile){
                     word_t configValue;
                     int numRead = sscanf(resultBuff[1], "%lu", &configValue);
                     if(numRead != 1){
-                        fprintf(stdout, "Error line %i.\n", lineNumber);
+                        fprintf(stdout, "Error line %i of the config file.\n", lineNumber);
                         exit(RET_CONFIG);
                     }
                     //Appliyng the config line
                     if(!strcmp(resultBuff[0], "word_size")){
                         if(configValue%8){
-                            fprintf(stdout, "Error line %i.\n", lineNumber);
+                            fprintf(stdout, "Error line %i of the config file.\n", lineNumber);
                             exit(RET_CONFIG);
                         }
                         vm->config->word_size = configValue;
                     }else if(!strcmp(resultBuff[0], "ram_size")){
                         vm->config->ram_size = configValue;
                     }else{
-                        fprintf(stdout, "Error line %i.\n", lineNumber);
+                        fprintf(stdout, "Error line %i of the config file.\n", lineNumber);
                         exit(RET_CONFIG);
                     }
                 }
                 break;
             case ERROR:
-                fprintf(stdout, "Error line %i.\n", lineNumber);
+                fprintf(stdout, "Error line %i of the config file.\n", lineNumber);
                 exit(RET_CONFIG);
                 break;
             case NO_LINE:
@@ -71,6 +71,13 @@ void applyConfig(asrm* vm, const char* configFile){
         mask = mask << 8;
         mask = mask + 0xFF;
     }
+    vm->config->word_mask = mask;
+    //freeing allocated blocks
+    free(resultBuff[0]);
+    free(resultBuff[1]);
+    free(resultBuff);
+    free(line);
+    fclose(f);
 }
 
 /*
