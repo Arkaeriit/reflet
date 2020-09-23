@@ -5,6 +5,8 @@
 
 #include "asrm.h"
 static void run_inst(asrm* vm);
+static word_t loadWordRAM(const asrm* vm, word_t addr);
+static void putRAMWord(asrm* vm, word_t addr, word_t content);
 
 /*
  * Create an asrm struct with the content described in content.h
@@ -72,17 +74,17 @@ static void run_inst(asrm* vm){
                 if(CR(vm))
                     PC(vm) = WR(vm);
             }else if(instruction == POP){
-                SP(vm)--;
-                WR(vm) = (reg_mask) & vm->ram[SP(vm)];
+                SP(vm) = (SP(vm) - 1) & reg_mask;
+                WR(vm) = loadWordRAM(vm, SP(vm));
             }else if(instruction == PUSH){
-                vm->ram[SP(vm)] = WR(vm);
-                SP(vm)++;
+                putRAMWord(vm, SP(vm), WR(vm));
+                SP(vm) = (SP(vm) + 1) & reg_mask;
             }else if(instruction == CALL){
-                vm->ram[SP(vm)-1] = PC(vm); //-1 because we already updated the PC and we want to store the address of the call
-                SP(vm)++;
+                putRAMWord(vm, SP(vm)-1, PC(vm)); //-1 because we already updated the PC and we want to store the address of the call
+                SP(vm) = (SP(vm) + 1) & reg_mask;
             }else if(instruction == RET){
-                SP(vm)--;
-                PC(vm) = vm->ram[SP(vm)];
+                SP(vm) = (SP(vm) - 1) & reg_mask;
+                PC(vm) = loadWordRAM(vm, SP(vm));
             }else{
                 fprintf(stderr, "Warning, unknow instruction (%X) at address %" WORD_P ".\n",instruction, PC(vm) - 1);
             }
@@ -98,9 +100,11 @@ static void run_inst(asrm* vm){
             break;
         case ADD:
             WR(vm) += vm->reg[reg];
+            WR(vm) &= reg_mask;
             break;
         case SUB:
             WR(vm) -= vm->reg[reg];
+            WR(vm) &= reg_mask;
             break;
         case AND:
             WR(vm) &= vm->reg[reg];
@@ -115,10 +119,13 @@ static void run_inst(asrm* vm){
             WR(vm) = ~(vm->reg[reg]);
             break;
         case LSL:
+            //TODO: fill the unused bits with the same value as the MSB
             WR(vm) = WR(vm) << vm->reg[reg];
+            WR(vm) &= reg_mask;
             break;
         case LSR:
             WR(vm) = WR(vm) >> vm->reg[reg];
+            WR(vm) &= reg_mask;
             break;
         case EQ:
             CR(vm) = ((WR(vm) == vm->reg[reg]) ? ~0 : 0);
@@ -127,13 +134,45 @@ static void run_inst(asrm* vm){
             CR(vm) = ((WR(vm) < vm->reg[reg]) ? ~0 : 0);
             break;
         case STR:
-            vm->ram[vm->reg[reg]] = WR(vm);
+            putRAMWord(vm, vm->reg[reg], WR(vm));
             break;
         case LOAD:
-            WR(vm) = vm->ram[vm->reg[reg]];
+            WR(vm) = loadWordRAM(vm, vm->reg[reg]);
             break;
         default:
             fprintf(stderr, "Error in the reading of the instruction at address %" WORD_P ".\n", PC(vm) - 1);
+    }
+}
+
+/*
+ * Fetches a full word from ram
+ *  Arguments:
+ *      vm : the asrm struct
+ *      addr : the address of the word to be fetched
+ *  return:
+ *      The word in RAM (the byte at the address and the following bytes)
+ */
+static word_t loadWordRAM(const asrm* vm, word_t addr){
+    word_t ret = 0;
+    for(int a=addr + vm->config->word_size_byte - 1; a>=addr; a--){
+        ret += vm->ram[a];
+        if(a != addr)
+            ret = ret << 8;
+    }
+    return ret;
+}
+
+/*
+ * Put a whole word in RAM
+ *  Arguments:
+ *      vm : the asrm struct
+ *      addr : the startin address of where we must put the word
+ *      content : the word to be put in RAM
+ */
+static void putRAMWord(asrm* vm, word_t addr, word_t content){
+    for(int offset=0; offset<vm->config->word_size_byte; offset++){
+        uint8_t byteToSend = (uint8_t) (content >> (offset * 8)) & 0xFF;
+        vm->ram[addr+offset] = byteToSend;
     }
 }
 
