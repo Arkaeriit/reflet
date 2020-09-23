@@ -10,8 +10,9 @@ int main(int argc, char** argv){
             help();
             return 0;
         }
-        asrm* vm = load_file(argv[1]);
-        if(vm == NULL){
+        asrm* vm = asrm_init();
+        bool loading = load_file(argv[1], vm);
+        if(!loading){
             fprintf(stderr, "Unable to set the simulator up.\n");
             return RET_NO_VM;
         }

@@ -50,10 +50,11 @@ Here is a list of the instruction of an ASRM processor.
 | ret | 0x0D | Nothing | Jump to the address just after the address on top of the stack. |
 
 ## Connection to memory
-To be able to work, an ASRM processor needs a connection to some RAM (or RAM and ROM) where values can be stored and machine code can be read. As this document describes no word size for an ASRM processor, the behavior of the RAM can differ. This means that a piece of machine code working wits a specific  ASRM processor might not work with another processor with different word size or different RAM behavior. For consistency sake, in the simulator and the Verilog implementation in this repository, each address of RAM or ROM is assigned to a word. For example, two consecutive 16-bit words will have two consecutive addresses.
+### Word size
+To be able to work, an ASRM processor needs a connection to some RAM (or RAM and ROM) where values can be stored and machine code can be read. As this document describes no word size for an ASRM processor.
+The ASRM processor wird size should be 8 bits times a power of two. The memory should have data bus the same size as the processor. Each byte of the RAM should be addressable to fetch individual instructions in each bytes. 
+Except in the case of overflows, ASRM machine code should work with ASRM processor of various word size.
 
-### Value Truncation
-If the word size is greater than 8 bits, only the 8 LSB will be used as machine code when needed. If the word size is less than 8 bits, the values in RAM must be 8 bits, the full 8 bits will be used as instructions but the values will be truncated when loaded into a register.
 
 ### Starting address
 Any byte is a valid ASRM instruction. To enable a minimal value of error-correcting, the 4 first byte of a machine code file can be reserved for the "ASRM" magic word. To enable the existence of the magic word, the program starts at the 5th byte.

@@ -14,7 +14,14 @@ static void run_inst(asrm* vm);
 asrm* asrm_init(){
     asrm* ret = malloc(sizeof(asrm));
     ret->reg = calloc(NUMBER_OF_REGISTERS, sizeof(word_t));
-    ret->ram = calloc(RAM_SIZE, sizeof(ram_word_t));
+    ret->ram = NULL; //Left blank, should be written a value depending of its configuration
+    //default config
+    struct asrm_config* conf = malloc(sizeof(struct asrm_config));
+    conf->word_size = WORD_SIZE;
+    conf->word_size_byte = WORD_SIZE_BYTE;
+    conf->word_mask = WORD_MASK;
+    conf->ram_size = RAM_SIZE;
+    ret->config = conf;
     //Input reset values not equal to 0
     CR(ret) = ~0;
     PC(ret) = START_CHAR;
@@ -22,9 +29,17 @@ asrm* asrm_init(){
 }
 
 /*
+ * Setup the ram of an ASRM struct depending of its configuration
+ */
+void asrm_initRAM(asrm* vm){
+    vm->ram = calloc(vm->config->ram_size, sizeof(ram_word_t));
+}
+
+/*
  * Free an asrm struct
  */
 void asrm_free(asrm* vm){
+    free(vm->config);
     free(vm->reg);
     free(vm->ram);
     free(vm);
@@ -42,6 +57,7 @@ void asrm_run(asrm* vm){
  * Run a single instruction from the RAM
  */
 static void run_inst(asrm* vm){
+    word_t reg_mask = vm->config->word_mask;
     uint8_t instruction = (uint8_t) vm->ram[PC(vm)];
     uint8_t opperand = (instruction & 0xF0) >> 4;
     uint8_t reg = instruction & 0x0F;
@@ -57,7 +73,7 @@ static void run_inst(asrm* vm){
                     PC(vm) = WR(vm);
             }else if(instruction == POP){
                 SP(vm)--;
-                WR(vm) = vm->ram[SP(vm)];
+                WR(vm) = (reg_mask) & vm->ram[SP(vm)];
             }else if(instruction == PUSH){
                 vm->ram[SP(vm)] = WR(vm);
                 SP(vm)++;
@@ -68,7 +84,7 @@ static void run_inst(asrm* vm){
                 SP(vm)--;
                 PC(vm) = vm->ram[SP(vm)];
             }else{
-                fprintf(stderr, "Warning, unknow instruction (%X) at address %X.\n",instruction, PC(vm) - 1);
+                fprintf(stderr, "Warning, unknow instruction (%X) at address %" WORD_P ".\n",instruction, PC(vm) - 1);
             }
             break;
         case SET:
@@ -117,7 +133,7 @@ static void run_inst(asrm* vm){
             WR(vm) = vm->ram[vm->reg[reg]];
             break;
         default:
-            fprintf(stderr, "Error in the reading of the instruction at address %X.\n", PC(vm) - 1);
+            fprintf(stderr, "Error in the reading of the instruction at address %" WORD_P ".\n", PC(vm) - 1);
     }
 }
 

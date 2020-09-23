@@ -8,13 +8,16 @@
 
 #include <inttypes.h>
 
-#define WORD_SIZE 8
-typedef uint8_t word_t;
+//Default set-up config, can be changed
+#define WORD_SIZE 8 /*Actual number of bits in a processor register*/
+#define WORD_SIZE_BYTE 1 /*Number of bytes in a word*/
+#define WORD_MASK 0xFF /*MASK used to ensure the use of the correct number of bits*/
+typedef uint64_t word_t; //Type used in the simulator
+#define WORD_P PRIu64
 #define RAM_SIZE 255
-#define RAM_WORD_SIZE 8
 typedef uint8_t ram_word_t;
-#define RAM_SIZE_BYTE (sizeof(ram_word_t) * RAM_SIZE)
 
+//Mgic word settings, unchangeable
 #define NO_MAGIC_WORD_CHECKING 0
 #define MAGIC_WORD_WARNING 1
 #define MAGIC_WORD_ERROR 2
@@ -22,9 +25,11 @@ typedef uint8_t ram_word_t;
 #define MAGIC_WORD_SIZE 4
 #define MAGIC_WORD "ASRM"
 
+//Magic numbers
 #define START_CHAR 4
 #define NUMBER_OF_REGISTERS 16
 
+//Return value
 #define RET_INVALID_ARGS 1
 #define RET_NO_VM 2
 

@@ -9,22 +9,25 @@ static bool magic_word_ok(asrm* vm);
  * Create a asrm simulator and load a file in its RAM
  *  Argument:
  *      filename : the file with the content to be put in RAM
+ *      vm : a pointer to an initialised but not loaded asrm struct
  *  return:
- *      A pointer to the asrm struct if everything is OK
- *      A NULL pointer otherwise
+ *      true if the loading went right
+ *      false in case of an issue
  */
-asrm* load_file(const char* filename){
-    asrm* ret = asrm_init();
+bool load_file(const char* filename, asrm* vm){
+    if(vm->ram != NULL)
+        free(vm->ram);
+    asrm_initRAM(vm);
     //opening file
     FILE* f;
     if((f = fopen(filename, "r")) == NULL){
         fprintf(stderr, "Error, unable to read file %s.\n", filename);
-        asrm_free(ret);
-        return NULL;
+        asrm_free(vm);
+        return false;
     } 
     //reading file
-    char* ram_char = (char*) ret->ram;
-    for(int i=0; i<RAM_SIZE_BYTE; i++){
+    char* ram_char = (char*) vm->ram;
+    for(int i=0; i<vm->config->ram_size; i++){
         char ch = fgetc(f);
         if(feof(f))
             break;
@@ -33,16 +36,16 @@ asrm* load_file(const char* filename){
     fclose(f);
     //cheaking for errors
     if(MAGIC_WORD_CHECKING){
-        bool no_error = magic_word_ok(ret);
+        bool no_error = magic_word_ok(vm);
         if(MAGIC_WORD_CHECKING == MAGIC_WORD_WARNING && !no_error)
             fprintf(stderr, "Warning: magic word not found.\n");
         if(MAGIC_WORD_CHECKING == MAGIC_WORD_ERROR && !no_error){
             fprintf(stderr, "Error: magic word not founr.\n");
-            asrm_free(ret);
-            return NULL;
+            asrm_free(vm);
+            return false;
         }
     }
-    return ret;
+    return true;
 }
 
 /*

@@ -12,7 +12,7 @@
 #include "constants.h"
 #include "asrm.h"
 
-asrm* load_file(const char* filename);
+bool load_file(const char* filename, asrm* vm);
 
 #endif
 
