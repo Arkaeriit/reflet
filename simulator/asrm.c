@@ -7,6 +7,7 @@
 static void run_inst(asrm* vm);
 static word_t loadWordRAM(const asrm* vm, word_t addr);
 static void putRAMWord(asrm* vm, word_t addr, word_t content);
+static void io(asrm* vm);
 
 /*
  * Create an asrm struct with the content described in content.h
@@ -51,8 +52,10 @@ void asrm_free(asrm* vm){
  * Run the program in the vm's RAM
  */
 void asrm_run(asrm* vm){
-    while(PC(vm) < vm->config->ram_size)
+    while(PC(vm) < vm->config->ram_size){
         run_inst(vm);
+        io(vm);
+    }
 }
 
 /*
@@ -173,6 +176,22 @@ static void putRAMWord(asrm* vm, word_t addr, word_t content){
     for(int offset=0; offset<vm->config->word_size_byte; offset++){
         uint8_t byteToSend = (uint8_t) (content >> (offset * 8)) & 0xFF;
         vm->ram[addr+offset] = byteToSend;
+    }
+}
+
+/*
+ * Check if a vm needs to do io.
+ * If the address 0 in ram is 0, the content of address 1 is printed.
+ * If the address 2 in ram is 0, a char is read and put in address 3.
+ */
+static void io(asrm* vm){
+    if(!vm->ram[0]){
+        printf("%c",vm->ram[1]);
+        vm->ram[0] = 'A';
+    }
+    if(!vm->ram[2]){
+        vm->ram[3] = getchar();
+        vm->ram[2] = 'R';
     }
 }
 
