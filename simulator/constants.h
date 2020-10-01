@@ -12,7 +12,7 @@
 #define WORD_SIZE 8 /*Actual number of bits in a processor register*/
 #define WORD_SIZE_BYTE 1 /*Number of bytes in a word*/
 #define WORD_MASK 0xFF /*MASK used to ensure the use of the correct number of bits*/
-typedef uint64_t word_t; //Type used in the simulator
+typedef uint8_t word_t; //Type used in the simulator
 #define WORD_P PRIu64
 #define RAM_SIZE 255
 typedef uint8_t ram_word_t;

@@ -1,4 +1,5 @@
-FLAGS = -Wall -Werror -g
+#FLAGS = -Wall -Werror -g
+FLAGS = -Wall -g
 CONSTANTS = opperand.h constants.h
 
 asrm-sim.bin : main.o asrm.o loader.o config.o

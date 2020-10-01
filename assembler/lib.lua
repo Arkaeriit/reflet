@@ -46,7 +46,7 @@ string.splitLine = function(str)
 end
 
 setsize = function(wordsize)
-    return wordsize * 6 + 3
+    return wordsize * 8 + 2
 end
 
 --Return the code to set a value in the vorking register
@@ -61,7 +61,7 @@ setValue = function(value, wordsize)
         currentNibble = currentNibble & 15
         str = str.."set "..tostring(currentNibble).."\nor R11\n"
         if i ~= wordsize*2 then 
-            str = str.."lsl R12\n"
+            str = str.."lsl R12\ncpy R11\n"
         end
     end
     return str

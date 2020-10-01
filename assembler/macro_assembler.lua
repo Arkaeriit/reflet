@@ -185,7 +185,7 @@ macro_assembler = function(arg)
     else --error
         io.stderr:write("Error: invalid arguments.\n\n")
         help()
-        return RET_INVALID_ARG
+        return RET_INVALID_ARGS
     end
 end
 

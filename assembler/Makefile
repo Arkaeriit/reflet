@@ -34,6 +34,16 @@ readingCode.luac : readingCode.lua
 macro_assembler.luac : macro_assembler.lua
 	luac -o macro_assembler.luac macro_assembler.lua
 
+install : install_pico install_macro
+
+install_pico :
+	cp -f asrmpasm.bin /usr/local/bin/asrmpasm
+
+install_macro :
+	mkdir -p /usr/local/share/asrm
+	cp -f asrmmasm.bin /usr/local/bin/asrmmasm
+	cp -f lib.luac link.luac macro.luac readingCode.luac macro_assembler.luac /usr/local/share/asrm/
+
 clean:
 	rm -f *.o
 	rm -f *.bin
