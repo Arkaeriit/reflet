@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "mini_assembler.h"
+#include "pico_assembler.h"
 
 static void help();
 

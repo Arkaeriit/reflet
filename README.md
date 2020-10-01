@@ -2,7 +2,7 @@
 A RISC ISA.
 
 # This repository
-This repository contains a simulator for an ASRM processor (WIP), an assembler to create ASRM machine code (to do), and a Verilog implementation of an ASRM processor (to do).
+This repository contains a simulator for an ASRM processor (WIP), an assembler to create ASRM machine code (WIP), and a Verilog implementation of an ASRM processor (to do).
 
 # The architecture
 ASRM is a RISC ISA. Each instruction is coded on a single byte and composed of a 4 or 5-bit operand, followed by an optional 4-bit register. This ISA can be used with a processor with words of any size superior to 3 bits.
@@ -52,10 +52,10 @@ Here is a list of the instruction of an ASRM processor.
 ## Connection to memory
 ### Word size
 To be able to work, an ASRM processor needs a connection to some RAM (or RAM and ROM) where values can be stored and machine code can be read. As this document describes no word size for an ASRM processor.
-The ASRM processor wird size should be 8 bits times a power of two. The memory should have data bus the same size as the processor. Each byte of the RAM should be addressable to fetch individual instructions in each bytes. 
+The ASRM processor wird size should be 8 bits times a power of two. The memory should have data bus the same size as the processor word size. Each byte of the RAM should be addressable to fetch individual instructions in each bytes. 
 Except in the case of overflows, ASRM machine code should work with ASRM processor of various word size.
 
 
 ### Starting address
-Any byte is a valid ASRM instruction. To enable a minimal value of error-correcting, the 4 first byte of a machine code file can be reserved for the "ASRM" magic word. To enable the existence of the magic word, the program starts at the 5th byte.
+Any byte is a valid ASRM instruction. To enable a minimal value of error-correcting, the 4 first byte of a machine code file can be reserved for the "ASRM" magic word. To enable the existence of the magic word, the program starts at the 5th byte, at address 4.
 
