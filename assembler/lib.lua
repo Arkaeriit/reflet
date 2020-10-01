@@ -5,7 +5,8 @@ INST_ERR = 1
 INST_UKN = 2
 INST_BAS = 3
 INST_LINK = 4
-INST_MACRO = 5
+INST_LABEL = 5
+INST_MACRO = 6
 
 ----- auxyliary functions -----
 
@@ -36,5 +37,9 @@ string.splitLine = function(str)
         strpnt = strpnt + 1
     end
     return ret
+end
+
+setsize = function(wordsize)
+    return wordsize * 6 + 3
 end
 

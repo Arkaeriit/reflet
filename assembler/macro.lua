@@ -12,7 +12,7 @@ local setp = function(value, wordsize)
             str = str.."lsl R12\n"
         end
     end
-    return createElem(str, wordsize * 6 + 3, INST_MACRO)
+    return createElem(str, setsize(wordsize), INST_MACRO)
 end
 
 ----- interface function -----

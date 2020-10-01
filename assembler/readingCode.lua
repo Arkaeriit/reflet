@@ -52,7 +52,19 @@ local isMacro = function(tabInst)
         else
             return INST_ERR
         end
-    elseif mnemonic == "wordsize" then
+    elseif mnemonic == "label" then
+        if #tabInst == 2 then
+            return INST_LABEL
+        else
+            return INST_ERR
+        end
+    elseif mnemonic == "setlab" then
+        if #tabInst == 2 then
+            return INST_LINK
+        else
+            return INST_ERR
+        end
+    elseif mnemonic == "wordsize" then --not a real macro but will be treated as such by analyzeLine
         return NO_INST
     end
     return INST_UKN
