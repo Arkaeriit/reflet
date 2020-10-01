@@ -22,8 +22,7 @@ end
 
 setLabel = function(mnemonic, addr, wordsize)
     if mnemonic == "setlab" then
-        local tempInst = "set+ "..tostring(addr)
-        return expandMacro(tempInst, wordsize).content
+        return setValue(addr, wordsize)
     else
         print("Un truc cloche")
     end

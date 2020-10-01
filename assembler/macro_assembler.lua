@@ -24,6 +24,8 @@ need to be.
 4. compiling
 The micro-assembly code is written in a tmp file and the micro-assembler
 is used to create a binairy file
+
+Unlike in most other file in this project, here wordsize is in bytes.
 ]]
 
 ----- main steps -----
@@ -59,14 +61,20 @@ local basicASM = function(filetab, wordsize)
         str = filetab[line]
         --print(line, str)
         local type = analyzeLine(str)
-        --print(type)
+        --print(type, str)
         if type == INST_ERR then
-            io.stderr:write("Error line ",line,"\n")
+            io.stderr:write("Error line ",line - 4,"\n") -- -4 is not to bither the user with the 4 line runtime
             return nil,true
         elseif type == INST_BAS then
             ret[#ret+1] = createElem(str..'\n', 1, INST_BAS)
         elseif type == INST_MACRO then
-            ret[#ret+1] = expandMacro(str, wordsize)
+            local exM = expandMacro(str, wordsize)
+            if exM then
+                ret[#ret+1] = exM
+            else
+                io.stderr:write("Error line ",line - 4,", macro can not be expanded.\n")
+                return nil,true
+            end
         elseif type == INST_LABEL then
             ret[#ret+1] = createElem(str, labelSize(str, wordsize), INST_LABEL)
         elseif type == INST_LINK then
@@ -95,6 +103,11 @@ local linking = function(tab, wordsize)
             tab[i].content = ";"..tab[i].content..";\n" --usefull for debug but that's it
         end
         currentPointer = currentPointer + tab[i].size
+    end
+    --checking binary size
+    if currentPointer >= 2^(wordsize*8) then
+        io.stderr:write("Error: binary output too large (",currentPointer,"/",2^(wordsize*8),"). Consider extending wordsize.\n")
+        return true
     end
     --placing label calls
     for i=1,#tab do

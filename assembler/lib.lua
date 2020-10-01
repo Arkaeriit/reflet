@@ -49,3 +49,21 @@ setsize = function(wordsize)
     return wordsize * 6 + 3
 end
 
+--Return the code to set a value in the vorking register
+--also return a boolean telling if we try to set too big of a number
+setValue = function(value, wordsize)
+    if value > 2^(wordsize*8) then
+        return nil
+    end
+    local str = "set 4\ncpy R12\nset 0\ncpy R11\n"
+    for i=1,wordsize*2 do
+        local currentNibble = (value >> (4 * (wordsize*2 -i))) --the currrent nibble, starting at the ed
+        currentNibble = currentNibble & 15
+        str = str.."set "..tostring(currentNibble).."\nor R11\n"
+        if i ~= wordsize*2 then 
+            str = str.."lsl R12\n"
+        end
+    end
+    return str
+end
+

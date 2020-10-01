@@ -1,16 +1,11 @@
 ----- macro creators -----
 
 -- define the set+ macro
--- todo: check for the correct size of number
+-- If the code can not be made, return nil
 local setp = function(value, wordsize)
-    local str = "set 4\ncpy R12\nset 0\ncpy R11\n"
-    for i=1,wordsize*2 do
-        local currentNibble = (value >> (4 * (wordsize*2 -i))) --the currrent nibble, starting at the ed
-        currentNibble = currentNibble & 15
-        str = str.."set "..tostring(currentNibble).."\nor R11\n"
-        if i ~= wordsize*2 then 
-            str = str.."lsl R12\n"
-        end
+    local str = setValue(value, wordsize)
+    if str == nil then
+        return nil 
     end
     return createElem(str, setsize(wordsize), INST_MACRO)
 end
