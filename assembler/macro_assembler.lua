@@ -110,12 +110,15 @@ local linking = function(tab, wordsize)
     end
 end
 
-local compiling = function(tab)
-    local f = io.open("testCMP","w")
+local compiling = function(tab, outFile)
+    math.randomseed(os.time())
+    local tmpFile = "/tmp/asrmasm"..tostring(math.random(10000))
+    local f = io.open(tmpFile,"w")
     for i=1,#tab do
         f:write(tab[i].content)
     end
-    --todo
+    f:close()
+    assembleFile(tmpFile, outFile)
 end
 
 ----- function usable outside of the fine -----
@@ -127,7 +130,7 @@ createElem = function(str, size, type)
 end
 
 --todo error checking in each steps
-macro_assembler = function()
+macro_assembler = function(arg)
     local help = function()
         print("asrmmasm : the asrm macro-assembler.")
         print("Usage : asrmmasm <assembly file> <output file>")
@@ -138,12 +141,12 @@ macro_assembler = function()
     elseif #arg == 2 then --normal usage
         local f = io.open(arg[1])
         if not f then --checking for OK file
-            io.stderr:write("Error : unable to open ",arg[1], "\n")
+            io.stderr:write("Error: unable to open ",arg[1], "\n")
             return 3
         end
         local frstLine = f:read():splitLine() --checking for word size
         local wordsize = 2
-        if #frstLine == 2 and math.tointeger(frstLine[2]) and tonumber(frstLine[2]) > 0 and frstLine[1] == "wordsize" and math.tointeger(math.tointeger(frstLine[2])/8) then
+        if #frstLine == 2 and math.tointeger(frstLine[2]) and tonumber(frstLine[2]) > 0 and frstLine[1] == "wordsize" and math.tointeger(math.tointeger(frstLine[2]/8)) then
             wordsize = math.tointeger(frstLine[2])/8
             if wordsize ~= 1 and wordsize ~= 2 and wordsize ~= 4 and wordsize ~= 8 then
                 io.stderr:write("Warning: non standart word size.\n")
@@ -156,7 +159,7 @@ macro_assembler = function()
         local filetab = reading(arg[1], wordsize)
         local tab = basicASM(filetab, wordsize)
         linking(tab, wordsize)
-        compiling(tab)
+        compiling(tab, arg[2])
         return 0
     else --error
         io.stderr:write("Error: invalid arguments.\n\n")
