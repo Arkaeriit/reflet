@@ -53,6 +53,10 @@ local linking = function(tab)
 end
 
 local compiling = function(tab)
+    local f = io.open("testCMP","w")
+    for i=1,#tab do
+        f:write(tab[i].content)
+    end
     --todo
 end
 
@@ -64,6 +68,7 @@ createElem = function(str, size, type)
     return ret
 end
 
+--todo error checking in each steps
 macro_assembler = function()
     local help = function()
         print("asrmmasm : the asrm macro-assembler.")
@@ -82,7 +87,7 @@ macro_assembler = function()
         local wordsize = 2
         if #frstLine == 2 and math.tointeger(frstLine[2]) and tonumber(frstLine[2]) > 0 and frstLine[1] == "wordsize" then
             wordsize = math.tointeger(frstLine[2])
-            if wordsize ~= 1 or wordsize ~= 2 or wordsize ~= 4 or wordsize ~= 8 then
+            if wordsize ~= 1 and wordsize ~= 2 and wordsize ~= 4 and wordsize ~= 8 then
                 io.stderr:write("Warning: non standart word size.\n")
             end
         else
@@ -93,6 +98,7 @@ macro_assembler = function()
         local tab = basicASM(arg[1], wordsize)
         linking(tab)
         compiling(tab)
+        return 0
     else --error
         io.stderr:write("Error: invalid arguments.\n\n")
         help()

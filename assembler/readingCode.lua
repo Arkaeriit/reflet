@@ -52,6 +52,8 @@ local isMacro = function(tabInst)
         else
             return INST_ERR
         end
+    elseif mnemonic == "wordsize" then
+        return NO_INST
     end
     return INST_UKN
 end
@@ -70,7 +72,6 @@ analyzeLine = function(line)
     elseif isBasic(tabInst) == INST_BAS then
         return INST_BAS
     end --Only INST_UKN left
-    print("macro")
     if isMacro(tabInst) == INST_ERR or isMacro(tabInst) == INST_UKN then
         return INST_ERR
     else
