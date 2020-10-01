@@ -12,5 +12,5 @@ mini_assembler_main.o : mini_assembler_main.c
 
 clean:
 	rm -f *.o
-	rm *.bin
+	rm -f *.bin
 
