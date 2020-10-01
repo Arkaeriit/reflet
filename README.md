@@ -2,7 +2,7 @@
 A RISC ISA.
 
 # This repository
-This repository contains a simulator for an ASRM processor (WIP), an assembler to create ASRM machine code (WIP), and a Verilog implementation of an ASRM processor (to do).
+This repository contains a simulator for an ASRM processor (WIP), an assembler to create ASRM machine code (to do), and a Verilog implementation of an ASRM processor (to do).
 
 # The architecture
 ASRM is a RISC ISA. Each instruction is coded on a single byte and composed of a 4 or 5-bit operand, followed by an optional 4-bit register. This ISA can be used with a processor with words of any size superior to 3 bits.
@@ -20,7 +20,7 @@ R13 or CR is the comparison register. This register is updated by logical operat
 ### Program counter
 R14 or PC is the program counter. It contains the address of the current address. It can also be used to jump to a specific code address when forcefully modified by the user. Its reset value is 4.
 ### Stack pointer
-R15 or SP is the stack pointer. It is updated when doing pop or push instructions and it point toward an address in RAM. Its reset value is 0 but is should be initialised if you intend to use the stack.
+R15 or SP is the stack pointer. It is updated when doing pop or push instructions and it points toward an address in RAM. Its reset value is 0 but it should be initialized if you intend to use the stack.
 
 ## Instructions
 Here is a list of the instruction of an ASRM processor. 
@@ -46,14 +46,14 @@ Here is a list of the instruction of an ASRM processor.
 | jif | 0x09 | Nothing | Jump to the address in the working register if the comparison register is not equal to 0, does not affect the stack |
 | pop | 0x0A | Nothing | Put the content of the working register on the stack and updates the stack pointer. |
 | push | 0x0B | Nothing | Put the value on top of the stack in the working register and updates the stack pointer.
-| call | 0xC | Nothing | Put the curent address in the stack and jump to the address in the working register. | 
+| call | 0xC | Nothing | Put the current address in the stack and jump to the address in the working register. | 
 | ret | 0x0D | Nothing | Jump to the address just after the address on top of the stack. |
 
 ## Connection to memory
 ### Word size
 To be able to work, an ASRM processor needs a connection to some RAM (or RAM and ROM) where values can be stored and machine code can be read. As this document describes no word size for an ASRM processor.
-The ASRM processor wird size should be 8 bits times a power of two. The memory should have data bus the same size as the processor word size. Each byte of the RAM should be addressable to fetch individual instructions in each bytes. 
-Except in the case of overflows, ASRM machine code should work with ASRM processor of various word size.
+The ASRM processor word size should be 8 bits times a power of two. The memory should have a data bus the same size as the processor word size. Each byte of the RAM should be addressable to fetch individual instructions in each byte. 
+Except in the case of overflows, ASRM machine code should work with ASRM processor of various word sizes.
 
 
 ### Starting address

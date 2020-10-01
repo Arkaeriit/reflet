@@ -24,6 +24,8 @@ int main(int argc, char** argv){
 }
 
 static void help(){
-    puts("Help message here");
+    puts("asrmpas : the asrm pico-assembler\n"
+         "Usage : asrmpasm <assembly file> <output file>"
+    );
 }
 
