@@ -8,6 +8,12 @@ INST_LINK = 4
 INST_LABEL = 5
 INST_MACRO = 6
 
+RET_OK = 0
+RET_INVALID_ARGS = 1
+RET_UNOPEN_FILE = 3
+RET_ERROR_COMPILATION = 5
+RET_ERROR_LINK = 6
+
 ----- auxyliary functions -----
 
 --idexes a single char from a string

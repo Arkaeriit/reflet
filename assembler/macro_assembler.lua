@@ -62,7 +62,7 @@ local basicASM = function(filetab, wordsize)
         --print(type)
         if type == INST_ERR then
             io.stderr:write("Error line ",line,"\n")
-            return
+            return nil,true
         elseif type == INST_BAS then
             ret[#ret+1] = createElem(str..'\n', 1, INST_BAS)
         elseif type == INST_MACRO then
@@ -75,7 +75,7 @@ local basicASM = function(filetab, wordsize)
             print("Un truc cloche")
         end
     end
-    return ret
+    return ret,false
 end
 
 local linking = function(tab, wordsize)
@@ -87,6 +87,7 @@ local linking = function(tab, wordsize)
             local label = tab[i].content:splitLine()[2]
             if labelMap[label] then
                 io.stderr:write("Error: label ",label," is set twice.\n")
+                return true
             else
                 labelMap[label] = currentPointer
                 --print(label, currentPointer)
@@ -105,9 +106,11 @@ local linking = function(tab, wordsize)
                 tab[i].content = setLabel(mnemonic, addr, wordsize)
             else
                 io.stderr:write("Error: label ",label," is called but not set.\n")
+                return true
             end
         end
     end
+    return false
 end
 
 local compiling = function(tab, outFile)
@@ -129,7 +132,6 @@ createElem = function(str, size, type)
     return ret
 end
 
---todo error checking in each steps
 macro_assembler = function(arg)
     local help = function()
         print("asrmmasm : the asrm macro-assembler.")
@@ -137,12 +139,12 @@ macro_assembler = function(arg)
     end
     if #arg == 1 and (arg[1] == "help" or arg[1] == "--help" or arg[1] == "-h") then --asking for help
         help()
-        return 0
+        return RET_OK
     elseif #arg == 2 then --normal usage
         local f = io.open(arg[1])
         if not f then --checking for OK file
             io.stderr:write("Error: unable to open ",arg[1], "\n")
-            return 3
+            return RET_UNOPEN_FILE
         end
         local frstLine = f:read():splitLine() --checking for word size
         local wordsize = 2
@@ -157,14 +159,20 @@ macro_assembler = function(arg)
         f:close()
         --assembling
         local filetab = reading(arg[1], wordsize)
-        local tab = basicASM(filetab, wordsize)
-        linking(tab, wordsize)
+        local tab,err = basicASM(filetab, wordsize)
+        if err then
+            return RET_ERROR_COMPILATION
+        end
+        err = linking(tab, wordsize)
+        if err then
+            return RET_ERROR_LINK
+        end
         compiling(tab, arg[2])
-        return 0
+        return RET_OK
     else --error
         io.stderr:write("Error: invalid arguments.\n\n")
         help()
-        return 1
+        return RET_INVALID_ARG
     end
 end
 

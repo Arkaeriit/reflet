@@ -51,11 +51,13 @@ int main(int argc, char** argv){
         lua_seti(L, -2, i);
     }
 
-    lua_call(L, 1, 0);
+    lua_call(L, 1, 1);
+
+    int ret = luaL_checkinteger(L, -1);
 
     //closing
     lua_close(L);
 
-    return 0;
+    return ret;
 }
 
