@@ -4,6 +4,7 @@ enum processLine_return{OK, NO_CODE, ERROR};
 static enum processLine_return processLine(const char* line, uint8_t* ret);
 static enum processLine_return preprocessLine(const char* line, char** ret);
 static bool makeInst(uint8_t opperand, bool isRegister, char* arg, uint8_t* ret);
+static void toLowerCase(char* str);
 
 void mini_assembleFile(const char* fileIn, const char* fileOut){
     //opening files
@@ -67,6 +68,7 @@ static enum processLine_return processLine(const char* line, uint8_t* ret){
     toPrePross[1] = malloc(100);
     enum processLine_return preProssRes = preprocessLine(line, toPrePross);
     bool instOK = true;
+    toLowerCase(toPrePross[0]);
     if(preProssRes == OK){
         if(mnSLP(toPrePross[0])){
             *ret = SLP;
@@ -223,4 +225,10 @@ static bool makeInst(uint8_t opperand, bool isRegister, char* arg, uint8_t* ret)
     *ret = ((opperand & 0xF) << 4) | (reg & 0xF);
     return true;
 }
-       
+
+static void toLowerCase(char* str){
+    for(size_t i=0; i<strlen(str); i++)
+        if( 65 <= str[i] && str[i] <= 90)
+            str[i] += 32;
+}
+
