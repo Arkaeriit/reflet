@@ -1,22 +1,13 @@
-# ASRM assembler
-
-An assembler to create ASRM machine code.
-
-This folder contains two programs, **asrmpasm** which is a very bare-bone assembler written in C, and **asrmmasm** which is a richer assembler written mostly in Lua.
-
-Both assemblers are case-insensitive for mnemonic but case-sensitive for anything else.
-
-## ASRMPASM
-This is a pico-assembler. It can only assemble basic instruction as described in the main README.md. It would be very tedious to use it but you have total control over what instructions will be created.
-
 ## ASRMMASM
-This is a macro-assembler. Not only can it assemble basic instructions but it can also assemble macro-instruction and manage labels. When using macro-instructions, the registers R11 and R12 might be used as temporary registers and overwritten.
+This is a macro-assembler. Not only can it assemble basic instructions but it can also assemble macro-instruction and manage labels. When using macro-instructions, the registers R11 and R12 might be used as temporary registers and overwritten. Furthermore, unless specified otherwise, the working registry will be modified.
 
 ### Macro instructions
 Macro instructions let you combine multiples instructions in one line to make your code cleaner. They are useful because the instruction size of 8 bits limits a lot what can be done with basic instructions. 
 |Mnemonic|Followed by|Effect|
 |--|--|--|--|
 | set+ | A number | Put the argument number in the working register. The number can be as big as a register can hold. |
+| mov | two registers | Copies the content of the second register into the first. Preserves the working register. |
+| setr | a register and a number | Set the value of the given register to the given number. Preserves the working register. |
 
 ### Labels
 Labels can be used to jump to various parts of the program without having to calculate the address of the target instructions.
@@ -24,6 +15,8 @@ Labels can be used to jump to various parts of the program without having to cal
 |--|--|--|--|
 | label | A label | Note. the address of the following instruction as the label. |
 | setlab | a label | Put the address of the label in the working register. |
+| callf | a label | Call the function noted by the label. |
+| goto | a label | Jumps to the label. |
 The entry point of the program should be a point labeled `start`.
 
 ### Word size

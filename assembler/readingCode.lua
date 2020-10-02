@@ -52,13 +52,25 @@ local isMacro = function(tabInst)
         else
             return INST_ERR
         end
+    elseif mnemonic == "mov" then
+        if #tabInst == 3 and isreg(tabInst[2]) and isreg(tabInst[3]) then
+            return INST_MACRO
+        else
+            return INST_ERR
+        end
+    elseif mnemonic == "setr" then
+        if #tabInst == 3 and isreg(tabInst[2]) and math.tointeger(tabInst[3]) and tonumber(tabInst[3]) >= 0 then
+            return INST_MACRO
+        else
+            return INST_ERR
+        end
     elseif mnemonic == "label" then
         if #tabInst == 2 then
             return INST_LABEL
         else
             return INST_ERR
         end
-    elseif mnemonic == "setlab" then
+    elseif mnemonic == "setlab" or mnemonic == "callf" or mnemonic == "goto" then
         if #tabInst == 2 then
             return INST_LINK
         else

@@ -10,6 +10,23 @@ local setp = function(value, wordsize)
     return createElem(str, setsize(wordsize), INST_MACRO)
 end
 
+-- define the mov macro
+local mov = function(tabInst)
+    local str = "push\nread "..tabInst[3].."\ncpy "..tabInst[2].."\npop\n"
+    return createElem(str, 6, INST_MACRO)
+end
+
+-- define the setr macro
+local setr = function(tabInst, wordsize)
+    local value = math.tointeger(tabInst[3])
+    local sV = setValue(value, wordsize)
+    if sV == nil then
+        return nil
+    end
+    local str = "push\n"..sV.."cpy "..tabInst[2].."\npop\n"
+    return createElem(str, setsize(wordsize) + 3, INST_MACRO)
+end
+
 ----- interface function -----
 
 expandMacro = function(str, wordsize)
