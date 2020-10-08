@@ -17,6 +17,12 @@ loader.o : loader.h loader.c $(CONSTANTS)
 config.o : config.h config.c $(CONSTANTS)
 	gcc -c config.c $(FLAGS) -o config.o	
 
+install :
+	cp -f asrm-sim.bin /usr/bin/asrm-sim
+
+uninstall :
+	rm -f /usr/bin/asrm-sim
+
 clean:
 	rm -f *.o
 	rm *.bin

@@ -36,26 +36,26 @@ void applyConfig(asrm* vm, const char* configFile){
                     word_t configValue;
                     int numRead = sscanf(resultBuff[1], "%lu", &configValue);
                     if(numRead != 1){
-                        fprintf(stdout, "Error line %i of the config file.\n", lineNumber);
+                        fprintf(stdout, "Error line %i of the config file, numeric value unreadable.\n", lineNumber);
                         exit(RET_CONFIG);
                     }
                     //Appliyng the config line
                     if(!strcmp(resultBuff[0], "word_size")){
                         if(configValue%8){
-                            fprintf(stdout, "Error line %i of the config file.\n", lineNumber);
+                            fprintf(stdout, "Error line %i of the config file, invalid word size.\n", lineNumber);
                             exit(RET_CONFIG);
                         }
                         vm->config->word_size = configValue;
                     }else if(!strcmp(resultBuff[0], "ram_size")){
                         vm->config->ram_size = configValue;
                     }else{
-                        fprintf(stdout, "Error line %i of the config file.\n", lineNumber);
+                        fprintf(stdout, "Error line %i of the config file, unknow parameter.\n", lineNumber);
                         exit(RET_CONFIG);
                     }
                 }
                 break;
             case ERROR:
-                fprintf(stdout, "Error line %i of the config file.\n", lineNumber);
+                fprintf(stdout, "Error line %i of the config file, invalid format.\n", lineNumber);
                 exit(RET_CONFIG);
                 break;
             case NO_LINE:

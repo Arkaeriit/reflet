@@ -5,7 +5,7 @@
 
 #include "asrm.h"
 static void run_inst(asrm* vm);
-static int byteExchanged(const asrm* vm){
+static int byteExchanged(const asrm* vm);
 static word_t loadWordRAM(const asrm* vm, word_t addr);
 static void putRAMWord(asrm* vm, word_t addr, word_t content);
 static void io(asrm* vm);
