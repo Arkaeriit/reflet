@@ -1,20 +1,12 @@
 FLAGS = -Wall -Werror -g
 CONSTANTS = opperand.h
 LUA = -llua -lm -ldl   
+ASRMPASM = -lasrmpasm
 
-all : asrmmasm.bin asrmpasm.bin
+all : asrmmasm.bin
 
-asrmmasm.bin : macro_assembler.o pico_assembler.o lib.luac link.luac macro.luac readingCode.luac macro_assembler.luac
-	gcc pico_assembler.o macro_assembler.o $(LUA) -o asrmmasm.bin
-
-asrmpasm.bin : pico_assembler_main.o pico_assembler.o
-	gcc pico_assembler.o pico_assembler_main.o -o asrmpasm.bin
-
-pico_assembler.o : pico_assembler.h pico_assembler.c $(CONSTANTS)
-	gcc -c pico_assembler.c $(FLAGS) -o pico_assembler.o
-
-pico_assembler_main.o : pico_assembler_main.c
-	gcc -c pico_assembler_main.c $(FLAGS) -o pico_assembler_main.o
+asrmmasm.bin : macro_assembler.o lib.luac link.luac macro.luac readingCode.luac macro_assembler.luac
+	gcc macro_assembler.o $(LUA) $(ASRMPASM) -o asrmmasm.bin
 
 macro_assembler.o : macro_assembler.c
 	gcc -c macro_assembler.c $(FLAGS) -o macro_assembler.o

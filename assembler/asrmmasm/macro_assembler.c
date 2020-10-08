@@ -6,7 +6,7 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
-#include "pico_assembler.h"
+#include <asrmpasm.h>
 
 //wrapper for mini_assembleFile
 int lua_mini_assembleFile(lua_State* L){
