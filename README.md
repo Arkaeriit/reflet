@@ -5,7 +5,7 @@ A RISC ISA.
 This repository contains a simulator for an ASRM processor (WIP), an assembler to create ASRM machine code (to do), and a Verilog implementation of an ASRM processor (to do).
 
 # The architecture
-ASRM is a RISC ISA. Each instruction is coded on a single byte and composed of a 4 or 5-bit operand, followed by an optional 4-bit register. This ISA can be used with a processor with words of any size superior to 3 bits.
+ASRM is a RISC ISA. Each instruction is coded on a single byte and composed of a 4 or 5-bit operand, followed by an optional 4-bit register. This ISA can be used with a processor with words of any size superior which is 8 bits times a power of two. When the processor has a word size above 8 bits, it is little-endian.
 
 Most operations are made between one of the 12 general-purpose registers and an implicit working register.
 
@@ -15,8 +15,13 @@ An ASRM processor got 16 registers.
 R0 or WR is the working register.  This is the most important register, most operations will either copy its value into another register modify its content. Its use is never explicitly mentioned in the instructions as it is assumed that it is used most of the time. Its reset value is 0.
 ### General purpose registers
 R1 to r12 are the 12 general-purpose registers. They are meant to store values used to interact with the working register. Their reset values are 0.
-### Comparison register
-R13 or CR is the comparison register. This register is updated by logical operations and its Boolean value is used for conditional jumps. Its reset value is every bit set to 1.
+### Status register
+R13 or SR is the status register. 
+* The first bit is the comparison bit. It is set to 1 when a comparison instruction is realized and 0 otherwise. The comparison bit is used for conditional jumps.  
+* The bits 2 and 1 are the educed behaviors bits. When they are both set to 0, the processor behaves normally. When they are set to `b01`, if the word size of the processor is above 32 bits, the processor will act as a 32-bit processor when interfacing with memory. When they are set to `b10`, if the word size of the processor is above 16 bits, the processor will act as a 16-bit processor when interfacing with memory. When they are set to `b11`, the processor will act as an 8-bit processor when interfacing with memory.
+
+Its reset value is  0x1.
+
 ### Program counter
 R14 or PC is the program counter. It contains the address of the current address. It can also be used to jump to a specific code address when forcefully modified by the user. Its reset value is 4.
 ### Stack pointer
@@ -41,7 +46,7 @@ Here is a list of the instruction of an ASRM processor.
 | eq | 0xC | A register | If the content of the working register is the same as the one in the argument registers, set all the bits of the comparison register to one. Otherwise, they are set to 0 |
 | les | 0xD | A register | If the content of the working register is less than the one in the argument registers, set all the bits of the comparison register to one. Otherwise, they are set to 0 |
 | str | 0xE | A register with an address | Store the value in the working register to the address given in the argument register |
-| load | 0xF | A register with an address | Put in the working register the value at the address given in the argument register |
+| lod | 0xF | A register with an address | Put in the working register the value at the address given in the argument register |
 | jmp | 0x08 | Nothing | Jump to the address in the working register, does not affect the stack. |
 | jif | 0x09 | Nothing | Jump to the address in the working register if the comparison register is not equal to 0, does not affect the stack |
 | pop | 0x0A | Nothing | Put the content of the working register on the stack and updates the stack pointer. |

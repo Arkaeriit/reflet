@@ -5,9 +5,11 @@
 
 #include "asrm.h"
 static void run_inst(asrm* vm);
+static int byteExchanged(const asrm* vm){
 static word_t loadWordRAM(const asrm* vm, word_t addr);
 static void putRAMWord(asrm* vm, word_t addr, word_t content);
 static void io(asrm* vm);
+#define min(x, y) (x < y ? x : y)
 
 /*
  * Create an asrm struct with the content described in content.h
@@ -26,7 +28,7 @@ asrm* asrm_init(){
     conf->ram_size = RAM_SIZE;
     ret->config = conf;
     //Input reset values not equal to 0
-    CR(ret) = ~0;
+    SR(ret) = 1;
     PC(ret) = START_CHAR;
     return ret;
 }
@@ -74,7 +76,7 @@ static void run_inst(asrm* vm){
             }else if(instruction == JMP){
                 PC(vm) = WR(vm);
             }else if(instruction == JIF){
-                if(CR(vm))
+                if(SR(vm) & 1)
                     PC(vm) = WR(vm);
             }else if(instruction == POP){
                 SP(vm) = (SP(vm) - 1) & reg_mask;
@@ -131,10 +133,20 @@ static void run_inst(asrm* vm){
             WR(vm) &= reg_mask;
             break;
         case EQ:
-            CR(vm) = ((WR(vm) == vm->reg[reg]) ? ~0 : 0);
+            if(WR(vm) == vm->reg[reg]){
+                SR(vm) |= 1;
+            }else{
+                SR(vm) = SR(vm) >> 1;
+                SR(vm) = SR(vm) << 1;
+            }
             break;
         case LES:
-            CR(vm) = ((WR(vm) < vm->reg[reg]) ? ~0 : 0);
+            if(WR(vm) < vm->reg[reg]){
+                SR(vm) |= 1;
+            }else{
+                SR(vm) = SR(vm) >> 1;
+                SR(vm) = SR(vm) << 1;
+            }
             break;
         case STR:
             putRAMWord(vm, vm->reg[reg], WR(vm));
@@ -148,6 +160,32 @@ static void run_inst(asrm* vm){
 }
 
 /*
+ * Compute how many byte of data the processor should
+ * exchange with the RAM
+ *  Argument :
+ *      vm : the asrm struct
+ *  return :
+ *      The number of byte exchange with the RAM, depending on the
+ *      processor's word size and the reduced behavior bits in the
+ *      status register.
+ */
+static int byteExchanged(const asrm* vm){
+    switch((SR(vm) & 0x6) >> 1){
+        case 0:
+            return vm->config->word_size_byte;
+        case 1:
+            return min(vm->config->word_size_byte, 4);
+        case 2:
+            return min(vm->config->word_size_byte, 2);
+        case 3:
+            return 1;
+        default: //We should never be there
+            fprintf(stderr, "Error in byteExchanged\n");
+            return 0;
+    }
+}
+
+/*
  * Fetches a full word from ram
  *  Arguments:
  *      vm : the asrm struct
@@ -157,7 +195,7 @@ static void run_inst(asrm* vm){
  */
 static word_t loadWordRAM(const asrm* vm, word_t addr){
     word_t ret = 0;
-    for(int a=addr + vm->config->word_size_byte - 1; a>=addr; a--){
+    for(int a=addr + byteExchanged(vm) - 1; a>=addr; a--){
         ret += vm->ram[a];
         if(a != addr)
             ret = ret << 8;
@@ -173,7 +211,7 @@ static word_t loadWordRAM(const asrm* vm, word_t addr){
  *      content : the word to be put in RAM
  */
 static void putRAMWord(asrm* vm, word_t addr, word_t content){
-    for(int offset=0; offset<vm->config->word_size_byte; offset++){
+    for(int offset=0; offset<byteExchanged(vm); offset++){
         uint8_t byteToSend = (uint8_t) (content >> (offset * 8)) & 0xFF;
         vm->ram[addr+offset] = byteToSend;
     }

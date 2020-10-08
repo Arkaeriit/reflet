@@ -199,7 +199,7 @@ static enum processLine_return preprocessLine(const char* line, char** ret){
  *      true if the form of the argument is correct, false oterwise
  */
 static bool makeInst(uint8_t opperand, bool isRegister, char* arg, uint8_t* ret){
-    bool isNamedRegister = !(strcmp(arg, "WR") && strcmp(arg, "CR") && strcmp(arg, "SP") && strcmp(arg, "PC")); //Is the register a special register
+    bool isNamedRegister = !(strcmp(arg, "WR") && strcmp(arg, "SR") && strcmp(arg, "SP") && strcmp(arg, "PC")); //Is the register a special register
     if(isRegister && (arg[0] != 'r' && arg[0] != 'R' && !isNamedRegister)) //A register must be notted with a starting R or with its name
         return false;
     if(isNamedRegister && !isRegister) //No point in using a name if this is not a register
@@ -208,7 +208,7 @@ static bool makeInst(uint8_t opperand, bool isRegister, char* arg, uint8_t* ret)
     if(isNamedRegister){
         if(!strcmp(arg, "WR"))
             reg = 0;
-        if(!strcmp(arg, "CR"))
+        if(!strcmp(arg, "SR"))
             reg = 13;
         if(!strcmp(arg, "PC"))
             reg = 14;

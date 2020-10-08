@@ -25,7 +25,7 @@ typedef struct asrm_struct {
 } asrm;
 
 #define WR(vm) vm->reg[0]
-#define CR(vm) vm->reg[13]
+#define SR(vm) vm->reg[13]
 #define PC(vm) vm->reg[14]
 #define SP(vm) vm->reg[15]
 
