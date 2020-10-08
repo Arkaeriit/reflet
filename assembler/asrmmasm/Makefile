@@ -7,7 +7,7 @@ INCLUDEPATH = /usr/include
 all : asrmmasm.bin libasrmmasm.so
 
 libasrmmasm.so : libasrmmasm.o lib.luac link.luac macro.luac readingCode.luac macro_assembler.luac
-	gcc -shared libasrmmasm.o $(LUA) $(ASRMPASM) -o libasrmmasm.so
+	gcc -shared libasrmmasm.o $(ASRMPASM) -o libasrmmasm.so
 
 asrmmasm.bin : macro_assembler.o lib.luac link.luac macro.luac readingCode.luac macro_assembler.luac
 	gcc macro_assembler.o $(LUA) $(ASRMPASM) -o asrmmasm.bin
@@ -44,6 +44,16 @@ install_lib :
 	mkdir -p $(LIBPATH) $(INCLUDEPATH)
 	cp -f libasrmmasm.h $(INCLUDEPATH)/asrmmasm.h
 	cp -f libasrmmasm.so $(LIBPATH)/libasrmmasm.so
+
+uninstall : uninstall_macro uninstall_lib
+
+uninstall_macro :
+	rm -f /usr/local/bin/asrmmasm
+	rm -f /usr/local/share/asrm/lib.luac /usr/local/share/asrm/link.luac /usr/local/share/asrm/macro.luac /usr/local/share/asrm/readingCode.luac /usr/local/share/asrm/macro_assembler.luac 
+
+uninstall_lib :
+	rm -f $(INCLUDEPATH)/asrmmasm.h
+	rm -f $(LIBPATH)/libasrmmasm.so
 
 clean:
 	rm -f *.o

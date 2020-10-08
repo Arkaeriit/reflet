@@ -115,11 +115,14 @@ static enum processLine_return processLine(const char* line, uint8_t* ret){
         }else if(mnRET(toPrePross[0])){
             *ret = RET;
         }else{
+            fprintf(stderr, "Error, unknown instruction.\n");
             preProssRes = ERROR; //instruction undetermined
         }
     }
-    if(!instOK)
+    if(!instOK){
+        fprintf(stderr, "Error, unable to read a line, invalid format.\n");
         preProssRes = ERROR;
+    }
     free(toPrePross[0]);
     free(toPrePross[1]);
     free(toPrePross);
@@ -200,10 +203,14 @@ static enum processLine_return preprocessLine(const char* line, char** ret){
  */
 static bool makeInst(uint8_t opperand, bool isRegister, char* arg, uint8_t* ret){
     bool isNamedRegister = !(strcmp(arg, "WR") && strcmp(arg, "SR") && strcmp(arg, "SP") && strcmp(arg, "PC")); //Is the register a special register
-    if(isRegister && (arg[0] != 'r' && arg[0] != 'R' && !isNamedRegister)) //A register must be notted with a starting R or with its name
+    if(isRegister && (arg[0] != 'r' && arg[0] != 'R' && !isNamedRegister)){ //A register must be notted with a starting R or with its name
+        fprintf(stderr, "Error, no register while one was expected\n");
         return false;
-    if(isNamedRegister && !isRegister) //No point in using a name if this is not a register
+    }
+    if(isNamedRegister && !isRegister){ //No point in using a name if this is not a register
+        fprintf(stderr, "Error, using a named register while a number was expeted.\n");
         return false;
+    }
     uint32_t reg;
     if(isNamedRegister){
         if(!strcmp(arg, "WR"))
@@ -217,10 +224,14 @@ static bool makeInst(uint8_t opperand, bool isRegister, char* arg, uint8_t* ret)
     }else{
         int offset = (isRegister ? 1 : 0); //If it is a register there is a 'r' at the begining
         int numRead = sscanf(arg+offset, "%u", &reg);
-        if(numRead != 1)
+        if(numRead != 1){
+            fprintf(stderr, "Error, unable to read number\n");
             return false;
-        if(reg > 15)
+        }
+        if(reg > 15){
+            fprintf(stderr, "Error, using a register above 15.\n");   
             return false;
+        }
     }
     *ret = ((opperand & 0xF) << 4) | (reg & 0xF);
     return true;

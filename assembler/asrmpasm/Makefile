@@ -29,6 +29,15 @@ install_lib :
 	cp -f pico_assembler.h $(INCLUDEPATH)/asrmpasm.h
 	cp -f libasrmpasm.so $(LIBPATH)/libasrmpasm.so
 
+uninstall : uninstall_lib uninstall_lib
+
+uninstall_pico : 
+	rm -f /usr/local/bin/asrmpasm
+
+uninstall_lib :
+	rm -f $(INCLUDEPATH)/asrmpasm.h
+	rm -f $(LIBPATH)/libasrmpasm.so
+
 clean:
 	rm -f *.o
 	rm -f *.so
