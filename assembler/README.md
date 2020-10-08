@@ -14,7 +14,7 @@ Macro instructions let you combine multiples instructions in one line to make yo
 ### Labels
 Labels can be used to jump to various parts of the program without having to calculate the address of the target instructions.
 |Mnemonic|Followed by|Effect|
-|--|--|--|--|
+|--|--|--|
 | label | A label | Note. the address of the following instruction as the label. |
 | setlab | a label | Put the address of the label in the working register. |
 | callf | a label | Call the function noted by the label. |
