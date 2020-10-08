@@ -19,6 +19,7 @@ Labels can be used to jump to various parts of the program without having to cal
 | setlab | a label | Put the address of the label in the working register. |
 | callf | a label | Call the function noted by the label. |
 | goto | a label | Jumps to the label. |
+
 The entry point of the program should be a point labeled `start`.
 
 ### Word size
