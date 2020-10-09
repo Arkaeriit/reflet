@@ -20,6 +20,7 @@ asrm* asrm_init(){
     asrm* ret = malloc(sizeof(asrm));
     ret->reg = calloc(NUMBER_OF_REGISTERS, sizeof(word_t));
     ret->ram = NULL; //Left blank, should be written a value depending of its configuration
+    ret->active = true;
     //default config
     struct asrm_config* conf = malloc(sizeof(struct asrm_config));
     conf->word_size = WORD_SIZE;
@@ -62,7 +63,7 @@ void asrm_free(asrm* vm){
  * Run the program in the vm's RAM
  */
 void asrm_run(asrm* vm){
-    while(PC(vm) < vm->config->ram_size){
+    while((PC(vm) < vm->config->ram_size) && vm->active){
         debugLog(vm);
         run_inst(vm);
         io(vm);
@@ -99,6 +100,8 @@ static void run_inst(asrm* vm){
             }else if(instruction == RET){
                 SP(vm) = (SP(vm) - 1) & reg_mask;
                 PC(vm) = loadWordRAM(vm, SP(vm));
+            }else if(instruction == QUIT){
+                vm->active = false;
             }else{
                 fprintf(stderr, "Warning, unknow instruction (%X) at address %" WORD_P ".\n",instruction, PC(vm) - 1);
             }

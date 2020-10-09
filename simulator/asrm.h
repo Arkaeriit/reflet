@@ -30,6 +30,7 @@ typedef struct asrm_struct {
     ram_word_t* ram;
     struct asrm_config* config;
     struct asrm_debug* debug;
+    bool active;
 } asrm;
 
 #include "debug.h"

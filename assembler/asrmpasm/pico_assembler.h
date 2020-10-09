@@ -42,6 +42,7 @@ void mini_assembleFile(const char* fileIn, const char* fileOut);
 #define PUSH 0x0B
 #define CALL 0x0C
 #define RET  0x0D
+#define QUIT 0x0E
 
 //mnemonics
 #define mnSLP(mn) !(strcmp(mn, "SLP") && strcmp(mn, "slp"))
@@ -66,6 +67,7 @@ void mini_assembleFile(const char* fileIn, const char* fileOut);
 #define mnPUSH(mn) !(strcmp(mn, "PUSH") && strcmp(mn, "push"))
 #define mnCALL(mn) !(strcmp(mn, "CALL") && strcmp(mn, "call"))
 #define mnRET(mn) !(strcmp(mn, "RET") && strcmp(mn, "ret"))
+#define mnQUIT(mn) !(strcmp(mn, "QUIT") && strcmp(mn, "quit"))
 
 #endif
 

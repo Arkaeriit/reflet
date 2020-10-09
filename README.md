@@ -53,6 +53,7 @@ Here is a list of the instruction of an ASRM processor.
 | push | 0x0B | Nothing | Put the value on top of the stack in the working register and updates the stack pointer.
 | call | 0xC | Nothing | Put the current address in the stack and jump to the address in the working register. | 
 | ret | 0x0D | Nothing | Jump to the address just after the address on top of the stack. |
+| quit | 0x0E | Nothing | Reset the processor or stop it. |
 
 ## Connection to memory
 ### Word size

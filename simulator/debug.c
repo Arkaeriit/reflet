@@ -45,19 +45,21 @@ static char* dataAboutInstruction(asrm* vm){
     switch(opperand){
         case 0:
             if(isSlp(instruction)){
-                sprintf(ret, "SLP: sleeping");
+                sprintf(ret, "SLP: sleeping, value of the working register: %lu", WR(vm));
             }else if(instruction == JMP){
-                sprintf(ret,"JMP: jumping to %lx",WR(vm));
+                sprintf(ret,"JMP: jumping to 0x%lx",WR(vm));
             }else if(instruction == JIF){
-                sprintf(ret,"JIF: conditional jump to %lx. Status register: %lx",WR(vm), SR(vm));
+                sprintf(ret,"JIF: conditional jump toi 0x%lx. Status register: 0x%lx",WR(vm), SR(vm));
             }else if(instruction == POP){
                 sprintf(ret,"POP: poping stack");
             }else if(instruction == PUSH){
                 sprintf(ret, "PUSH: pushing value to stack");
             }else if(instruction == CALL){
-                sprintf(ret,"CALL: calling function at %lx",WR(vm));
+                sprintf(ret,"CALL: calling function at 0x%lx",WR(vm));
             }else if(instruction == RET){
                 sprintf(ret, "RET: returning from last call");
+            }else if(instruction == QUIT){
+                sprintf(ret, "QUIT: stopping the simulation");
             }else{
                 sprintf(ret, "Unknown instruction");
             }

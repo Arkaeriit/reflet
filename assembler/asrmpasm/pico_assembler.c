@@ -114,6 +114,8 @@ static enum processLine_return processLine(const char* line, uint8_t* ret){
             *ret = CALL;
         }else if(mnRET(toPrePross[0])){
             *ret = RET;
+        }else if(mnQUIT(toPrePross[0])){
+            *ret = QUIT;
         }else{
             fprintf(stderr, "Error, unknown instruction.\n");
             preProssRes = ERROR; //instruction undetermined

@@ -21,10 +21,10 @@ debug.o : debug.h debug.c $(CONSTANTS)
 	gcc -c debug.c $(FLAGS) -o debug.o	
 
 install :
-	cp -f asrm-sim.bin /usr/bin/asrm-sim
+	cp -f asrm-sim.bin /usr/local/bin/asrm-sim
 
 uninstall :
-	rm -f /usr/bin/asrm-sim
+	rm -f /usr/local/bin/asrm-sim
 
 clean:
 	rm -f *.o
