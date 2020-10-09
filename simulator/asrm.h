@@ -10,6 +10,7 @@
 #include "opperand.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 struct asrm_config {
     word_t word_size;
@@ -18,11 +19,20 @@ struct asrm_config {
     word_t ram_size;
 };
 
+struct asrm_debug {
+    bool enable;
+    FILE* file;
+    word_t steps;
+};
+
 typedef struct asrm_struct {
     word_t* reg;
     ram_word_t* ram;
     struct asrm_config* config;
+    struct asrm_debug* debug;
 } asrm;
+
+#include "debug.h"
 
 #define WR(vm) vm->reg[0]
 #define SR(vm) vm->reg[13]

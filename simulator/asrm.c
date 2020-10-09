@@ -27,6 +27,11 @@ asrm* asrm_init(){
     conf->word_mask = WORD_MASK;
     conf->ram_size = RAM_SIZE;
     ret->config = conf;
+    //default debug
+    struct asrm_debug* debug = malloc(sizeof(struct asrm_debug));
+    debug->enable = false;
+    debug->steps = 1;
+    ret->debug = debug;
     //Input reset values not equal to 0
     SR(ret) = 1;
     PC(ret) = START_CHAR;
@@ -47,6 +52,9 @@ void asrm_free(asrm* vm){
     free(vm->config);
     free(vm->reg);
     free(vm->ram);
+    if(vm->debug->enable)
+        fclose(vm->debug->file);
+    free(vm->debug);
     free(vm);
 }
 
@@ -55,6 +63,7 @@ void asrm_free(asrm* vm){
  */
 void asrm_run(asrm* vm){
     while(PC(vm) < vm->config->ram_size){
+        debugLog(vm);
         run_inst(vm);
         io(vm);
     }
@@ -124,7 +133,6 @@ static void run_inst(asrm* vm){
             WR(vm) = ~(vm->reg[reg]);
             break;
         case LSL:
-            //TODO: fill the unused bits with the same value as the MSB
             WR(vm) = WR(vm) << vm->reg[reg];
             WR(vm) &= reg_mask;
             break;

@@ -32,6 +32,19 @@ void applyConfig(asrm* vm, const char* configFile){
         switch(pross){
             case OK:
                 {
+                    //Checking non-numeric config parameters
+                    if(!strcmp(resultBuff[0], "log")){
+                        if(vm->debug->enable){
+                            fprintf(stdout, "Error line %i of the config file, multiple log files.\n", lineNumber);
+                            exit(RET_CONFIG);
+                        }
+                        vm->debug->enable = true;
+                        if((vm->debug->file = fopen(resultBuff[1], "w")) == NULL){
+                            fprintf(stdout, "Error line %i of the config file, unable to open log file.\n", lineNumber);
+                            exit(RET_CONFIG);
+                        }
+                        break;
+                    }
                     //Checking if we can use the config value
                     word_t configValue;
                     int numRead = sscanf(resultBuff[1], "%lu", &configValue);

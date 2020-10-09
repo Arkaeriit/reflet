@@ -2,8 +2,8 @@
 FLAGS = -Wall -g
 CONSTANTS = opperand.h constants.h
 
-asrm-sim.bin : main.o asrm.o loader.o config.o
-	gcc asrm.o main.o loader.o config.o -o asrm-sim.bin
+asrm-sim.bin : main.o asrm.o loader.o config.o debug.o
+	gcc asrm.o main.o loader.o config.o debug.o -o asrm-sim.bin
 
 main.o : main.c
 	gcc -c main.c $(FLAGS) -o main.o
@@ -16,6 +16,9 @@ loader.o : loader.h loader.c $(CONSTANTS)
 
 config.o : config.h config.c $(CONSTANTS)
 	gcc -c config.c $(FLAGS) -o config.o	
+
+debug.o : debug.h debug.c $(CONSTANTS)
+	gcc -c debug.c $(FLAGS) -o debug.o	
 
 install :
 	cp -f asrm-sim.bin /usr/bin/asrm-sim

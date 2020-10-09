@@ -6,10 +6,12 @@ The simulator should be given two arguments to start: a configuration file and a
 
 ## Configuration
 The configuration file should contain information about the processor such as the word size or the ram size.
-|Parameter name|value|
-|--------------|-----|
-|word\_size     |The size of the processor registers in bits.|
-|ram\_size      |The size of the RAM in bytes.|
+|Parameter name|Value|Default Value|
+|--------------|-----|--|
+|word\_size     |The size of the processor registers in bits.| 8 |
+|ram\_size      |The size of the RAM in bytes.| 255 |
+|log            |A file where debug log will we stored.| disabled |
+
 You can add comments in the config file by prefixing them with a `;`.
 For example, the following configuration file will help simulate an 8-bit processor with 100 bytes of RAM.
 ```
