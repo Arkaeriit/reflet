@@ -5,9 +5,9 @@
 
 #include "asrm.h"
 static void run_inst(asrm* vm);
-static int byteExchanged(const asrm* vm);
-static word_t loadWordRAM(const asrm* vm, word_t addr);
-static void putRAMWord(asrm* vm, word_t addr, word_t content);
+static int byteExchanged(const asrm* vm, bool stack_b);
+static word_t loadWordRAM(const asrm* vm, word_t addr, bool stack_b);
+static void putRAMWord(asrm* vm, word_t addr, word_t content, bool stack_b);
 static void io(asrm* vm);
 #define min(x, y) (x < y ? x : y)
 
@@ -90,16 +90,17 @@ static void run_inst(asrm* vm){
                     PC(vm) = WR(vm);
             }else if(instruction == POP){
                 SP(vm) = (SP(vm) - 1) & reg_mask;
-                WR(vm) = loadWordRAM(vm, SP(vm));
+                WR(vm) = loadWordRAM(vm, SP(vm), true);
             }else if(instruction == PUSH){
-                putRAMWord(vm, SP(vm), WR(vm));
+                putRAMWord(vm, SP(vm), WR(vm), true);
                 SP(vm) = (SP(vm) + 1) & reg_mask;
             }else if(instruction == CALL){
-                putRAMWord(vm, SP(vm)-1, PC(vm)); //-1 because we already updated the PC and we want to store the address of the call
+                putRAMWord(vm, SP(vm), PC(vm), true); //-1 because we already updated the PC and we want to store the address of the call
                 SP(vm) = (SP(vm) + 1) & reg_mask;
+                PC(vm) = WR(vm);
             }else if(instruction == RET){
                 SP(vm) = (SP(vm) - 1) & reg_mask;
-                PC(vm) = loadWordRAM(vm, SP(vm));
+                PC(vm) = loadWordRAM(vm, SP(vm), true);
             }else if(instruction == QUIT){
                 vm->active = false;
             }else{
@@ -160,10 +161,10 @@ static void run_inst(asrm* vm){
             }
             break;
         case STR:
-            putRAMWord(vm, vm->reg[reg], WR(vm));
+            putRAMWord(vm, vm->reg[reg], WR(vm), false);
             break;
         case LOAD:
-            WR(vm) = loadWordRAM(vm, vm->reg[reg]);
+            WR(vm) = loadWordRAM(vm, vm->reg[reg], false);
             break;
         default:
             fprintf(stderr, "Error in the reading of the instruction at address %" WORD_P ".\n", PC(vm) - 1);
@@ -175,12 +176,15 @@ static void run_inst(asrm* vm){
  * exchange with the RAM
  *  Argument :
  *      vm : the asrm struct
+ *      stack_b : are we ignoring the behavior bits?
  *  return :
  *      The number of byte exchange with the RAM, depending on the
  *      processor's word size and the reduced behavior bits in the
  *      status register.
  */
-static int byteExchanged(const asrm* vm){
+static int byteExchanged(const asrm* vm, bool stack_b){
+    if(stack_b)
+        return vm->config->word_size_byte;
     switch((SR(vm) & 0x6) >> 1){
         case 0:
             return vm->config->word_size_byte;
@@ -201,12 +205,13 @@ static int byteExchanged(const asrm* vm){
  *  Arguments:
  *      vm : the asrm struct
  *      addr : the address of the word to be fetched
+ *      stack_b : are we ignoring the behavior bits
  *  return:
  *      The word in RAM (the byte at the address and the following bytes)
  */
-static word_t loadWordRAM(const asrm* vm, word_t addr){
+static word_t loadWordRAM(const asrm* vm, word_t addr, bool stack_b){
     word_t ret = 0;
-    for(int a=addr + byteExchanged(vm) - 1; a>=addr; a--){
+    for(int a=addr + byteExchanged(vm, stack_b) - 1; a>=addr; a--){
         ret += vm->ram[a];
         if(a != addr)
             ret = ret << 8;
@@ -220,9 +225,10 @@ static word_t loadWordRAM(const asrm* vm, word_t addr){
  *      vm : the asrm struct
  *      addr : the startin address of where we must put the word
  *      content : the word to be put in RAM
+ *      stack_b : are we ignoring the behavior bits
  */
-static void putRAMWord(asrm* vm, word_t addr, word_t content){
-    for(int offset=0; offset<byteExchanged(vm); offset++){
+static void putRAMWord(asrm* vm, word_t addr, word_t content, bool stack_b){
+    for(int offset=0; offset<byteExchanged(vm, stack_b); offset++){
         uint8_t byteToSend = (uint8_t) (content >> (offset * 8)) & 0xFF;
         vm->ram[addr+offset] = byteToSend;
     }
