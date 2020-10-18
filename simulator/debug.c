@@ -65,7 +65,7 @@ static char* dataAboutInstruction(asrm* vm){
             }
             break;
         case SET:
-            sprintf(ret, "SET: setting WE to %i", reg);
+            sprintf(ret, "SET: setting WR to %i", reg);
             break;
         case READ:
             sprintf(ret, "READ: setting WR to valie of register %i, which is %lu", reg, vm->reg[reg]);
@@ -104,7 +104,7 @@ static char* dataAboutInstruction(asrm* vm){
             sprintf(ret, "LES: comparing working register (%lu) and register %i (%lu)", WR(vm), reg, vm->reg[reg]);
             break;
         case STR:
-            sprintf(ret, "STR: storing register %i (%lu) at address 0x%lx",reg, vm->reg[reg], WR(vm));
+            sprintf(ret, "STR: storing register %lu at address in register %i (0x%lx)",WR(vm), vm->reg[reg], reg);
             break;
         case LOAD:
             sprintf(ret, "LOAD: puting the content of address %lx in register %i", WR(vm), reg);
