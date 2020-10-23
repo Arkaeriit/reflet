@@ -7,7 +7,7 @@
 
 module asrm_cpu#(
     parameter wordsize = 16
-)(
+    )(
     //main control signal
     input clk,
     input reset,
@@ -16,9 +16,9 @@ module asrm_cpu#(
     output [wordsize-1:0] addr,
     output [wordsize-1:0] data_out,
     output write_en
-)
+    );
 
-   reg [wordsize-1:0] registers [3:0]; //The registers 
+   reg [wordsize-1:0] registers [15:0]; //The registers 
 
    //reset values
    always @ (posedge clk)
@@ -59,18 +59,19 @@ module asrm_cpu#(
     wire [3:0] argument_id = instruction[3:0];
 
     asrm_alu #(wordsize) alu(
-        registers[wr_id],
+        registers[`wr_id],
         registers[argument_id],
-        registers[rs_id],
-        opperand,
+        registers[`sr_id],
+        instruction,
         content_alu,
         index_alu);
 
     asrm_addr #(wordsize) ram_interface(
         clk,
         reset,
-        registers[pc_id],
-        registers[sp_id],
+        registers[`wr_id],
+        registers[`pc_id],
+        registers[`sp_id],
         registers[argument_id],
         instruction,
         addr,
@@ -85,13 +86,13 @@ module asrm_cpu#(
     always @ (posedge clk)
         if(reset) //The reset behavious is handeled above
         begin
-            if(index != pc_id) //When changing the pc, no need to increment it
-                registers[pc_id] = registers[pc_id] + 1;
-            if(instruction == inst_pop)
-                registers[sp_id] = registers[sp_id] - 1
-            if(instruction == inst_push)
-                registers[sp_id] = registers[sp_id] + 1
-            registers[index] = content
+            if(index != `pc_id) //When changing the pc, no need to increment it
+                registers[`pc_id] = registers[`pc_id] + 1;
+            if(instruction == `inst_pop)
+                registers[`sp_id] = registers[`sp_id] - 1;
+            if(instruction == `inst_push)
+                registers[`sp_id] = registers[`sp_id] + 1;
+            registers[index] = content;
         end
                 
 endmodule

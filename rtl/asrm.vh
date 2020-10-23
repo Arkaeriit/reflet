@@ -9,7 +9,7 @@
 
  //Register index id
 `define wr_id 4'h0
-`define rs_if 4'hD
+`define sr_id 4'hD
 `define pc_id 4'hE
 `define sp_id 4'hF
 
@@ -31,6 +31,7 @@
 `define opp_load 4'hF
 
 //Instructions
+`define inst_slp  8'h00
 `define inst_jmp  8'h08
 `define inst_jim  8'h09
 `define inst_pop  8'h0A
