@@ -53,6 +53,7 @@ module asrm_cpu#(
     wire [wordsize-1:0] content = content_alu | content_addr;
 
     //submodules
+    wire ram_not_ready;
     wire [7:0] instruction;
     wire [3:0] opperand = instruction[7:4];
     wire [3:0] argument_id = instruction[3:0];
@@ -65,19 +66,32 @@ module asrm_cpu#(
         content_alu,
         index_alu);
 
-        //memoy submodule to do
+    asrm_addr #(wordsize) ram_interface(
+        clk,
+        reset,
+        registers[pc_id],
+        registers[sp_id],
+        registers[argument_id],
+        instruction,
+        addr,
+        data_out,
+        data_in,
+        write_en,
+        content_addr,
+        index_addr,
+        ram_not_ready);
     
     //updating reegisters
     always @ (posedge clk)
         if(reset) //The reset behavious is handeled above
         begin
-            if(index == pc_id)
-                registers[index] = content;
-            else
-            begin
-                registers[index] = content
+            if(index != pc_id) //When changing the pc, no need to increment it
                 registers[pc_id] = registers[pc_id] + 1;
-            end
+            if(instruction == inst_pop)
+                registers[sp_id] = registers[sp_id] - 1
+            if(instruction == inst_push)
+                registers[sp_id] = registers[sp_id] + 1
+            registers[index] = content
         end
                 
 endmodule
