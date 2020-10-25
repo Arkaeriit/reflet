@@ -16,7 +16,7 @@ module asrm_addr#(
     input [wordsize-1:0] programCounter,
     input [wordsize-1:0] stackPointer,
     input [wordsize-1:0] otherRegister,
-    output reg [7:0] instruction = 0,
+    output reg [7:0] instruction,
     //ram connection
     output [wordsize-1:0] addr,
     output [wordsize-1:0] data_out,
@@ -29,14 +29,16 @@ module asrm_addr#(
     );
 
     wire [3:0] opperand = instruction[7:4];
-    reg [3:0] not_ready = 1;
+    reg [3:0] not_ready;
     assign ram_not_ready = |not_ready;
+    wire using_ram = instruction == `inst_pop || instruction == `inst_push || instruction == `inst_call || instruction == `inst_ret || opperand == `opp_str || opperand == `opp_load;
+    wire fetching_instruction = not_ready == 2 || not_ready == 1 || not_ready == 0;
 
 
     //addr selection
     wire [wordsize-1:0] addr_stack = ( instruction == `inst_pop || instruction == `inst_push || instruction == `inst_ret || instruction == `inst_call ? stackPointer : 0 );
     wire [wordsize-1:0] addr_reg = ( opperand == `opp_str || opperand == `opp_load ? otherRegister : 0 );
-    assign addr = ( not_ready ? addr_reg | addr_stack : programCounter); //The defaut behaviour is to seek the address of the next piece of code
+    assign addr = ( !fetching_instruction ? addr_reg | addr_stack : programCounter); //The defaut behaviour is to seek the address of the next piece of code
 
     //selecting the data to send
     wire [wordsize-1:0] data_wr = ( instruction == `inst_push || opperand == `opp_str ? workingRegister : 0 );
@@ -56,29 +58,21 @@ module asrm_addr#(
 
     //Changing the not_ready register to let the CPU<->RAM commuticatio to occur
     always @ (posedge clk)
-    begin
-        if(!not_ready & reset) //we are ready and thus must addapt the time of not ready to engage the communication with the ram
-        begin
-            if(instruction == `inst_pop || instruction == `inst_push || instruction == `inst_ret || `inst_call || opperand == `opp_str || opperand == `opp_load)
-                not_ready = 1;
-        end
-        if(not_ready & reset)
-            not_ready = not_ready - 1;
-    end
-
-    //updating the instruction or the working dirrectory
-    always @ (posedge clk)
         if(!reset)
         begin
-            not_ready = 1;
+            not_ready = 3;
             instruction = 0;
         end
         else
         begin
-            if(not_ready) //ram-related instruction
-            begin
-            end
-            else //fetchin new oppetations
+            if(!not_ready) //we are ready and thus must addapt the time of not ready to engage the communication with the ram
+                begin
+                    if(using_ram)
+                        not_ready = 4;
+                end
+            else
+                not_ready = not_ready - 1;
+            if(fetching_instruction)
                 instruction = data_in;
         end
 

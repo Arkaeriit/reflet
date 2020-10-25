@@ -84,15 +84,18 @@ module asrm_cpu#(
     
     //updating reegisters
     always @ (posedge clk)
-        if(reset) //The reset behavious is handeled above
+        if(reset & !ram_not_ready) //The reset behavious is handeled above
         begin
             if(index != `pc_id) //When changing the pc, no need to increment it
                 registers[`pc_id] = registers[`pc_id] + 1;
             if(instruction == `inst_pop)
                 registers[`sp_id] = registers[`sp_id] - 1;
-            if(instruction == `inst_push)
+            else if(instruction == `inst_push)
                 registers[`sp_id] = registers[`sp_id] + 1;
-            registers[index] = content;
+            else if(opperand == `opp_set)
+                registers[`wr_id] = instruction[3:0];
+            else
+                registers[index] = content;
         end
                 
 endmodule
