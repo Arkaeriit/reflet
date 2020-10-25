@@ -11,6 +11,7 @@ module asrm_cpu#(
     //main control signal
     input clk,
     input reset,
+    output reg quit, //Set to one when the quit instruction is read
     //System bus connection
     input [wordsize-1:0] data_in,
     output [wordsize-1:0] addr,
@@ -40,6 +41,7 @@ module asrm_cpu#(
            registers[13] = 1;
            registers[14] = 4;
            registers[15] = 0;
+           quit = 0;
        end
     
     //register to change index
@@ -86,17 +88,17 @@ module asrm_cpu#(
     always @ (posedge clk)
         if(reset & !ram_not_ready) //The reset behavious is handeled above
         begin
+            if(instruction == `inst_quit)
+                quit = 1;
             if(index != `pc_id) //When changing the pc, no need to increment it
                 registers[`pc_id] = registers[`pc_id] + 1;
             if(instruction == `inst_pop)
                 registers[`sp_id] = registers[`sp_id] - 1;
             else if(instruction == `inst_push)
                 registers[`sp_id] = registers[`sp_id] + 1;
-            else if(opperand == `opp_set)
-                registers[`wr_id] = instruction[3:0];
             else
                 registers[index] = content;
         end
-                
+
 endmodule
 

@@ -26,12 +26,17 @@ module asrm_alu
     wire [wordsize-1:0] and_out = ( opperand == `opp_and ? working_register & other_register : defaultValue );
     wire [wordsize-1:0] or_out  = ( opperand == `opp_or  ? working_register | other_register : defaultValue );
     wire [wordsize-1:0] xor_out = ( opperand == `opp_xor ? working_register ^ other_register : defaultValue );
-    wire [wordsize-1:0] not_out = ( opperand == `opp_not ? !other_register : defaultValue );
+    wire [wordsize-1:0] not_out = ( opperand == `opp_not ? ~other_register : defaultValue );
     wire [wordsize-1:0] lsl_out = ( opperand == `opp_lsl ? defaultValue : defaultValue ); //todo
     wire [wordsize-1:0] lsr_out = ( opperand == `opp_lsr ? defaultValue : defaultValue ); //todo
-    //sleep, we want to put wr into wr
-    wire [wordsize-1:0] out_slp = ( instruction == `inst_slp ? working_register : defaultValue );
-    wire [wordsize-1:0] out_wr = add_out | sub_out | and_out | or_out | xor_out | not_out | lsl_out | lsr_out | out_slp;
+    //sleep and cpy, we want to use the raw working register value
+    wire [wordsize-1:0] raw_out = ( instruction == `inst_slp || opperand == `opp_cpy ? working_register : defaultValue );
+    //set, we put the end of the instruction in wr
+    wire [wordsize-1:0] set_out = ( opperand == `opp_set ? instruction[3:0] : defaultValue );
+    //the real value
+    wire [wordsize-1:0] out_nocmp = add_out | sub_out | and_out | or_out | xor_out | not_out | lsl_out | lsr_out | raw_out | set_out;
+    wire [3:0] out_reg_nocmp = ( opperand == `opp_cpy ? instruction[3:0] : 4'h0 );
+
 
     //comparaisons
     wire cmp_eq  = ( opperand == `opp_eq ? working_register == other_register : defaultValue );
@@ -43,8 +48,8 @@ module asrm_alu
     //We want to see if we are trying to change the working register or
     //the status register
     wire cmp_opp = (opperand == `opp_eq) || (opperand == `opp_les);
-    assign out = (cmp_opp ? out_cmp : out_wr);
-    assign out_reg = (cmp_opp ? `sr_id : 4'h0);
+    assign out = (cmp_opp ? out_cmp : out_nocmp);
+    assign out_reg = (cmp_opp ? `sr_id : out_reg_nocmp);
 
 endmodule
 

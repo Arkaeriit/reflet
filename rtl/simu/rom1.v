@@ -15,6 +15,7 @@ always @ (posedge clk)
       11 : out = 54;
       12 : out = 85;
       13 : out = 150;
+      14 : out = 8'h0E;
       default: out = 0;
     endcase
 endmodule
