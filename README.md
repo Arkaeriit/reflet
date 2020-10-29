@@ -18,7 +18,7 @@ R1 to r12 are the 12 general-purpose registers. They are meant to store values u
 ### Status register
 R13 or SR is the status register. 
 * The first bit is the comparison bit. It is set to 1 when a comparison instruction is realized and 0 otherwise. The comparison bit is used for conditional jumps.  
-* The bits 2 and 1 are the educed behaviors bits. When they are both set to 0, the processor behaves normally. When they are set to `b01`, if the word size of the processor is above 32 bits, the processor will act as a 32-bit processor when interfacing with memory. When they are set to `b10`, if the word size of the processor is above 16 bits, the processor will act as a 16-bit processor when interfacing with memory. When they are set to `b11`, the processor will act as an 8-bit processor when interfacing with memory.
+* The bits 2 and 1 are the reduced behaviors bits. When they are both set to 0, the processor behaves normally. When they are set to `b01`, if the word size of the processor is above 32 bits, the processor will act as a 32-bit processor when interfacing with memory. When they are set to `b10`, if the word size of the processor is above 16 bits, the processor will act as a 16-bit processor when interfacing with memory. When they are set to `b11`, the processor will act as an 8-bit processor when interfacing with memory.
 
 Its reset value is  0x1.
 

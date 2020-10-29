@@ -65,6 +65,7 @@ module asrm_cpu#(
         registers[`pc_id],
         registers[`sp_id],
         registers[argument_id],
+        registers[`sr_id],
         instruction,
         addr,
         data_out,

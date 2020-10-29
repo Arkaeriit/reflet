@@ -16,6 +16,7 @@ module asrm_addr#(
     input [wordsize-1:0] programCounter,
     input [wordsize-1:0] stackPointer,
     input [wordsize-1:0] otherRegister,
+    input [wordsize-1:0] statusRegister,
     output reg [7:0] instruction,
     //ram connection
     output [wordsize-1:0] addr,
@@ -28,11 +29,12 @@ module asrm_addr#(
     output ram_not_ready
     );
 
+    //Communication with the CPU
     wire [3:0] opperand = instruction[7:4];
     reg [3:0] not_ready;
     reg hide_ready; //This is used to hide the fact that not_ready is set to 0 when we need to use the ram
-    assign ram_not_ready = |not_ready | (!hide_ready & using_ram);
     wire using_ram = instruction == `inst_pop || instruction == `inst_push || instruction == `inst_call || instruction == `inst_ret || opperand == `opp_str || opperand == `opp_load;
+    assign ram_not_ready = |not_ready | (!hide_ready & using_ram);
     wire fetching_instruction = (not_ready == 2 || not_ready == 1 || not_ready == 0) & !hide_ready;
 
 
@@ -48,9 +50,12 @@ module asrm_addr#(
     assign data_out = data_wr | data_pc;
 
     //data to send to the cpu
-    reg [wordsize-1:0] data_buff; //Register to store the value we fetched
+    wire [1:0] reduced_behavior_bits = statusRegister[2:1];
+    wire reduced_behavior = (reduced_behavior_bits != 2'b00) && ( (reduced_behavior_bits == 2'b01 && wordsize > 32) || (reduced_behavior_bits == 2'b10 && wordsize > 16) || (reduced_behavior_bits == 2'b11 && wordsize > 8) );
+    reg [127:0] data_buff; //Register to store the value we fetched
+    wire [127:0] data_in_wide = data_in;
     wire returning_value = instruction == `inst_pop || instruction == `inst_ret || opperand == `opp_load;
-    wire [wordsize-1:0] data_out_out = ( returning_value ? data_buff : 0 ); //When we want to use walue read from ram
+    wire [wordsize-1:0] data_out_out = ( returning_value ? data_buff[wordsize-1:0] : 0 ); //When we want to use walue read from ram
     wire [wordsize-1:0] wr_out = ( instruction == `inst_push || instruction == `inst_call || opperand == `opp_str ? workingRegister : 0 ); //when we don't need to update any register we will simply put the content of the working register into itself
     assign out = wr_out | data_out_out;
     always @ (posedge clk)
@@ -58,10 +63,31 @@ module asrm_addr#(
             data_buff = 0;
         else
             if(returning_value & ! fetching_instruction)
-                data_buff = data_in;
+            begin
+                if(reduced_behavior)
+                    case(reduced_behavior_bits)
+                        2'b01 : 
+                        begin
+                            data_buff[31:0] = data_in_wide[31:0];
+                            data_buff[127:32] = 0;
+                        end
+                        2'b01 : 
+                        begin
+                            data_buff[15:0] = data_in_wide[15:0];
+                            data_buff[127:16] = 0;
+                        end
+                        2'b01 : 
+                        begin
+                            data_buff[7:0] = data_in_wide[7:0];
+                            data_buff[127:8] = 0;
+                        end
+                    endcase
+                else //normal behavior
+                    data_buff[wordsize-1:0] = data_in_wide;
+            end
 
     //register to update
-    assign out_reg = 0; //All the instructions handeled by this module are 
+    assign out_reg = 0; //All the instructions handeled by this module are going to edit the working register
 
     //write enable
     assign write_en = (instruction == `inst_push || instruction == `inst_call || opperand == `opp_str) & !fetching_instruction;
@@ -84,7 +110,7 @@ module asrm_addr#(
                         if(hide_ready) //About to fetch an instruction
                             not_ready = 2;
                         else //Interfacing whith RAM
-                            not_ready = 1;
+                            not_ready = 2;
                         hide_ready = !hide_ready;
                     end
                     else
@@ -93,7 +119,7 @@ module asrm_addr#(
                 1 : 
                 begin 
                     if(!hide_ready)
-                        instruction = data_in;
+                        instruction = data_in[7:0];
                     not_ready = not_ready - 1;
                 end
                 default : not_ready = not_ready - 1;

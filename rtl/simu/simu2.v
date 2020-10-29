@@ -19,7 +19,7 @@ module test2();
     rom2 rom2(clk, !addr[7], addr[4:0], dataRom);
     //The ram got the addresses between 0x80 and 0xFF
     wire [7:0] dataRam;
-    ram #(7, 8) ram(clk, reset, addr[7], addr[6:0], dOut, write_en, dataRam);
+    ram #(7, 1) ram(clk, reset, addr[7], addr[6:0], dOut, write_en, dataRam);
 
     assign dIn = dataRam | dataRom;
 
