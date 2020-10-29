@@ -1,6 +1,6 @@
 
 
-module test1();
+module simu1();
 
     reg clk = 0;
     always #1 clk = !clk;
