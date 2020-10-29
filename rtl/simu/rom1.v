@@ -1,3 +1,8 @@
+/*-------------------------\
+|This ROM test the baasic  |
+|functionalities of the ALU|
+\-------------------------*/
+
 module rom1(input clk, input [3:0] addr, output reg [7:0] out = 0);
 always @ (posedge clk)
     case(addr)
