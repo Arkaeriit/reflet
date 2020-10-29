@@ -8,10 +8,19 @@
 `define asrm_vf
 
  //Register index id
-`define wr_id 4'h0
-`define sr_id 4'hD
-`define pc_id 4'hE
-`define sp_id 4'hF
+`define wr_id 4'h0 /*working register*/
+`define sr_id 4'hD /*Status register*/
+`define pc_id 4'hE /*Program counter*/
+`define sp_id 4'hF /*Stack pointer*/
+`define gp_start 4'h1 /*general purpuse registers*/
+`define gp_end 4'hC
+
+//Registers reset value
+`define wr_reset 0 /*working register*/
+`define sr_reset 1 /*Status register*/
+`define pc_reset 4 /*Program counter*/
+`define sp_reset 0 /*Stack pointer*/
+`define gp_reset 0 /*general purpuse registers*/
 
 //Opperands
 `define opp_set  4'h1

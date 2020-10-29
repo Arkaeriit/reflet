@@ -81,7 +81,10 @@ module asrm_addr#(
                 begin
                     if(using_ram)
                     begin
-                        not_ready = 5;
+                        if(hide_ready) //About to fetch an instruction
+                            not_ready = 2;
+                        else //Interfacing whith RAM
+                            not_ready = 1;
                         hide_ready = !hide_ready;
                     end
                     else

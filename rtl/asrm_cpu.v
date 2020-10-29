@@ -25,22 +25,12 @@ module asrm_cpu#(
    always @ (posedge clk)
        if(!reset)
        begin
-           registers[00] = 0;
-           registers[01] = 0;
-           registers[02] = 0;
-           registers[03] = 0;
-           registers[04] = 0;
-           registers[05] = 0;
-           registers[06] = 0;
-           registers[07] = 0;
-           registers[08] = 0;
-           registers[09] = 0;
-           registers[10] = 0;
-           registers[11] = 0;
-           registers[12] = 0;
-           registers[13] = 1;
-           registers[14] = 4;
-           registers[15] = 0;
+           registers[`wr_id] = `wr_reset;
+           registers[`sr_id] = `rs_reset;
+           registers[`pc_id] = `pc_reset;
+           registers[`sp_id] = `sp_reset;
+           for(integer i=`gp_start; i<=`gp_end; i++)
+               registers[i] = `gp_reset;
            quit = 0;
        end
     
@@ -88,19 +78,18 @@ module asrm_cpu#(
     always @ (posedge clk)
         if(reset & !ram_not_ready) //The reset behavious is handeled above
         begin
-            if(instruction == `inst_quit)
-                quit = 1;
+            case(instruction)
+                `inst_quit : quit = 1;
+                `inst_pop :
+                begin
+                    registers[`sp_id] = registers[`sp_id] - 1;
+                    registers[index] = content;
+                end
+                `inst_push : registers[`sp_id] = registers[`sp_id] + 1;
+                default : registers[index] = content;
+            endcase
             if(index != `pc_id) //When changing the pc, no need to increment it
                 registers[`pc_id] = registers[`pc_id] + 1;
-            if(instruction == `inst_pop)
-            begin
-                registers[`sp_id] = registers[`sp_id] - 1;
-                registers[index] = content;
-            end
-            else if(instruction == `inst_push)
-                registers[`sp_id] = registers[`sp_id] + 1;
-            else
-                registers[index] = content;
         end
 
 endmodule
