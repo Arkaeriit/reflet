@@ -26,10 +26,10 @@ module asrm_cpu#(
        if(!reset)
        begin
            registers[`wr_id] = `wr_reset;
-           registers[`sr_id] = `rs_reset;
+           registers[`sr_id] = `sr_reset;
            registers[`pc_id] = `pc_reset;
            registers[`sp_id] = `sp_reset;
-           for(integer i=`gp_start; i<=`gp_end; i++)
+           for(integer i=`gp_start; i<=`gp_end; i=i+1)
                registers[i] = `gp_reset;
            quit = 0;
        end
