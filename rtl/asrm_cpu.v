@@ -93,7 +93,10 @@ module asrm_cpu#(
             if(index != `pc_id) //When changing the pc, no need to increment it
                 registers[`pc_id] = registers[`pc_id] + 1;
             if(instruction == `inst_pop)
+            begin
                 registers[`sp_id] = registers[`sp_id] - 1;
+                registers[index] = content;
+            end
             else if(instruction == `inst_push)
                 registers[`sp_id] = registers[`sp_id] + 1;
             else
