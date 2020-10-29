@@ -33,11 +33,17 @@ module asrm_alu
     wire [wordsize-1:0] raw_out = ( instruction == `inst_slp || opperand == `opp_cpy ? working_register : defaultValue );
     //set, we put the end of the instruction in wr
     wire [wordsize-1:0] set_out = ( opperand == `opp_set ? instruction[3:0] : defaultValue );
-    //read, we put the raw value of the other register
-    wire [wordsize-1:0] read_out = ( opperand == `opp_read ? other_register : defaultValue );
+    //read and jump, we put the raw value of the other register
+    wire [wordsize-1:0] oth_out = ( opperand == `opp_read || instruction == `inst_jmp ? other_register : defaultValue );
+    //conditional jump, the risult is slp or jmp depending on the bit 0 of SR
+    wire [wordsize-1:0] jif_out = ( instruction == `inst_jif ? (status_register[0] : other_register : working_register) : defaultValue );
     //the real value
-    wire [wordsize-1:0] out_nocmp = add_out | sub_out | and_out | or_out | xor_out | not_out | lsl_out | lsr_out | raw_out | set_out | read_out;
-    wire [3:0] out_reg_nocmp = ( opperand == `opp_cpy ? instruction[3:0] : 4'h0 );
+    wire [wordsize-1:0] out_nocmp = add_out | sub_out | and_out | or_out | xor_out | not_out | lsl_out | lsr_out | raw_out | set_out | oth_out | jif_out;
+    wire [3:0] out_reg_nocmp = ( opperand == `opp_cpy 
+                                    ? instruction[3:0] 
+                                    : ( (instruction == `inst_jif && status_register[0]) || instruction == `inst_jmp
+                                        ? `pc_id
+                                        : 4'h0 ));
 
 
     //comparaisons
