@@ -22,5 +22,5 @@ ram_size 100
 ```
 
 ## IO
-To test your programs, the simulator is able to do basic IO. To print a character, write it at address 0x1 and then write 0 at address 0x0. To get an input char, write 0 at address 0x2. The input char will be written at address 0x3.
+To test your programs, the simulator can do basic IO. To print a character, write it at address 0x1 and then write 0 at address 0x0. To get an input char, write 0 at address 0x2. The input char will be written at address 0x3.
 

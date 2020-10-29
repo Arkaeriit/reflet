@@ -2,7 +2,7 @@
 A RISC ISA.
 
 # This repository
-This repository contains a simulator for an ASRM processor (WIP), an assembler to create ASRM machine code (to do), and a Verilog implementation of an ASRM processor (to do).
+This repository contains a simulator for an ASRM processor (mostly done), an assembler to create ASRM machine code (WIP), and a Verilog implementation of an ASRM processor (WIP).
 
 # The architecture
 ASRM is a RISC ISA. Each instruction is coded on a single byte and composed of a 4 or 5-bit operand, followed by an optional 4-bit register. This ISA can be used with a processor with words of any size superior which is 8 bits times a power of two. When the processor has a word size above 8 bits, it is little-endian.
