@@ -55,7 +55,7 @@ module asrm_addr#(
     reg [127:0] data_buff; //Register to store the value we fetched
     wire [127:0] data_in_wide = data_in;
     wire returning_value = instruction == `inst_pop || instruction == `inst_ret || opperand == `opp_load;
-    wire [wordsize-1:0] data_out_out = ( returning_value ? data_buff[wordsize-1:0] : 0 ); //When we want to use walue read from ram
+    wire [wordsize-1:0] data_out_out = ( returning_value ? ( instruction == `inst_ret ? data_buff[wordsize-1:0] + 1 : data_buff[wordsize-1:0]) : 0 ); //When we want to use walue read from ram. Note, when returning from a function, we need to go after what we put in the stack in order not to be trapped in an infinite loop
     wire [wordsize-1:0] wr_out = ( instruction == `inst_push || instruction == `inst_call || opperand == `opp_str ? workingRegister : 0 ); //when we don't need to update any register we will simply put the content of the working register into itself
     assign out = wr_out | data_out_out;
     always @ (posedge clk)
@@ -87,7 +87,7 @@ module asrm_addr#(
             end
 
     //register to update
-    assign out_reg = 0; //All the instructions handeled by this module are going to edit the working register
+    assign out_reg = ( instruction == `inst_ret || instruction == `inst_call ? `pc_id : 0 ); 
 
     //write enable
     assign write_en = (instruction == `inst_push || instruction == `inst_call || opperand == `opp_str) & !fetching_instruction;

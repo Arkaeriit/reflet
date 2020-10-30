@@ -29,16 +29,14 @@ module asrm_alu
     wire [wordsize-1:0] not_out = ( opperand == `opp_not ? ~other_register : defaultValue );
     wire [wordsize-1:0] lsl_out = ( opperand == `opp_lsl ? working_register << other_register : defaultValue );
     wire [wordsize-1:0] lsr_out = ( opperand == `opp_lsr ? working_register >> other_register : defaultValue );
-    //sleep and cpy, we want to use the raw working register value
-    wire [wordsize-1:0] raw_out = ( instruction == `inst_slp || opperand == `opp_cpy ? working_register : defaultValue );
-    //set, we put the end of the instruction in wr
+    //sleep, jmp, jif and cpy, we want to use the raw working register value. In the case of jif, when the condition is not met, the register selection will take care of the logic.
+    wire [wordsize-1:0] raw_out = ( instruction == `inst_slp || opperand == `opp_cpy || instruction == `inst_jif || instruction == `inst_jmp ? working_register : defaultValue );
+    //set, jmp and jif we put the end of the instruction in wr. 
     wire [wordsize-1:0] set_out = ( opperand == `opp_set ? instruction[3:0] : defaultValue );
-    //read and jump, we put the raw value of the other register
-    wire [wordsize-1:0] oth_out = ( opperand == `opp_read || instruction == `inst_jmp ? other_register : defaultValue );
-    //conditional jump, the risult is slp or jmp depending on the bit 0 of SR
-    wire [wordsize-1:0] jif_out = ( instruction == `inst_jif ? (status_register[0] : other_register : working_register) : defaultValue );
+    //read, we put the raw value of the other register
+    wire [wordsize-1:0] oth_out = ( opperand == `opp_read ? other_register : defaultValue );
     //the real value
-    wire [wordsize-1:0] out_nocmp = add_out | sub_out | and_out | or_out | xor_out | not_out | lsl_out | lsr_out | raw_out | set_out | oth_out | jif_out;
+    wire [wordsize-1:0] out_nocmp = add_out | sub_out | and_out | or_out | xor_out | not_out | lsl_out | lsr_out | raw_out | set_out | oth_out;
     wire [3:0] out_reg_nocmp = ( opperand == `opp_cpy 
                                     ? instruction[3:0] 
                                     : ( (instruction == `inst_jif && status_register[0]) || instruction == `inst_jmp

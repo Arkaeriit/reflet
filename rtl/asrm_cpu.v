@@ -86,7 +86,17 @@ module asrm_cpu#(
                     registers[`sp_id] = registers[`sp_id] - 1;
                     registers[index] = content;
                 end
+                `inst_ret :
+                begin
+                    registers[`sp_id] = registers[`sp_id] - 1;
+                    registers[index] = content;
+                end
                 `inst_push : registers[`sp_id] = registers[`sp_id] + 1;
+                `inst_call : 
+                begin
+                    registers[`sp_id] = registers[`sp_id] + 1;
+                    registers[index] = content;
+                end
                 default : registers[index] = content;
             endcase
             if(index != `pc_id) //When changing the pc, no need to increment it
