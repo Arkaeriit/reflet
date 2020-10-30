@@ -39,7 +39,8 @@ module asrm_addr#(
 
 
     //addr selection
-    wire [wordsize-1:0] addr_pop = ( instruction == `inst_pop || instruction == `inst_ret ? stackPointer - 1 : 0 ); //We need the -1 because the CPU updated the stack pointer
+    wire [4:0] pop_offset;
+    wire [wordsize-1:0] addr_pop = ( instruction == `inst_pop || instruction == `inst_ret ? stackPointer - pop_offset : 0 ); //We need the -1 because the CPU updated the stack pointer
     wire [wordsize-1:0] addr_push = ( instruction == `inst_push || instruction == `inst_call ? stackPointer : 0 );
     wire [wordsize-1:0] addr_reg = ( opperand == `opp_str || opperand == `opp_load ? otherRegister : 0 );
     assign addr = ( !fetching_instruction ? addr_reg | addr_pop | addr_push : programCounter); //The defaut behaviour is to seek the address of the next piece of code
@@ -47,50 +48,33 @@ module asrm_addr#(
     //selecting the data to send
     wire [wordsize-1:0] data_wr = ( instruction == `inst_push || opperand == `opp_str ? workingRegister : 0 );
     wire [wordsize-1:0] data_pc = ( instruction == `inst_call ? programCounter : 0 );
-    assign data_out = data_wr | data_pc;
+    wire [wordsize-1:0] data_out_cpu = data_wr | data_pc;
 
     //data to send to the cpu
-    wire [1:0] reduced_behavior_bits = statusRegister[2:1];
-    wire reduced_behavior = (reduced_behavior_bits != 2'b00) && ( (reduced_behavior_bits == 2'b01 && wordsize > 32) || (reduced_behavior_bits == 2'b10 && wordsize > 16) || (reduced_behavior_bits == 2'b11 && wordsize > 8) );
-    reg [127:0] data_buff; //Register to store the value we fetched
-    wire [127:0] data_in_wide = data_in;
+    wire [wordsize-1:0] data_in_cpu;
     wire returning_value = instruction == `inst_pop || instruction == `inst_ret || opperand == `opp_load;
-    wire [wordsize-1:0] data_out_out = ( returning_value ? ( instruction == `inst_ret ? data_buff[wordsize-1:0] + 1 : data_buff[wordsize-1:0]) : 0 ); //When we want to use walue read from ram. Note, when returning from a function, we need to go after what we put in the stack in order not to be trapped in an infinite loop
+    wire [wordsize-1:0] data_out_out = ( returning_value ? (instruction == `inst_ret ? data_in_cpu + 1 : data_in_cpu) : 0 ); //When we want to use walue read from ram. Note, when returning from a function, we need to go after what we put in the stack in order not to be trapped in an infinite loop
     wire [wordsize-1:0] wr_out = ( instruction == `inst_push || instruction == `inst_call || opperand == `opp_str ? workingRegister : 0 ); //when we don't need to update any register we will simply put the content of the working register into itself
     assign out = wr_out | data_out_out;
-    always @ (posedge clk)
-        if(!reset)
-            data_buff = 0;
-        else
-            if(returning_value & ! fetching_instruction)
-            begin
-                if(reduced_behavior)
-                    case(reduced_behavior_bits)
-                        2'b01 : 
-                        begin
-                            data_buff[31:0] = data_in_wide[31:0];
-                            data_buff[127:32] = 0;
-                        end
-                        2'b01 : 
-                        begin
-                            data_buff[15:0] = data_in_wide[15:0];
-                            data_buff[127:16] = 0;
-                        end
-                        2'b01 : 
-                        begin
-                            data_buff[7:0] = data_in_wide[7:0];
-                            data_buff[127:8] = 0;
-                        end
-                    endcase
-                else //normal behavior
-                    data_buff[wordsize-1:0] = data_in_wide;
-            end
 
     //register to update
     assign out_reg = ( instruction == `inst_ret || instruction == `inst_call ? `pc_id : 0 ); 
 
     //write enable
-    assign write_en = (instruction == `inst_push || instruction == `inst_call || opperand == `opp_str) & !fetching_instruction;
+    assign write_en = (instruction == `inst_push || instruction == `inst_call || opperand == `opp_str) & !fetching_instruction & !(|ram_not_ready);
+    
+    //handeling reduced behavior
+    asrm_addr_reduced_behavior #(wordsize) reduced_behavior(
+        clk,
+        reset,
+        fetching_instruction,
+        instruction,
+        statusRegister,
+        pop_offset,
+        data_in,
+        data_out,
+        data_out_cpu,
+        data_in_cpu);
 
     //Changing the not_ready register to let the CPU<->RAM commuticatio to occur
     always @ (posedge clk)

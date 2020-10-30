@@ -74,6 +74,18 @@ module asrm_cpu#(
         content_addr,
         index_addr,
         ram_not_ready);
+
+    //computing how much the stack pointer should evolve when using it
+    integer default_increase = wordsize/8; //Progression when handling addressis or with no reduced behavious
+    integer increase11 = 1; //A separate value for each conbinaison of reduced behaviour
+    wire [7:0] increase01 = ( wordsize > 32 ? 4 : default_increase );
+    wire [7:0] increase10 = ( wordsize > 16 ? 2 : default_increase );
+    wire [1:0] reduced_behavior = registers[`sr_id][2:1];
+    wire [7:0] increase_data = ( reduced_behavior == 2'b00 ? default_increase :
+                                    ( reduced_behavior == 2'b01 ? increase01 :
+                                        ( reduced_behavior == 2'b10 ? increase10 :
+                                            increase11)));
+
     
     //updating reegisters
     always @ (posedge clk)
@@ -83,18 +95,18 @@ module asrm_cpu#(
                 `inst_quit : quit = 1;
                 `inst_pop :
                 begin
-                    registers[`sp_id] = registers[`sp_id] - 1;
+                    registers[`sp_id] = registers[`sp_id] - increase_data;
                     registers[index] = content;
                 end
                 `inst_ret :
                 begin
-                    registers[`sp_id] = registers[`sp_id] - 1;
+                    registers[`sp_id] = registers[`sp_id] - default_increase;
                     registers[index] = content;
                 end
-                `inst_push : registers[`sp_id] = registers[`sp_id] + 1;
+                `inst_push : registers[`sp_id] = registers[`sp_id] + increase_data;
                 `inst_call : 
                 begin
-                    registers[`sp_id] = registers[`sp_id] + 1;
+                    registers[`sp_id] = registers[`sp_id] + default_increase;
                     registers[index] = content;
                 end
                 default : registers[index] = content;
