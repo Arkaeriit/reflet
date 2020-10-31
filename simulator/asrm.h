@@ -17,6 +17,10 @@ struct asrm_config {
     word_t word_size_byte;
     word_t word_mask;
     word_t ram_size;
+    word_t tx_cmd;
+    word_t tx_data;
+    word_t rx_cmd;
+    word_t rx_data;
 };
 
 struct asrm_debug {

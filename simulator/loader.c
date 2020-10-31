@@ -45,6 +45,11 @@ bool load_file(const char* filename, asrm* vm){
             return false;
         }
     }
+    //Checking that the io cmd address are not empty to prevent unwanted io
+    if(!vm->ram[vm->config->tx_cmd])
+        vm->ram[vm->config->tx_cmd] = 1;
+    if(!vm->ram[vm->config->rx_cmd])
+        vm->ram[vm->config->rx_cmd] = 1;
     return true;
 }
 

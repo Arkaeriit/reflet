@@ -27,6 +27,10 @@ asrm* asrm_init(){
     conf->word_size_byte = WORD_SIZE_BYTE;
     conf->word_mask = WORD_MASK;
     conf->ram_size = RAM_SIZE;
+    conf->tx_cmd = TX_CMD;
+    conf->tx_data = TX_DATA;
+    conf->rx_cmd = RX_CMD;
+    conf->rx_data = RX_DATA;
     ret->config = conf;
     //default debug
     struct asrm_debug* debug = malloc(sizeof(struct asrm_debug));
@@ -240,13 +244,13 @@ static void putRAMWord(asrm* vm, word_t addr, word_t content, bool stack_b){
  * If the address 2 in ram is 0, a char is read and put in address 3.
  */
 static void io(asrm* vm){
-    if(!vm->ram[0]){
-        printf("%c",vm->ram[1]);
-        vm->ram[0] = 'A';
+    if(!vm->ram[vm->config->tx_cmd]){
+        printf("%c",vm->ram[vm->config->tx_data]);
+        vm->ram[vm->config->tx_cmd] = 'A';
     }
-    if(!vm->ram[2]){
-        vm->ram[3] = getchar();
-        vm->ram[2] = 'R';
+    if(!vm->ram[vm->config->rx_cmd]){
+        vm->ram[vm->config->rx_data] = getchar();
+        vm->ram[vm->config->rx_cmd] = 'R';
     }
 }
 

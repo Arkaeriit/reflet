@@ -16,6 +16,10 @@ typedef uint64_t word_t; //Type used in the simulator
 #define WORD_P PRIu64
 #define RAM_SIZE 255
 typedef uint8_t ram_word_t;
+#define TX_CMD 0
+#define TX_DATA 1
+#define RX_CMD 2
+#define RX_DATA 3
 
 //Mgic word settings, unchangeable
 #define NO_MAGIC_WORD_CHECKING 0

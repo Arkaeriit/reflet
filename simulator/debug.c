@@ -104,7 +104,7 @@ static char* dataAboutInstruction(asrm* vm){
             sprintf(ret, "LES: comparing working register (%lu) and register %i (%lu)", WR(vm), reg, vm->reg[reg]);
             break;
         case STR:
-            sprintf(ret, "STR: storing register %lu at address in register %i (0x%lx)",WR(vm), vm->reg[reg], reg);
+            sprintf(ret, "STR: storing register %lu at address in register %i (0x%lx)",WR(vm), reg, vm->reg[reg]);
             break;
         case LOAD:
             sprintf(ret, "LOAD: puting the content of address %lx in register %i", WR(vm), reg);

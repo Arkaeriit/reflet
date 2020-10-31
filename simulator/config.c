@@ -61,6 +61,14 @@ void applyConfig(asrm* vm, const char* configFile){
                         vm->config->word_size = configValue;
                     }else if(!strcmp(resultBuff[0], "ram_size")){
                         vm->config->ram_size = configValue;
+                    }else if(!strcmp(resultBuff[0], "tx_cmd")){
+                        vm->config->tx_cmd = configValue;
+                    }else if(!strcmp(resultBuff[0], "tx_data")){
+                        vm->config->tx_data = configValue;
+                    }else if(!strcmp(resultBuff[0], "rx_cmd")){
+                        vm->config->rx_cmd = configValue;
+                    }else if(!strcmp(resultBuff[0], "rx_data")){
+                        vm->config->rx_data = configValue;
                     }else{
                         fprintf(stdout, "Error line %i of the config file, unknow parameter.\n", lineNumber);
                         exit(RET_CONFIG);
