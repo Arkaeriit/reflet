@@ -1,3 +1,14 @@
+# ASRM assembler
+
+An assembler to create ASRM machine code.
+
+This folder contains two programs, **asrmpasm** which is a very bare-bone assembler written in C, and **asrmmasm** which is a richer assembler written mostly in Lua.
+
+Both assemblers are case-insensitive for mnemonic but case-sensitive for anything else.
+
+## ASRMPASM
+This is a pico-assembler. It can only assemble basic instruction as described in the main README.md. It would be very tedious to use it but you have total control over what instructions will be created.
+
 ## ASRMMASM
 This is a macro-assembler. Not only can it assemble basic instructions but it can also assemble macro-instruction and manage labels. When using macro-instructions, the registers R11 and R12 might be used as temporary registers and overwritten. Furthermore, unless specified otherwise, the working registry will be modified.
 

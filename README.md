@@ -2,7 +2,7 @@
 A RISC ISA.
 
 # This repository
-This repository contains a simulator for an ASRM processor (mostly done), an assembler to create ASRM machine code (WIP), and a Verilog implementation of an ASRM processor (WIP).
+This repository contains a simulator for an ASRM processor, an assembler to create ASRM machine code, and a Verilog implementation of an ASRM processor.
 
 # The architecture
 ASRM is a RISC ISA. Each instruction is coded on a single byte and composed of a 4 or 5-bit operand, followed by an optional 4-bit register. This ISA can be used with a processor with words of any size superior which is 8 bits times a power of two. When the processor has a word size above 8 bits, it is little-endian.
@@ -50,8 +50,8 @@ Here is a list of the instruction of an ASRM processor.
 | jmp | 0x08 | Nothing | Jump to the address in the working register, does not affect the stack. |
 | jif | 0x09 | Nothing | Jump to the address in the working register if the comparison register is not equal to 0, does not affect the stack |
 | pop | 0x0A | Nothing | Put the content of the working register on the stack and updates the stack pointer. |
-| push | 0x0B | Nothing | Put the value on top of the stack in the working register and updates the stack pointer.
-| call | 0x0C | Nothing | Put the current address in the stack and jump to the address in the working register. | 
+| push | 0x0B | Nothing | Put the value on top of the stack in the working register and updates the stack pointer. |
+| call | 0xC | Nothing | Put the current address in the stack and jump to the address in the working register. | 
 | ret | 0x0D | Nothing | Jump to the address just after the address on top of the stack. |
 | quit | 0x0E | Nothing | Reset the processor or stop it. |
 
