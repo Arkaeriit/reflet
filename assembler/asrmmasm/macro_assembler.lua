@@ -162,7 +162,7 @@ macro_assembler = function(arg)
         local frstLine = f:read():splitLine() --checking for word size
         local wordsize = 2
         if #frstLine == 2 and math.tointeger(frstLine[2]) and tonumber(frstLine[2]) > 0 and frstLine[1] == "wordsize" and math.tointeger(math.tointeger(frstLine[2]/8)) then
-            wordsize = math.tointeger(frstLine[2])/8
+            wordsize = math.tointeger(frstLine[2])/8 --wordsize in cunted in byte in all the files here but enterd in bits in the source file
             if wordsize ~= 1 and wordsize ~= 2 and wordsize ~= 4 and wordsize ~= 8 then
                 io.stderr:write("Warning: non standart word size.\n")
             end
