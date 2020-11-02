@@ -66,7 +66,7 @@ setValue = function(value, wordsize)
         local currentNibble = (value >> (4 * (sizeInNimbles -i))) --the currrent nibble, starting at the end
         currentNibble = currentNibble & 15
         str = str.."set "..tostring(currentNibble).."\nor R11\n"
-        if i ~= wordsize*2 then 
+        if i ~= sizeInNimbles then 
             str = str.."lsl R12\ncpy R11\n"
         end
     end
