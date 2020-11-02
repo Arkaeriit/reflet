@@ -35,11 +35,14 @@ module ram16
                 memory_ram[addr] = data_in[7:0];
                 memory_ram[addr+1] = data_in[15:8];
             end
-            data_out[15:8] = memory_ram[addr+1];
-            data_out[7:0] = memory_ram[addr];
-
+            if(output_en)
+            begin
+                data_out[15:8] = memory_ram[addr+1];
+                data_out[7:0] = memory_ram[addr];
+            end
+            else
+                data_out = 0;
         end
-        
 
 endmodule
 

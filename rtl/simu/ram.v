@@ -31,10 +31,11 @@ module ram
         begin
             if(write_rq)
                 memory_ram[addr] = data_in;
-            data_out = memory_ram[addr];
-
+            if(output_en)
+                data_out = memory_ram[addr];
+            else 
+                data_out = 0;
         end
         
-
 endmodule
 
