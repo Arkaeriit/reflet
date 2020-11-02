@@ -39,7 +39,7 @@ module asrm_addr#(
 
 
     //addr selection
-    wire [4:0] pop_offset;
+    wire [5:0] pop_offset;
     wire [wordsize-1:0] addr_pop = ( instruction == `inst_pop || instruction == `inst_ret ? stackPointer - pop_offset : 0 ); //We need the -1 because the CPU updated the stack pointer
     wire [wordsize-1:0] addr_push = ( instruction == `inst_push || instruction == `inst_call ? stackPointer : 0 );
     wire [wordsize-1:0] addr_reg = ( opperand == `opp_str || opperand == `opp_load ? otherRegister : 0 );
