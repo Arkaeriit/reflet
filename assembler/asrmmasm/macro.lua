@@ -13,7 +13,7 @@ end
 -- define the mov macro
 local mov = function(tabInst)
     local str = "push\nread "..tabInst[3].."\ncpy "..tabInst[2].."\npop\n"
-    return createElem(str, 6, INST_MACRO)
+    return createElem(str, 4, INST_MACRO)
 end
 
 -- define the setr macro
@@ -71,6 +71,20 @@ local data = function(str)
     return createElem(ret, endStr-startStr-1, INST_MACRO)
 end
 
+--define the pushr macro
+local pushr = function(tabInst)
+    local reg = tabInst[2]
+    local str = "read "..reg.."\npush\n"
+    return createElem(str, 2, INST_MACRO)
+end
+
+--define the popr macro
+local popr = function(tabInst)
+    local reg = tabInst[2]
+    local str = "pop\ncpy "..reg.."\n"
+    return createElem(str, 2, INST_MACRO)
+end
+
 
 ----- interface function -----
 
@@ -79,10 +93,18 @@ expandMacro = function(str, wordsize)
     local mnemonic = tabInst[1]:lower()
     if mnemonic == "set+" then
         return setp(math.tointeger(tabInst[2]), wordsize)
+    elseif mnemonic == "mov" then
+        return mov(tabInst)
+    elseif mnemonic == "setr" then
+        return setr(tabInst)
     elseif mnemonic == "rawbytes" then
         return rawbytes(tabInst)
     elseif mnemonic == "data" then
         return data(str)
+    elseif mnemonic == "pushr" then
+        return pushr(tabInst)
+    elseif mnemonic == "popr" then
+        return popr(tabInst)
     end
 end
 

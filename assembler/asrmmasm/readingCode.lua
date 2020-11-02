@@ -59,6 +59,12 @@ local isMacro = function(tabInst)
         else
             return INST_ERR
         end
+    elseif mnemonic == "pushr" or mnemonic == "popr" then
+        if #tabInst == 2 and isreg(tabInst[2]) then
+            return INST_MACRO
+        else
+            return INST_ERR
+        end
     elseif mnemonic == "data" or mnemonic == "rawbytes" then
         if #tabInst >= 2 then
             return INST_MACRO
