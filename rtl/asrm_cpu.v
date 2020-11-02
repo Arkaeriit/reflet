@@ -89,7 +89,7 @@ module asrm_cpu#(
     
     //updating reegisters
     always @ (posedge clk)
-        if(reset & !ram_not_ready) //The reset behavious is handeled above
+        if(reset & !ram_not_ready & !quit) //The reset behavious is handeled above
         begin
             case(instruction)
                 `inst_quit : quit = 1;
