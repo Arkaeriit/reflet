@@ -27,6 +27,7 @@ math.log2 = function(num)
 end
 
 --Takes a string and put each word before a ; in a separate place in a table
+--copies the content of the string in a field named "raw"
 string.splitLine = function(str)
     local ret = {}
     local strpnt = 1
@@ -47,6 +48,7 @@ string.splitLine = function(str)
         end
         strpnt = strpnt + 1
     end
+    ret.raw = str
     return ret
 end
 
@@ -60,7 +62,8 @@ setValue = function(value, wordsize)
     if value > 2^(wordsize*8) then
         return nil
     end
-    local sizeInNimbles = math.ceil(math.ceil(math.log2(value))/4)
+    --local sizeInNimbles = math.ceil(math.ceil(math.log2(value))/4)
+    local sizeInNimbles = wordsize*2 --ignoring optimisations
     local str = "set 4\ncpy R12\nset 0\ncpy R11\n"
     for i=1,sizeInNimbles do
         local currentNibble = (value >> (4 * (sizeInNimbles -i))) --the currrent nibble, starting at the end

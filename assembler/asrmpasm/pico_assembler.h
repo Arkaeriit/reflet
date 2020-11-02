@@ -69,5 +69,7 @@ void mini_assembleFile(const char* fileIn, const char* fileOut);
 #define mnRET(mn) !(strcmp(mn, "RET") && strcmp(mn, "ret"))
 #define mnQUIT(mn) !(strcmp(mn, "QUIT") && strcmp(mn, "quit"))
 
+#define macroRAWBYTE(mn) !(strcmp(mn, "RAWBYTE") && strcmp(mn, "rawbyte"))
+
 #endif
 

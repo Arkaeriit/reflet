@@ -25,6 +25,13 @@ local isBasic = function(tabInst)
             return INST_ERR
         end
     end
+    if mnemonic == "rawbyte" then
+        if #tabInst == 2 and math.tointeger(tabInst[2]) and math.tointeger(tabInst[2]) <= 255 and math.tointeger(tabInst[2]) >= 0 then
+            return INST_BAS
+        else
+            return INST_ERR
+        end
+    end
     if mnemonic == "set" then
         if #tabInst == 2 and validNum(tabInst[2]) then
             return INST_BAS
@@ -48,6 +55,12 @@ local isMacro = function(tabInst)
     mnemonic = tabInst[1]:lower()
     if mnemonic == "set+" then
         if #tabInst == 2 and math.tointeger(tabInst[2]) and tonumber(tabInst[2]) >= 0 then
+            return INST_MACRO
+        else
+            return INST_ERR
+        end
+    elseif mnemonic == "data" or mnemonic == "rawbytes" then
+        if #tabInst >= 2 then
             return INST_MACRO
         else
             return INST_ERR

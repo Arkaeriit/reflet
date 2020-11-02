@@ -116,6 +116,13 @@ static enum processLine_return processLine(const char* line, uint8_t* ret){
             *ret = RET;
         }else if(mnQUIT(toPrePross[0])){
             *ret = QUIT;
+        }else if(macroRAWBYTE(toPrePross[0])){
+            int byte = atoi(toPrePross[1]);
+            if( (uint8_t) byte != byte){
+                fprintf(stderr, "Error, value after rawbyte is more than a byte.\n");
+                preProssRes = ERROR;
+            }
+            *ret = (uint8_t) byte;
         }else{
             fprintf(stderr, "Error, unknown instruction.\n");
             preProssRes = ERROR; //instruction undetermined

@@ -27,6 +27,51 @@ local setr = function(tabInst, wordsize)
     return createElem(str, setsize(wordsize) + 3, INST_MACRO)
 end
 
+--definite the rawbytes macro
+local rawbytes = function(tabInst)
+    local str = ""
+    for i=2,#tabInst do
+        if not math.tointeger(tabInst[i]) or math.tointeger(tabInst[i]) >= 255 then
+            print(math.tointeger(tabInst[i]), math.tointeger(tabInst[i] >= 255))
+            io.stderr:write(tabInst[i], " is not a valid byte\n")
+            return nil
+        end
+        str = str.."rawbyte "..tabInst[i].."\n"
+    end
+    return createElem(str, #tabInst-1, INST_MACRO)
+end
+
+--define the data macro
+local data = function(str)
+    local startStr = 0;
+    local endStr = 0;
+    for i=1,#str do
+        if str:sub(i,i) == '"' then
+            if startStr == 0 then
+                startStr = i
+            else
+                if endStr == 0 then
+                    endStr = i
+                else
+                    io.stderr:write("Error, malformed string in macro data\n")
+                    return nil
+                end
+            end
+        end
+    end
+    if endStr == 0 then
+        io.stderr:write("Error, malformed string in macro data\n")
+        return nil
+    end
+    local ret = ""
+    for i=startStr+1,endStr-1 do
+        local char = str:byte(i)
+        ret = ret.."rawbyte "..tostring(char).."\n"
+    end
+    return createElem(ret, endStr-startStr-1, INST_MACRO)
+end
+
+
 ----- interface function -----
 
 expandMacro = function(str, wordsize)
@@ -34,6 +79,10 @@ expandMacro = function(str, wordsize)
     local mnemonic = tabInst[1]:lower()
     if mnemonic == "set+" then
         return setp(math.tointeger(tabInst[2]), wordsize)
+    elseif mnemonic == "rawbytes" then
+        return rawbytes(tabInst)
+    elseif mnemonic == "data" then
+        return data(str)
     end
 end
 
