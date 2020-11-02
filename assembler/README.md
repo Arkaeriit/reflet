@@ -23,6 +23,8 @@ Macro instructions let you combine multiples instructions in one line to make yo
 | set+ | A number | Put the argument number in the working register. The number can be as big as a register can hold. |
 | mov | two registers | Copies the content of the second register into the first. Preserves the working register. |
 | setr | a register and a number | Set the value of the given register to the given number. Preserves the working register. |
+| pushr | a register | push the content of the register on the stack. |
+| popr | a register | pop the top of the stack into the given register. |
 
 ### Labels
 Labels can be used to jump to various parts of the program without having to calculate the address of the target instructions.
