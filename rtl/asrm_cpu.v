@@ -50,30 +50,33 @@ module asrm_cpu#(
     wire [3:0] opperand = instruction[7:4];
     wire [3:0] argument_id = instruction[3:0];
 
-    asrm_alu #(wordsize) alu(
-        registers[`wr_id],
-        registers[argument_id],
-        registers[`sr_id],
-        instruction,
-        content_alu,
-        index_alu);
+    asrm_alu #(.wordsize(wordsize)) alu(
+        .working_register(registers[`wr_id]),
+        .other_register(registers[argument_id]),
+        .status_register(registers[`sr_id]),
+        .instruction(instruction),
+        .out(content_alu),
+        .out_reg(index_alu));
 
-    asrm_addr #(wordsize) ram_interface(
-        clk,
-        reset,
-        registers[`wr_id],
-        registers[`pc_id],
-        registers[`sp_id],
-        registers[argument_id],
-        registers[`sr_id],
-        instruction,
-        addr,
-        data_out,
-        data_in,
-        write_en,
-        content_addr,
-        index_addr,
-        ram_not_ready);
+    asrm_addr #(.wordsize(wordsize)) ram_interface(
+        .clk(clk),
+        .reset(reset),
+        //instruction from the CPU
+        .workingRegister(registers[`wr_id]),
+        .programCounter(registers[`pc_id]),
+        .stackPointer(registers[`sp_id]),
+        .otherRegister(registers[argument_id]),
+        .statusRegister(registers[`sr_id]),
+        .instruction(instruction),
+        //System bus
+        .addr(addr),
+        .data_out(data_out),
+        .data_in(data_in),
+        .write_en(write_en),
+        //Out to the CPU
+        .out(content_addr),
+        .out_reg(index_addr),
+        .ram_not_ready(ram_not_ready));
 
     //computing how much the stack pointer should evolve when using it
     integer default_increase = wordsize/8; //Progression when handling addressis or with no reduced behavious

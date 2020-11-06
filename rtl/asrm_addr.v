@@ -64,17 +64,17 @@ module asrm_addr#(
     assign write_en = (instruction == `inst_push || instruction == `inst_call || opperand == `opp_str) & !fetching_instruction & !(|ram_not_ready);
     
     //handeling reduced behavior
-    asrm_addr_reduced_behavior #(wordsize) reduced_behavior(
-        clk,
-        reset,
-        fetching_instruction,
-        instruction,
-        statusRegister,
-        pop_offset,
-        data_in,
-        data_out,
-        data_out_cpu,
-        data_in_cpu);
+    asrm_addr_reduced_behavior #(.wordsize(wordsize)) reduced_behavior(
+        .clk(clk),
+        .reset(reset),
+        .fetching_instruction(fetching_instruction),
+        .instruction(instruction),
+        .statusRegister(statusRegister),
+        .pop_offset(pop_offset),
+        .data_in(data_in),
+        .data_out(data_out),
+        .data_out_cpu(data_out_cpu),
+        .data_in_cpu(data_in_cpu));
 
     //Changing the not_ready register to let the CPU<->RAM commuticatio to occur
     always @ (posedge clk)
