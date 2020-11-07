@@ -22,6 +22,9 @@ module asrm_interrupt#(
     //Instructions handeling
     wire setint_opp = instruction[7:2];
     wire [wordsize-1:0] out_setint = ( setint_opp == `opp_setint ? working_register : 0 ); //When doing a setint, we do not want to change any registers so we do the same thing as for slp
-    wire out_retint = ( instruction == `inst_retint ? /*TODO*/ : 0 );
+    wire out_retint = ( instruction == `inst_retint ? 0/*TODO*/ : 0 );
     assign out = out_setint | out_retint;
     assign out_reg = ( instruction == `inst_retint ? `pc_id : 0 );
+
+endmodule
+

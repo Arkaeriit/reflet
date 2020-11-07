@@ -16,13 +16,13 @@ module asrm_stack #(
     );
 
     reg [wordsize-1:0] data [depth-1:0];
-    reg [depth-1:0] index; //point to the index of out
-    assign out = data[index];
+    reg [depth-1:0] index; //point to the next updated element of data
+    assign out = data[index-1];
 
     always @ (posedge clk)
         if(!reset)
         begin
-            index = ~0;
+            index = 0;
             for(integer i=0; i<depth; i=i+1)
                 data[i] = 0;
         end
@@ -30,7 +30,7 @@ module asrm_stack #(
         begin
             if(push)
             begin
-                data[index+1] = in;
+                data[index] = in;
                 index = index + 1;
             end
             else
