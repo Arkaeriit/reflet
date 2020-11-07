@@ -1,5 +1,4 @@
 
-
 module simu1();
 
     reg clk = 0;
@@ -12,9 +11,16 @@ module simu1();
     wire write_en;
     wire quit;
     
-    asrm_cpu #(8) cpu(clk, reset, quit, dIn, addr, dOut, write_en);
+    asrm_cpu #(.wordsize(8)) cpu(
+        .clk(clk), 
+        .reset(reset), 
+        .quit(quit), 
+        .data_in(dIn), 
+        .addr(addr), 
+        .data_out(dOut), 
+        .write_en(write_en));
 
-    rom1 rom1(clk, addr[3:0], dIn);
+    rom1 rom1(.clk(clk), .addr(addr[3:0]), .out(dIn));
 
     initial
     begin

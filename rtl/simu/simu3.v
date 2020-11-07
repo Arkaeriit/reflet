@@ -12,14 +12,32 @@ module simu3();
     wire quit;
     
     
-    asrm_cpu #(16) cpu(clk, reset, quit, dIn, addr, dOut, write_en);
+    asrm_cpu #(.wordsize(16)) cpu(
+        .clk(clk), 
+        .reset(reset), 
+        .quit(quit), 
+        .data_in(dIn), 
+        .addr(addr), 
+        .data_out(dOut), 
+        .write_en(write_en));
 
     //The rom got the addresses between 0x00 and 0x7F
     wire [7:0] dataRom;
-    rom3 rom3(clk, !addr[15], addr[7:0], dataRom);
+    rom3 rom3(
+        .clk(clk), 
+        .enable_out(!addr[15]), 
+        .addr(addr[7:0]), 
+        .dataOut(dataRom));
     //The ram got the addresses between 0x80 and 0xFF
     wire [15:0] dataRam;
-    ram16 #(15) ram(clk, reset, addr[15], addr[14:0], dOut, write_en, dataRam);
+    ram16 #(.addrSize(15)) ram(
+        .clk(clk), 
+        .reset(reset), 
+        .output_en(addr[15]), 
+        .addr(addr[14:0]), 
+        .data_in(dOut), 
+        .write_rq(write_en), 
+        .data_out(dataRam));
 
     assign dIn = dataRam | {8'h0, dataRom};
 
