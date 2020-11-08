@@ -26,9 +26,10 @@ module asrm_interrupt#(
     wire [3:0] int_masked = ext_int & int_mask;
 
     //Instructions handeling
+    wire [wordsize-1:0] prev_counter; //Addr for returning from interrupts
     wire setint_opp = instruction[7:2];
     wire [wordsize-1:0] out_setint = ( setint_opp == `opp_setint ? working_register : 0 ); //When doing a setint, we do not want to change any registers so we do the same thing as for slp
-    wire out_retint = ( instruction == `inst_retint ? 0/*TODO*/ : 0 );
+    wire out_retint = ( instruction == `inst_retint ? prev_counter : 0 );
     assign out = out_setint | out_retint;
     assign out_reg = ( instruction == `inst_retint ? `pc_id : 0 );
 
@@ -65,7 +66,6 @@ module asrm_interrupt#(
                 routines[arg] = working_register;
     
     //Storing the program counter and the level of interrupts
-    wire [wordsize-1:0] prev_counter;
     asrm_stack #(.wordsize(wordsize), .depth(4)) stack_counter(
         .clk(clk),
         .reset(reset),
@@ -83,7 +83,7 @@ module asrm_interrupt#(
 
     //Telling the CPU about a new instruction
     assign int = new_int | quit_int;
-    assign out_routine = (new_int ? routines[target_level] : prev_counter); 
+    assign out_routine = routines[target_level]; 
 
 endmodule
 

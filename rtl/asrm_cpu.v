@@ -16,7 +16,9 @@ module asrm_cpu#(
     input [wordsize-1:0] data_in,
     output [wordsize-1:0] addr,
     output [wordsize-1:0] data_out,
-    output write_en
+    output write_en,
+    //Other connections
+    input [3:0] ext_int
     );
 
    reg [wordsize-1:0] registers [15:0]; //The registers 
@@ -37,18 +39,22 @@ module asrm_cpu#(
     //register to change index
     wire [3:0] index_addr;
     wire [3:0] index_alu;
-    wire [3:0] index = index_addr | index_alu;
+    wire [3:0] index_int;
+    wire [3:0] index = index_addr | index_alu | index_int;
 
     //Content of the register to change
     wire [wordsize-1:0] content_addr;
     wire [wordsize-1:0] content_alu;
-    wire [wordsize-1:0] content = content_alu | content_addr;
+    wire [wordsize-1:0] content_int;
+    wire [wordsize-1:0] content = content_alu | content_addr | content_int;
 
     //submodules
     wire ram_not_ready;
     wire [7:0] instruction;
     wire [3:0] opperand = instruction[7:4];
     wire [3:0] argument_id = instruction[3:0];
+    wire int;
+    wire [wordsize-1:0] int_routine;
 
     asrm_alu #(.wordsize(wordsize)) alu(
         .working_register(registers[`wr_id]),
@@ -78,6 +84,20 @@ module asrm_cpu#(
         .out_reg(index_addr),
         .ram_not_ready(ram_not_ready));
 
+    asrm_interrupt #(.wordsize(wordsize)) interrupt(
+        .clk(clk),
+        .reset(reset),
+        .ext_int(ext_int),
+        .instruction(instruction),
+        .workingRegister(registers[`wr_id]),
+        .programCounter(registers[`pc_id]),
+        .int_mask(registers[`sr_id][6:1]),
+        .out(content_int),
+        .out_reg(index_int),
+        .out_routine(int_routine),
+        .cpu_update(!ram_not_ready),
+        .int(int));
+
     //computing how much the stack pointer should evolve when using it
     integer default_increase = wordsize/8; //Progression when handling addressis or with no reduced behavious
     integer increase11 = 1; //A separate value for each conbinaison of reduced behaviour
@@ -94,28 +114,35 @@ module asrm_cpu#(
     always @ (posedge clk)
         if(reset & !ram_not_ready & !quit) //The reset behavious is handeled above
         begin
-            case(instruction)
-                `inst_quit : quit = 1;
-                `inst_pop :
-                begin
-                    registers[`sp_id] = registers[`sp_id] - increase_data;
-                    registers[index] = content;
-                end
-                `inst_ret :
-                begin
-                    registers[`sp_id] = registers[`sp_id] - default_increase;
-                    registers[index] = content;
-                end
-                `inst_push : registers[`sp_id] = registers[`sp_id] + increase_data;
-                `inst_call : 
-                begin
-                    registers[`sp_id] = registers[`sp_id] + default_increase;
-                    registers[index] = content;
-                end
-                default : registers[index] = content;
-            endcase
-            if(index != `pc_id) //When changing the pc, no need to increment it
-                registers[`pc_id] = registers[`pc_id] + 1;
+            if(int)
+            begin
+                registers[`pc_id] = int_routine;
+            end
+            else
+            begin
+                case(instruction)
+                    `inst_quit : quit = 1;
+                    `inst_pop :
+                    begin
+                        registers[`sp_id] = registers[`sp_id] - increase_data;
+                        registers[index] = content;
+                    end
+                    `inst_ret :
+                    begin
+                        registers[`sp_id] = registers[`sp_id] - default_increase;
+                        registers[index] = content;
+                    end
+                    `inst_push : registers[`sp_id] = registers[`sp_id] + increase_data;
+                    `inst_call : 
+                    begin
+                        registers[`sp_id] = registers[`sp_id] + default_increase;
+                        registers[index] = content;
+                    end
+                    default : registers[index] = content;
+                endcase
+                if(index != `pc_id) //When changing the pc, no need to increment it
+                    registers[`pc_id] = registers[`pc_id] + 1;
+            end
         end
 
 endmodule
