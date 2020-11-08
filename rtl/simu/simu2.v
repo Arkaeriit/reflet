@@ -19,7 +19,8 @@ module simu2();
         .data_in(dIn), 
         .addr(addr), 
         .data_out(dOut), 
-        .write_en(write_en));
+        .write_en(write_en),
+        .extint(4'h0));
 
     //The rom got the addresses between 0x00 and 0x7F
     wire [7:0] dataRom;

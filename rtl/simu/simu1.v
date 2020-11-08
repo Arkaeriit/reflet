@@ -18,7 +18,8 @@ module simu1();
         .data_in(dIn), 
         .addr(addr), 
         .data_out(dOut), 
-        .write_en(write_en));
+        .write_en(write_en),
+        .ext_int(4'h0));
 
     rom1 rom1(.clk(clk), .addr(addr[3:0]), .out(dIn));
 
