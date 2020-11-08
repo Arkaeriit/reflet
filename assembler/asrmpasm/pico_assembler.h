@@ -76,7 +76,7 @@ void mini_assembleFile(const char* fileIn, const char* fileOut);
 #define mnDEBUG(mn) !(strcmp(mn, "DEBUG") && strcmp(mn, "debug"))
 #define mnCMPNOT(mn) !(strcmp(mn, "CMPNOT") && strcmp(mn, "cmpnot"))
 #define mnRETINT(mn) !(strcmp(mn, "RETINT") && strcmp(mn, "retint"))
-#define mnSETINT(mn) !(strcmp(mn, "SETINT") && strcmp(mn, "setINT"))
+#define mnSETINT(mn) !(strcmp(mn, "SETINT") && strcmp(mn, "setint"))
 #define macroRAWBYTE(mn) !(strcmp(mn, "RAWBYTE") && strcmp(mn, "rawbyte"))
 
 #endif
