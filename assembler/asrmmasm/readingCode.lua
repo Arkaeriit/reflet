@@ -18,7 +18,7 @@ end
 -- return INST_ERR in case of an error, INST_BAS in case it is a basic instruction and INST_UKN otherwise
 local isBasic = function(tabInst)
     mnemonic = tabInst[1]:lower()
-    if mnemonic == "slp" or mnemonic == "jif" or mnemonic == "jmp" or mnemonic == "pop" or mnemonic == "push" or mnemonic == "ret" or mnemonic == "call" or mnemonic == "quit" then
+    if mnemonic == "slp" or mnemonic == "jif" or mnemonic == "jmp" or mnemonic == "pop" or mnemonic == "push" or mnemonic == "ret" or mnemonic == "call" or mnemonic == "quit" or mnemonic "debug" or mnemonic == "cmpnot" or mnemonic == "retint" then
         if #tabInst == 1 then
             return INST_BAS
         else
@@ -27,6 +27,13 @@ local isBasic = function(tabInst)
     end
     if mnemonic == "rawbyte" then
         if #tabInst == 2 and math.tointeger(tabInst[2]) and math.tointeger(tabInst[2]) <= 255 and math.tointeger(tabInst[2]) >= 0 then
+            return INST_BAS
+        else
+            return INST_ERR
+        end
+    end
+    if mnemonic == "setint" then
+        if #tabInst == 2 and math.tointeger(tabInst[2]) and math.tointeger(tabInst[2]) <= 3 and math.tointeger(tabInst[2]) >= 0 then
             return INST_BAS
         else
             return INST_ERR

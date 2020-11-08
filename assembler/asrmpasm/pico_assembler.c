@@ -116,6 +116,19 @@ static enum processLine_return processLine(const char* line, uint8_t* ret){
             *ret = RET;
         }else if(mnQUIT(toPrePross[0])){
             *ret = QUIT;
+        }else if(mnDEBUG(toPrePross[0])){
+            *ret = DEBUG;
+        }else if(mnCMPNOT(toPrePross[0])){
+            *ret = CMPNOT;
+        }else if(mnRETINT(toPrePross[0])){
+            *ret = RETINT;
+        }else if(mnSETINT(toPrePross[0])){
+            int int_num = atoi(toPrePross[1]); //might something better at erroch checking than atoi...
+            if(!(0 <= int_num && int_num <= 3)){
+                fprintf(stderr, "Error interrupt number must be between 0 and 3.\n");
+                preProssRes = ERROR;
+            }
+            *ret = SETINT_MASK | int_num;
         }else if(macroRAWBYTE(toPrePross[0])){
             int byte = atoi(toPrePross[1]);
             if( (uint8_t) byte != byte){

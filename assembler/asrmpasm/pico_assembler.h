@@ -43,6 +43,11 @@ void mini_assembleFile(const char* fileIn, const char* fileOut);
 #define CALL 0x0C
 #define RET  0x0D
 #define QUIT 0x0E
+#define DEBUG  0x0F
+#define CMPNOT 0x01
+#define RETINT 0X02
+//0x03
+#define SETINT_MASK 0x04
 
 //mnemonics
 #define mnSLP(mn) !(strcmp(mn, "SLP") && strcmp(mn, "slp"))
@@ -68,7 +73,10 @@ void mini_assembleFile(const char* fileIn, const char* fileOut);
 #define mnCALL(mn) !(strcmp(mn, "CALL") && strcmp(mn, "call"))
 #define mnRET(mn) !(strcmp(mn, "RET") && strcmp(mn, "ret"))
 #define mnQUIT(mn) !(strcmp(mn, "QUIT") && strcmp(mn, "quit"))
-
+#define mnDEBUG(mn) !(strcmp(mn, "DEBUG") && strcmp(mn, "debug"))
+#define mnCMPNOT(mn) !(strcmp(mn, "CMPNOT") && strcmp(mn, "cmpnot"))
+#define mnRETINT(mn) !(strcmp(mn, "RETINT") && strcmp(mn, "retint"))
+#define mnSETINT(mn) !(strcmp(mn, "SETINT") && strcmp(mn, "setINT"))
 #define macroRAWBYTE(mn) !(strcmp(mn, "RAWBYTE") && strcmp(mn, "rawbyte"))
 
 #endif
