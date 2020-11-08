@@ -30,7 +30,7 @@ module asrm_alu
     wire [wordsize-1:0] lsl_out = ( opperand == `opp_lsl ? working_register << other_register : defaultValue );
     wire [wordsize-1:0] lsr_out = ( opperand == `opp_lsr ? working_register >> other_register : defaultValue );
     //sleep, jmp, jif and cpy, we want to use the raw working register value. In the case of jif, when the condition is not met, the register selection will take care of the logic.
-    wire [wordsize-1:0] raw_out = ( instruction == `inst_slp || opperand == `opp_cpy || instruction == `inst_jif || instruction == `inst_jmp ? working_register : defaultValue );
+    wire [wordsize-1:0] raw_out = ( instruction == `inst_slp || opperand == `opp_cpy || instruction == `inst_jif || instruction == `inst_jmp || instruction == `inst_debug ? working_register : defaultValue );
     //set, jmp and jif we put the end of the instruction in wr. 
     wire [wordsize-1:0] set_out = ( opperand == `opp_set ? instruction[3:0] : defaultValue );
     //read, we put the raw value of the other register
