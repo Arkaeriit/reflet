@@ -47,13 +47,14 @@ module asrm_alu
     //comparaisons
     wire cmp_eq  = ( opperand == `opp_eq ? working_register == other_register : defaultValue );
     wire cmp_les = ( opperand == `opp_les ? working_register <  other_register : defaultValue );
-    wire cmp = cmp_eq | cmp_les;
+    wire cmp_cmpnot = ( instruction == `inst_cmpnot ? !status_register[0] : defaultValue );
+    wire cmp = cmp_eq | cmp_les | cmp_cmpnot;
     wire [wordsize-1:0] out_cmp = {status_register[wordsize-1:1], cmp};
 
     //wireing out and out_reg
     //We want to see if we are trying to change the working register or
     //the status register
-    wire cmp_opp = (opperand == `opp_eq) || (opperand == `opp_les);
+    wire cmp_opp = (opperand == `opp_eq) || (opperand == `opp_les) || (instruction == `inst_cmpnot);
     assign out = (cmp_opp ? out_cmp : out_nocmp);
     assign out_reg = (cmp_opp ? `sr_id : out_reg_nocmp);
 

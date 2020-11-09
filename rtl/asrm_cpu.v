@@ -11,13 +11,14 @@ module asrm_cpu#(
     //main control signal
     input clk,
     input reset,
-    output reg quit, //Set to one when the quit instruction is read
     //System bus connection
     input [wordsize-1:0] data_in,
     output [wordsize-1:0] addr,
     output [wordsize-1:0] data_out,
     output write_en,
     //Other connections
+    output reg quit, //Set to one when the quit instruction is read
+    output debug,
     input [3:0] ext_int
     );
 
@@ -108,6 +109,9 @@ module asrm_cpu#(
                                     ( reduced_behavior == 2'b01 ? increase01 :
                                         ( reduced_behavior == 2'b10 ? increase10 :
                                             increase11)));
+
+    //debug signal
+    assign debug = instruction == ìnst_debug && !ram_not_ready;
 
     
     //updating reegisters
