@@ -14,6 +14,7 @@
 #define WORD_MASK 0xFF /*MASK used to ensure the use of the correct number of bits*/
 typedef uint64_t word_t; //Type used in the simulator
 #define WORD_P PRIu64
+#define WORD_PX PRIx64
 #define RAM_SIZE 255
 typedef uint8_t ram_word_t;
 #define TX_CMD 0

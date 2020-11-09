@@ -85,7 +85,7 @@ static void run_inst(asrm* vm){
     PC(vm)++;
     switch(opperand){
         case 0:
-            if(isSlp(instruction)){
+            if(instruction == SLP){
                 break;
             }else if(instruction == JMP){
                 PC(vm) = WR(vm);

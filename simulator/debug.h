@@ -4,8 +4,8 @@
 |steps of the simulation.                            |
 \---------------------------------------------------*/
 
-#ifndef DEBUG
-#define DEBUG
+#ifndef DEBUG_H
+#define DEBUG_H
 
 #include "asrm.h"
 #include <stdio.h>

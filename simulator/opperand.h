@@ -8,7 +8,6 @@
 
 #include <string.h>
 //opperands
-#define isSlp(instuction) ((instuction & 0xF8) == 0)
 #define SLP  0x00
 #define SET  0x1
 #define READ 0x2
@@ -32,31 +31,13 @@
 #define CALL 0x0C
 #define RET  0x0D
 #define QUIT 0x0E
+#define DEBUG  0x0F
+#define CMPNOT 0x01
+#define RETINT 0x02
+#define SETINT 0x04
 
-//mnemonics
-#define mnSLP(mn) !(strcmp(mn, "SLP") && strcmp(mn, "slp"))
-#define mnSET(mn) !(strcmp(mn, "SET") && strcmp(mn, "set"))
-#define mnREAD(mn) !(strcmp(mn, "READ") && strcmp(mn, "read"))
-#define mnCPY(mn) !(strcmp(mn, "CPY") && strcmp(mn, "cpy"))
-#define mnADD(mn) !(strcmp(mn, "ADD") && strcmp(mn, "add"))
-#define mnSUB(mn) !(strcmp(mn, "SUB") && strcmp(mn, "sub"))
-#define mnAND(mn) !(strcmp(mn, "AND") && strcmp(mn, "and"))
-#define mnOR(mn) !(strcmp(mn, "OR") && strcmp(mn, "or"))
-#define mnXOR(mn) !(strcmp(mn, "XOR") && strcmp(mn, "xor"))
-#define mnNOT(mn) !(strcmp(mn, "NOT") && strcmp(mn, "not"))
-#define mnLSL(mn) !(strcmp(mn, "LSL") && strcmp(mn, "lsl"))
-#define mnLSR(mn) !(strcmp(mn, "LSR") && strcmp(mn, "lsr"))
-#define mnEQ(mn) !(strcmp(mn, "EQ") && strcmp(mn, "eq"))
-#define mnLES(mn) !(strcmp(mn, "LES") && strcmp(mn, "les"))
-#define mnSTR(mn) !(strcmp(mn, "STR") && strcmp(mn, "str"))
-#define mnLOAD(mn) !(strcmp(mn, "LOAD") && strcmp(mn, "load"))
-#define mnJMP(mn) !(strcmp(mn, "JMP") && strcmp(mn, "jmp"))
-#define mnJIF(mn) !(strcmp(mn, "JIF") && strcmp(mn, "jif"))
-#define mnPOP(mn) !(strcmp(mn, "POP") && strcmp(mn, "pop"))
-#define mnPUSH(mn) !(strcmp(mn, "PUSH") && strcmp(mn, "push"))
-#define mnCALL(mn) !(strcmp(mn, "CALL") && strcmp(mn, "call"))
-#define mnRET(mn) !(strcmp(mn, "RET") && strcmp(mn, "ret"))
-#define mnQUIT(mn) !(strcmp(mn, "QUIT") && strcmp(mn, "quit"))
+#define SETINT_MASK 0xFC
+#define isSETINT(opp) ((opp & SETINT_MASK) == SETINT)
 
 #endif
 
