@@ -11,5 +11,5 @@ A module of compatible RAM is included here, it is used in the simulation file.
 As of now, there is no pipeline in the processor. This leads to instruction taking between 3 and 5 clock cycles to complete.
 
 ## Content of the folder
-This folder contains the 4 modules making the ASRM processor, `asrm_addr` and `asrm_addr_reduced_behavior` handle the instruction interfacing with the RAM. `asrm_alu` handle other instructions and `asrm_cpu` handle the registers and combine them.  In the folder simu, you will find what I used to test this. Each test module is associated with its ROM whose content is described.
+This folder contains the 6 modules making the ASRM processor, `asrm_addr` and `asrm_addr_reduced_behavior` handle the instruction interfacing with the RAM.`asrm_stack` and `asrm_interrupt` handle the interrupts. `asrm_alu` handle other instructions and `asrm_cpu` handle the registers and combine them.  In the folder simu, you will find what I used to test this. Each test module is associated with its ROM whose content is described.
 

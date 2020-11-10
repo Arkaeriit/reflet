@@ -19,6 +19,7 @@ R1 to r12 are the 12 general-purpose registers. They are meant to store values u
 R13 or SR is the status register. 
 * The first bit is the comparison bit. It is set to 1 when a comparison instruction is realized and 0 otherwise. The comparison bit is used for conditional jumps.  
 * The bits 2 and 1 are the reduced behaviors bits. When they are both set to 0, the processor behaves normally. When they are set to `b01`, if the word size of the processor is above 32 bits, the processor will act as a 32-bit processor when interfacing with memory. When they are set to `b10`, if the word size of the processor is above 16 bits, the processor will act as a 16-bit processor when interfacing with memory. When they are set to `b11`, the processor will act as an 8-bit processor when interfacing with memory.
+* The bits 3 to 6 are the flags to enable interrupts. Bit 3 enables interrupt 0, the bit 4 enables interrupt 1 up to bit 6 which enable interrupt 4.
 
 Its reset value is  0x1.
 
@@ -31,7 +32,7 @@ R15 or SP is the stack pointer. It is updated when doing pop or push instruction
 Here is a list of the instruction of an ASRM processor. 
 |Mnemonic|Operand|Followed by|Effect|
 |--|--|--|--|
-| slp | 0b00000 | Any 3 bits | Does nothing, wait for the next instruction |
+| slp | 0x00 | Nothing | Does nothing, wait for the next instruction |
 | set | 0x1 | A 4 bits number | Put the number in the working register|
 | read | 0x2 | A register | Copies the value in the argument register into the working register |
 | cpy | 0x3 | A register | Copies the value of the working register into the argument register |
@@ -54,6 +55,11 @@ Here is a list of the instruction of an ASRM processor.
 | call | 0xC | Nothing | Put the current address in the stack and jump to the address in the working register. | 
 | ret | 0x0D | Nothing | Jump to the address just after the address on top of the stack. |
 | quit | 0x0E | Nothing | Reset the processor or stop it. |
+| debug | 0x0F | Nothing | Does not modify any registers but the processor sends a signal to tell it is executing a debug instruction. |
+| cmpnot | 0x01 | Nothing | Flip the comparison bit of the status register. |
+| retint | 0X02 | Nothing | Return from an interruption context. | 
+| setint | b000001 | A two-bit number | Set the routine of the interruption of the given number to the address in the working register. |
+| *reserved* | 0x03 | Nothing | Reserved. |
 
 ## Connection to memory
 ### Word size
@@ -64,4 +70,14 @@ Except in the case of overflows, ASRM machine code should work with ASRM process
 
 ### Starting address
 Any byte is a valid ASRM instruction. To enable a minimal value of error-correcting, the 4 first byte of a machine code file can be reserved for the "ASRM" magic word. To enable the existence of the magic word, the program starts at the 5th byte, at address 4.
+
+## Interruptions
+An ASRM processor can react to external interruption and do special routines. There are 4 different interruptions going from 0 (the highest priority to 3, the lowest priority).
+
+To use interrupts, you must first tell the processor what is its interrupt routine. To do so, you must use the setint instruction with the number of the instruction as an argument while the address of the interruption routine is in the working register. Then, you must enable the interruption by setting to 1 the correct bit on the status register. The interruption is now set and enabled.
+
+If the instruction is set, when the processor will receive an interrupt signal, the content of the program counter will be stored. The address of the interruption routine will be then put in the program counter. All the other registers will stay at-is so they must be protected inside the interruption routine. To finish the interruption routine, use the retint instruction which will restore the program counter to its state before rentering the interruption. Be careful, in order not to loop back in the interruption, you must make sure that the peripheral responsible for the interruption stopped sending it.
+
+As there are different interruptions with different levels of priority, it is possible to nest interruptions. For example, if you are in the context of interruption 2 and that interruption 1 is raised, you will shift to the context of interruption 1. When doing retint you will shift back to the context of interrupt 2. 
+On the other hand, if you are in the context of interrupt 2 and interrupt 3 is raised, you will fall into the context of interruption 3 only when you use retint from the context of interrupt 2.
 
