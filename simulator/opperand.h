@@ -37,7 +37,7 @@
 #define SETINT 0x04
 
 #define SETINT_MASK 0xFC
-#define isSETINT(opp) ((opp & SETINT_MASK) == SETINT)
+#define isSETINT(inst) ((inst & SETINT_MASK) == SETINT)
 
 #endif
 

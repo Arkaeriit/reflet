@@ -41,5 +41,13 @@ typedef uint8_t ram_word_t;
 #define RET_UNOPEN_FILE 3
 #define RET_CONFIG 5
 
+//Interupt level
+#define LEVEL_NORMAL 4
+#define LEVEL_INT_3 3
+#define LEVEL_INT_2 2
+#define LEVEL_INT_1 1
+#define LEVEL_INT_0 0
+
+
 #endif
 

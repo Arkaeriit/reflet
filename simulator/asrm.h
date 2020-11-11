@@ -22,6 +22,13 @@ struct asrm_int {
     int count_up;
 };
 
+struct asrm_int_level {
+    int level;
+    int stack_depth;
+    int level_stack[5];
+    word_t routine_stack[5];
+};
+
 struct asrm_config {
     word_t word_size;
     word_t word_size_byte;
@@ -46,6 +53,7 @@ typedef struct asrm_struct {
     struct asrm_config* config;
     struct asrm_debug* debug;
     struct asrm_int* ints[4];
+    struct asrm_int_level* int_level;
     bool active;
 } asrm;
 

@@ -9,6 +9,10 @@ static int byteExchanged(const asrm* vm, bool stack_b);
 static word_t loadWordRAM(const asrm* vm, word_t addr, bool stack_b);
 static void putRAMWord(asrm* vm, word_t addr, word_t content, bool stack_b);
 static void io(asrm* vm);
+static word_t new_int(asrm* vm, int interupt);
+static void check_int(asrm* vm);
+static void ret_int(asrm* vm);
+static bool enabled_int(asrm* vm, int interupt);
 #define min(x, y) (x < y ? x : y)
 
 /*
@@ -50,6 +54,10 @@ asrm* asrm_init(){
         interupt->count_up = 0;
         ret->ints[i] = interupt;
     }
+    struct asrm_int_level* level = malloc(sizeof(struct asrm_int_level));
+    level->level = LEVEL_NORMAL;
+    level->stack_depth = 0;
+    ret->int_level = level;
     //Input reset values not equal to 0
     SR(ret) = 1;
     PC(ret) = START_CHAR;
@@ -71,6 +79,7 @@ void asrm_free(asrm* vm){
         free(vm->ints[i]);
         free(vm->config->ints[i]);
     }
+    free(vm->int_level);
     free(vm->config);
     free(vm->reg);
     free(vm->ram);
@@ -86,6 +95,7 @@ void asrm_free(asrm* vm){
 void asrm_run(asrm* vm){
     while((PC(vm) < vm->config->ram_size) && vm->active){
         debugLog(vm);
+        check_int(vm);
         run_inst(vm);
         io(vm);
     }
@@ -124,6 +134,18 @@ static void run_inst(asrm* vm){
                 PC(vm) = loadWordRAM(vm, SP(vm), true);
             }else if(instruction == QUIT){
                 vm->active = false;
+            }else if(instruction == DEBUG){
+                printf("Debug instruction reached at address %" WORD_PX ". The content of the working register is %" WORD_PX "\n", PC(vm)-1, WR(vm));
+            }else if(instruction == CMPNOT){
+                if(SR(vm) & 1)
+                    SR(vm) = (SR(vm) >> 1) << 1; //We want to turn the LSB into a 0
+                else
+                    SR(vm) |= 1;
+            }else if(isSETINT(instruction)){
+                uint8_t int_number = instruction & 3;
+                vm->ints[int_number]->routine = WR(vm);
+            }else if(instruction == RETINT){
+                ret_int(vm);
             }else{
                 fprintf(stderr, "Warning, unknow instruction (%X) at address %" WORD_P ".\n",instruction, PC(vm) - 1);
             }
@@ -269,5 +291,67 @@ static void io(asrm* vm){
         vm->ram[vm->config->rx_data] = getchar();
         vm->ram[vm->config->rx_cmd] = 'R';
     }
+}
+
+/*
+ * When a nex interrupt is activated, this function
+ * update the stacks and returns the address of the interrupt routine
+ *  Arguments:
+ *      vm: the asrm struct
+ *      interupt: the number of the interrupt being activated
+ *  returns:
+ *      The address of the routine to engage because of the interrupt
+ */
+static word_t new_int(asrm* vm, int interupt){
+    word_t ret = vm->ints[interupt]->routine;
+    vm->int_level->level_stack[vm->int_level->stack_depth] = vm->int_level->level;
+    vm->int_level->routine_stack[vm->int_level->stack_depth] = PC(vm);
+    vm->int_level->level = interupt;
+    vm->int_level->stack_depth++;
+    return ret;
+}
+
+/*
+ * Check if we reached the count_up for any of the
+ * interrupts and if so, update the level and the PC
+ *  Arguments:
+ *      vm: If you read the code, you know what it is
+ */
+static void check_int(asrm* vm){
+    for(int i=0; i<4; i++) //increasing each timer
+        vm->ints[i]->count_up++;
+    for(int i=0; i<4; i++){
+        if(vm->config->ints[i]->enable && vm->ints[i]->count_up >= vm->config->ints[i]->freq){ //Checking if an enabled interrupt reached its count_up
+            vm->ints[i]->count_up = 0;
+            if(i < vm->int_level->level && enabled_int(vm, i)){ //The interrupt is taken into account if its priority is higher than the current level and it is enabled in the status register
+                word_t routine = new_int(vm, i);
+                PC(vm) = routine;
+            }
+        }
+    }
+}
+
+/*
+ * Return from an interrupt and update the PC.
+ * If there is no interrupts to return from, print a message
+ * but do not do anything else.
+ */
+static void ret_int(asrm* vm){
+    if(vm->int_level->stack_depth){ //We are in an interrupt context, everything is fine
+        vm->int_level->stack_depth--;
+        vm->int_level->level = vm->int_level->level_stack[vm->int_level->stack_depth];
+        PC(vm) = vm->int_level->routine_stack[vm->int_level->stack_depth];
+    }else{
+        fprintf(stderr, "Warning: using RETINT while not in an interrupt context.\n");
+    }
+}
+
+/*
+ * Check if the interrup the enabled in the status register
+ */
+static bool enabled_int(asrm* vm, int interupt){
+    char flags = (SR(vm) >> 3) & 0xF;
+    bool ret = (flags >> interupt) & 1;
+    return ret;
 }
 
