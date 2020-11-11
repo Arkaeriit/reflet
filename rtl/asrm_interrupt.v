@@ -23,6 +23,7 @@ module asrm_interrupt#(
     input cpu_update,
     output int
     );
+    integer i; //loop counter
 
     //Masking interrupts
     wire [3:0] int_masked = ext_int & int_mask;
@@ -61,7 +62,7 @@ module asrm_interrupt#(
     wire [1:0] arg = instruction[1:0];
     always @ (posedge clk)
         if(!reset)
-            for(integer i=0; i<4; i=i+1)
+            for(i=0; i<4; i=i+1)
                 routines[i] = 0;
         else
             if(setint_opp == `opp_setint)

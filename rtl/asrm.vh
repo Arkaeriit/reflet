@@ -41,17 +41,17 @@
 `define opp_setint 6'h1
 
 //Instructions
-`define inst_slp     8'h00
-`define inst_compnot 8'h01
-`define inst_retint  8'h02
-`define inst_jmp     8'h08
-`define inst_jif     8'h09
-`define inst_pop     8'h0A
-`define inst_push    8'h0B
-`define inst_call    8'h0C
-`define inst_ret     8'h0D
-`define inst_quit    8'h0E
-`define inst_debug   8'h0F
+`define inst_slp    8'h00
+`define inst_cmpnot 8'h01
+`define inst_retint 8'h02
+`define inst_jmp    8'h08
+`define inst_jif    8'h09
+`define inst_pop    8'h0A
+`define inst_push   8'h0B
+`define inst_call   8'h0C
+`define inst_ret    8'h0D
+`define inst_quit   8'h0E
+`define inst_debug  8'h0F
 
 `endif
 

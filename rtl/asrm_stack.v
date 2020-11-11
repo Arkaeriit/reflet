@@ -14,6 +14,7 @@ module asrm_stack #(
     input pop,
     output [wordsize-1:0] out
     );
+    integer i; //loop counter
 
     reg [wordsize-1:0] data [depth-1:0];
     reg [depth-1:0] index; //point to the next updated element of data
@@ -23,7 +24,7 @@ module asrm_stack #(
         if(!reset)
         begin
             index = 0;
-            for(integer i=0; i<depth; i=i+1)
+            for(i=0; i<depth; i=i+1)
                 data[i] = 0;
         end
         else

@@ -11,7 +11,7 @@ module asrm_addr_reduced_behavior #(
     input reset,
     input fetching_instruction,
     input [7:0] instruction,
-    input [wordsize-1:0] statusRegister,
+    input [1:0] reduced_behavior_bits,
     output [5:0] pop_offset,
     //ram connection
     input [wordsize-1:0] data_in,
@@ -24,7 +24,6 @@ module asrm_addr_reduced_behavior #(
     //handling data_in
     reg [127:0] data_in_buff; //Register to store the value we fetched
     wire [127:0] data_in_wide = data_in;
-    wire [1:0] reduced_behavior_bits = statusRegister[2:1];
     wire reduced_behavior = (reduced_behavior_bits != 2'b00) && ( (reduced_behavior_bits == 2'b01 && wordsize > 32) || (reduced_behavior_bits == 2'b10 && wordsize > 16) || (reduced_behavior_bits == 2'b11 && wordsize > 8) );
     always @ (posedge clk)
         if(!reset)

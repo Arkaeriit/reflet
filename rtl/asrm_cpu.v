@@ -21,22 +21,10 @@ module asrm_cpu#(
     output debug,
     input [3:0] ext_int
     );
+    integer i; //loop counter
 
-   reg [wordsize-1:0] registers [15:0]; //The registers 
+    reg [wordsize-1:0] registers [15:0]; //The registers 
 
-   //reset values
-   always @ (posedge clk)
-       if(!reset)
-       begin
-           registers[`wr_id] = `wr_reset;
-           registers[`sr_id] = `sr_reset;
-           registers[`pc_id] = `pc_reset;
-           registers[`sp_id] = `sp_reset;
-           for(integer i=`gp_start; i<=`gp_end; i=i+1)
-               registers[i] = `gp_reset;
-           quit = 0;
-       end
-    
     //register to change index
     wire [3:0] index_addr;
     wire [3:0] index_alu;
@@ -73,7 +61,7 @@ module asrm_cpu#(
         .programCounter(registers[`pc_id]),
         .stackPointer(registers[`sp_id]),
         .otherRegister(registers[argument_id]),
-        .statusRegister(registers[`sr_id]),
+        .reduced_behaviour_bits(registers[`sr_id][2:1]),
         .instruction(instruction),
         //System bus
         .addr(addr),
@@ -111,41 +99,53 @@ module asrm_cpu#(
                                             increase11)));
 
     //debug signal
-    assign debug = instruction == ìnst_debug && !ram_not_ready;
-
+    assign debug = instruction == `inst_debug && !ram_not_ready;
     
     //updating reegisters
     always @ (posedge clk)
-        if(reset & !ram_not_ready & !quit) //The reset behavious is handeled above
+        if(!reset)
         begin
-            if(int)
+           registers[`wr_id] = `wr_reset;
+           registers[`sr_id] = `sr_reset;
+           registers[`pc_id] = `pc_reset;
+           registers[`sp_id] = `sp_reset;
+           for(i=`gp_start; i<=`gp_end; i=i+1)
+               registers[i] = `gp_reset;
+           quit = 0;
+        end
+        else
+        begin
+            if(!ram_not_ready & !quit)
             begin
-                registers[`pc_id] = int_routine;
-            end
-            else
-            begin
-                case(instruction)
-                    `inst_quit : quit = 1;
-                    `inst_pop :
-                    begin
-                        registers[`sp_id] = registers[`sp_id] - increase_data;
-                        registers[index] = content;
-                    end
-                    `inst_ret :
-                    begin
-                        registers[`sp_id] = registers[`sp_id] - default_increase;
-                        registers[index] = content;
-                    end
-                    `inst_push : registers[`sp_id] = registers[`sp_id] + increase_data;
-                    `inst_call : 
-                    begin
-                        registers[`sp_id] = registers[`sp_id] + default_increase;
-                        registers[index] = content;
-                    end
-                    default : registers[index] = content;
-                endcase
-                if(index != `pc_id) //When changing the pc, no need to increment it
-                    registers[`pc_id] = registers[`pc_id] + 1;
+                if(int)
+                begin
+                    registers[`pc_id] = int_routine;
+                end
+                else
+                begin
+                    case(instruction)
+                        `inst_quit : quit = 1;
+                        `inst_pop :
+                        begin
+                            registers[`sp_id] = registers[`sp_id] - increase_data;
+                            registers[index] = content;
+                        end
+                        `inst_ret :
+                        begin
+                            registers[`sp_id] = registers[`sp_id] - default_increase;
+                            registers[index] = content;
+                        end
+                        `inst_push : registers[`sp_id] = registers[`sp_id] + increase_data;
+                        `inst_call : 
+                        begin
+                            registers[`sp_id] = registers[`sp_id] + default_increase;
+                            registers[index] = content;
+                        end
+                        default : registers[index] = content;
+                    endcase
+                    if(index != `pc_id) //When changing the pc, no need to increment it
+                        registers[`pc_id] = registers[`pc_id] + 1;
+                end
             end
         end
 

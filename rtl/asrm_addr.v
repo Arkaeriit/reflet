@@ -16,7 +16,7 @@ module asrm_addr#(
     input [wordsize-1:0] programCounter,
     input [wordsize-1:0] stackPointer,
     input [wordsize-1:0] otherRegister,
-    input [wordsize-1:0] statusRegister,
+    input [1:0] reduced_behaviour_bits,
     output reg [7:0] instruction,
     //ram connection
     output [wordsize-1:0] addr,
@@ -69,7 +69,7 @@ module asrm_addr#(
         .reset(reset),
         .fetching_instruction(fetching_instruction),
         .instruction(instruction),
-        .statusRegister(statusRegister),
+        .reduced_behavior_bits(reduced_behaviour_bits),
         .pop_offset(pop_offset),
         .data_in(data_in),
         .data_out(data_out),
