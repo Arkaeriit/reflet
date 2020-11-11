@@ -69,6 +69,26 @@ void applyConfig(asrm* vm, const char* configFile){
                         vm->config->rx_cmd = configValue;
                     }else if(!strcmp(resultBuff[0], "rx_data")){
                         vm->config->rx_data = configValue;
+                    }else if(!strcmp(resultBuff[0], "int_0_freq")){
+                        if(configValue){
+                            vm->config->ints[0]->enable = true;
+                            vm->config->ints[0]->freq = configValue;
+                        }
+                    }else if(!strcmp(resultBuff[0], "int_1_freq")){
+                        if(configValue){
+                            vm->config->ints[1]->enable = true;
+                            vm->config->ints[1]->freq = configValue;
+                        }
+                    }else if(!strcmp(resultBuff[0], "int_2_freq")){
+                        if(configValue){
+                            vm->config->ints[2]->enable = true;
+                            vm->config->ints[2]->freq = configValue;
+                        }
+                    }else if(!strcmp(resultBuff[0], "int_3_freq")){
+                        if(configValue){
+                            vm->config->ints[3]->enable = true;
+                            vm->config->ints[3]->freq = configValue;
+                        }
                     }else{
                         fprintf(stdout, "Error line %i of the config file, unknow parameter.\n", lineNumber);
                         exit(RET_CONFIG);

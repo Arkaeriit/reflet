@@ -31,12 +31,25 @@ asrm* asrm_init(){
     conf->tx_data = TX_DATA;
     conf->rx_cmd = RX_CMD;
     conf->rx_data = RX_DATA;
+    for(int i=0; i<4; i++){
+        struct asrm_config_int* interupt = malloc(sizeof(struct asrm_config_int));
+        interupt->enable = false;
+        interupt->freq = 0;
+        conf->ints[i] = interupt;
+    }
     ret->config = conf;
     //default debug
     struct asrm_debug* debug = malloc(sizeof(struct asrm_debug));
     debug->enable = false;
     debug->steps = 1;
     ret->debug = debug;
+    //Interruption data
+    for(int i=0; i<4; i++){
+        struct asrm_int* interupt = malloc(sizeof(struct asrm_int));
+        interupt->routine = 0;
+        interupt->count_up = 0;
+        ret->ints[i] = interupt;
+    }
     //Input reset values not equal to 0
     SR(ret) = 1;
     PC(ret) = START_CHAR;
@@ -54,6 +67,10 @@ void asrm_initRAM(asrm* vm){
  * Free an asrm struct
  */
 void asrm_free(asrm* vm){
+    for(int i=0; i<4; i++){
+        free(vm->ints[i]);
+        free(vm->config->ints[i]);
+    }
     free(vm->config);
     free(vm->reg);
     free(vm->ram);

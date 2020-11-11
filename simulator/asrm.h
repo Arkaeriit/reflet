@@ -12,6 +12,16 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+struct asrm_config_int {
+    bool enable;
+    int freq;
+};
+
+struct asrm_int {
+    word_t routine;
+    int count_up;
+};
+
 struct asrm_config {
     word_t word_size;
     word_t word_size_byte;
@@ -21,6 +31,7 @@ struct asrm_config {
     word_t tx_data;
     word_t rx_cmd;
     word_t rx_data;
+    struct asrm_config_int* ints[4];
 };
 
 struct asrm_debug {
@@ -34,6 +45,7 @@ typedef struct asrm_struct {
     ram_word_t* ram;
     struct asrm_config* config;
     struct asrm_debug* debug;
+    struct asrm_int* ints[4];
     bool active;
 } asrm;
 
