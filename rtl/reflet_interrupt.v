@@ -38,7 +38,7 @@ module reflet_interrupt#(
 
     //Level of interrupts
     reg [2:0] level; //4 means normal context, otherwise, take the number of the current interrupts
-    wire [2:0] prev_level; //Store the previous state
+    reg [2:0] prev_level_slow; //Store the previous state
     wire [2:0] target_level = ( int_masked[0] ? 0 :
                                 ( int_masked[1] ? 1 : 
                                   ( int_masked[2] ? 2 :
@@ -70,8 +70,16 @@ module reflet_interrupt#(
     
     //Storing the program counter and the level of interrupts
     wire [wordsize-1:0] prev_counter;
+    wire [2:0] prev_level; //Store the previous state
+    reg [2:0] current_level_slow; //Store the current level with a small delay to put the right value in the stack
+    reg [2:0] current_level_slow_slow;
     always @ (posedge clk)
-        prev_counter_slow = prev_counter;
+    begin
+        prev_counter_slow <= prev_counter;
+        prev_level_slow <= prev_level;
+        current_level_slow <= level;
+        current_level_slow_slow <= current_level_slow;
+    end
     reflet_stack #(.wordsize(wordsize), .depth(4)) stack_counter(
         .clk(clk),
         .reset(reset),
@@ -84,7 +92,7 @@ module reflet_interrupt#(
         .reset(reset),
         .push(new_int),
         .pop(quit_int),
-        .in(level),
+        .in(current_level_slow_slow),
         .out(prev_level));
 
     //Telling the CPU about a new instruction
