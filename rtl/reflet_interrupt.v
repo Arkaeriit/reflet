@@ -54,7 +54,7 @@ module reflet_interrupt#(
                 level = target_level;
             else
                 if(quit_int)
-                    level = prev_level;
+                    level = prev_level_slow;
         end
 
     //Storing interruption routines' addresses

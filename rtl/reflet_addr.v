@@ -64,17 +64,26 @@ module reflet_addr#(
     assign write_en = (instruction == `inst_push || instruction == `inst_call || opperand == `opp_str) & !fetching_instruction & !(|ram_not_ready);
     
     //handeling reduced behavior
-    reflet_addr_reduced_behavior #(.wordsize(wordsize)) reduced_behavior(
-        .clk(clk),
-        .reset(reset),
-        .fetching_instruction(fetching_instruction),
-        .instruction(instruction),
-        .reduced_behavior_bits(reduced_behaviour_bits),
-        .pop_offset(pop_offset),
-        .data_in(data_in),
-        .data_out(data_out),
-        .data_out_cpu(data_out_cpu),
-        .data_in_cpu(data_in_cpu));
+    if(wordsize == 8) //no reduce behavior possible
+    begin
+        assign data_in_cpu = data_in;
+        assign data_out = data_out_cpu;
+        assign pop_offset = 1;
+    end
+    else
+    begin
+        reflet_addr_reduced_behavior #(.wordsize(wordsize)) reduced_behavior(
+            .clk(clk),
+            .reset(reset),
+            .fetching_instruction(fetching_instruction),
+            .instruction(instruction),
+            .reduced_behavior_bits(reduced_behaviour_bits),
+            .pop_offset(pop_offset),
+            .data_in(data_in),
+            .data_out(data_out),
+            .data_out_cpu(data_out_cpu),
+            .data_in_cpu(data_in_cpu));
+    end
 
     //Changing the not_ready register to let the CPU<->RAM commuticatio to occur
     always @ (posedge clk)
