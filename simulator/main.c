@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "loader.h"
-#include "asrm.h"
+#include "reflet.h"
 #include "config.h"
 
 static void help();
@@ -11,7 +11,7 @@ int main(int argc, char** argv){
             help();
             return 0;
         }
-        asrm* vm = asrm_init();
+        reflet* vm = reflet_init();
         if(argc == 3)
             applyConfig(vm, argv[2]);
         bool loading = load_file(argv[1], vm);
@@ -19,8 +19,8 @@ int main(int argc, char** argv){
             fprintf(stderr, "Unable to set the simulator up.\n");
             return RET_NO_VM;
         }
-        asrm_run(vm);
-        asrm_free(vm);
+        reflet_run(vm);
+        reflet_free(vm);
     }else{
         fprintf(stderr, "Error: invalid arguments.\n");
         help();

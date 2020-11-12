@@ -3,9 +3,9 @@
 |does basic opperation but flags will come soon.|
 \----------------------------------------------*/
 
-`include "asrm.vh"
+`include "reflet.vh"
 
-module asrm_alu
+module reflet_alu
     #(parameter wordsize = 16
     )(
     input [wordsize-1:0] working_register,

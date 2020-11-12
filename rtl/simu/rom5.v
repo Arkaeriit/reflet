@@ -6,7 +6,7 @@ module rom5(input clk, input enable_out,input [6:0] addr, output [7:0] dataOut);
 reg [7:0] ret; assign dataOut = (enable_out ? ret : 7'h0);
 always @ (posedge clk)
 case(addr)
-  7'h0 : ret = 8'h41; //asrmmasm runtime
+  7'h0 : ret = 8'h41; //reflet-masm runtime
   7'h1 : ret = 8'h53;
   7'h2 : ret = 8'h52;
   7'h3 : ret = 8'h4d;

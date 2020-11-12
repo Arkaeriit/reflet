@@ -1,14 +1,14 @@
-# ASRM simulator
-A simulator to test ASRM machine code. 
+# Reflet simulator
+A simulator to test Reflet machine code. 
 
 ## Usage
-The simulator should be given two arguments to start: a configuration file and a binary file. The binary file should contain proper ASRM machine code.
+The simulator should be given two arguments to start: a configuration file and a binary file. The binary file should contain proper Reflet machine code.
 
 ## IO
 To test your programs, the simulator can do basic IO. To print a character, write it at address `tx_data` (default to 0x1) and then write 0 at address `tx_cmd` (default to 0x0). To get an input char, write 0 at address `rx_cmd` (default to 0x2). The input char will be written at address `rx_data` (default to 0x3).
 
 ## Interrupts
-The simulatorcan handle interrupts. By default, no interrupts will append, but if you can add a line `int_X_freq xxx` to the config file with X the number of the interrupt (between 0 and 3) and xxx the number instruction between each time the interupt is raised. This will make the desired interrupts be raised at the desired frequency.
+The simulator can handle interrupts. By default, no interrupts will append, but if you can add a line `int_X_freq xxx` to the config file with X the number of the interrupt (between 0 and 3) and xxx the number instruction between each time the interrupt is raised. This will make the desired interrupts be raised at the desired frequency.
 
 ## Configuration
 The configuration file should contain information about the processor such as the word size or the ram size.
@@ -24,7 +24,7 @@ The configuration file should contain information about the processor such as th
 |int_0_freq    |The number of instruction betwen each raising of the interrupt 0 | 0 (disabled) |   
 |int_1_freq    |The number of instruction betwen each raising of the interrupt 1 | 0 (disabled) |   
 |int_2_freq    |The number of instruction betwen each raising of the interrupt 2 | 0 (disabled) |   
-|int_3_freq    |The number of instruction betwen each raising of the interrupt 3 | 0 (disabled) |  
+|int_3_freq    |The number of instruction betwen each raising of the interrupt 3 | 0 (disabled) |   
 
 You can add comments in the config file by prefixing them with a `;`.
 For example, the following configuration file will help simulate an 8-bit processor with 100 bytes of RAM.

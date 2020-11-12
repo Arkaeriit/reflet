@@ -6,7 +6,7 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
-#include <asrmpasm.h>
+#include <reflet-pasm.h>
 
 //wrapper for mini_assembleFile
 int lua_mini_assembleFile(lua_State* L){
@@ -25,16 +25,16 @@ int main(int argc, char** argv){
     lua_setglobal(L, "assembleFile");
 
     //oppening files
-    luaL_dofile(L, "/usr/share/asrm/lib.luac");
-    luaL_dofile(L, "/usr/share/asrm/link.luac");
-    luaL_dofile(L, "/usr/share/asrm/macro.luac");
-    luaL_dofile(L, "/usr/share/asrm/readingCode.luac");
-    luaL_dofile(L, "/usr/share/asrm/macro_assembler.luac");
-    luaL_dofile(L, "/usr/local/share/asrm/lib.luac");
-    luaL_dofile(L, "/usr/local/share/asrm/link.luac");
-    luaL_dofile(L, "/usr/local/share/asrm/macro.luac");
-    luaL_dofile(L, "/usr/local/share/asrm/readingCode.luac");
-    luaL_dofile(L, "/usr/local/share/asrm/macro_assembler.luac");
+    luaL_dofile(L, "/usr/share/reflet/lib.luac");
+    luaL_dofile(L, "/usr/share/reflet/link.luac");
+    luaL_dofile(L, "/usr/share/reflet/macro.luac");
+    luaL_dofile(L, "/usr/share/reflet/readingCode.luac");
+    luaL_dofile(L, "/usr/share/reflet/macro_assembler.luac");
+    luaL_dofile(L, "/usr/local/share/reflet/lib.luac");
+    luaL_dofile(L, "/usr/local/share/reflet/link.luac");
+    luaL_dofile(L, "/usr/local/share/reflet/macro.luac");
+    luaL_dofile(L, "/usr/local/share/reflet/readingCode.luac");
+    luaL_dofile(L, "/usr/local/share/reflet/macro_assembler.luac");
     luaL_dofile(L, "lib.lua");
     luaL_dofile(L, "link.lua");
     luaL_dofile(L, "macro.lua");

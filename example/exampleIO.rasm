@@ -1,8 +1,8 @@
 wordsize 8
-; This small program is ment to be assembled with asrmmasm
+; This small program is ment to be assembled with reflet-masm
 ; it asks a character from the user and print it 10 times
-; To assemble it, do asrmmasm exampleIO.asa exampleIO.asb
-; To run it, do asrm-sim exampleIO.asb
+; To assemble it, do reflet-masm exampleIO.asa exampleIO.asb
+; To run it, do reflet-sim exampleIO.asb
 ; (As this is a 8 bit program, the default configuration is enought)
 
 label start

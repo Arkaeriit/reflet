@@ -4,8 +4,8 @@
 |and opperands.                         |
 \--------------------------------------*/
 
-`ifndef asrm_vh
-`define asrm_vf
+`ifndef reflet_vh
+`define reflet_vf
 
  //Register index id
 `define wr_id 4'h0 /*working register*/

@@ -12,7 +12,7 @@ module simu4();
     wire quit;
     
     
-    asrm_cpu #(.wordsize(16)) cpu(
+    reflet_cpu #(.wordsize(16)) cpu(
         .clk(clk), 
         .reset(reset), 
         .quit(quit), 

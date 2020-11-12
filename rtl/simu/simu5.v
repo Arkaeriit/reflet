@@ -14,7 +14,7 @@ module simu5();
     wire [3:0] int = {3'b000, int0};
     
     
-    asrm_cpu #(.wordsize(8)) cpu(
+    reflet_cpu #(.wordsize(8)) cpu(
         .clk(clk), 
         .reset(reset), 
         .quit(quit), 

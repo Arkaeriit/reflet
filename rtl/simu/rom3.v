@@ -3,7 +3,7 @@
 \-----------------------------*/
 
 /*
-asrmmasp code:
+reflet-masm code:
 wordsize 16
 
 label multByTwo

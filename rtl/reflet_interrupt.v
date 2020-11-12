@@ -3,9 +3,9 @@
 |the interruptions.                           |
 \--------------------------------------------*/
 
-`include "asrm.vh"
+`include "reflet.vh"
 
-module asrm_interrupt#(
+module reflet_interrupt#(
     parameter wordsize = 16
     )(
     input clk,
@@ -72,14 +72,14 @@ module asrm_interrupt#(
     wire [wordsize-1:0] prev_counter;
     always @ (posedge clk)
         prev_counter_slow = prev_counter;
-    asrm_stack #(.wordsize(wordsize), .depth(4)) stack_counter(
+    reflet_stack #(.wordsize(wordsize), .depth(4)) stack_counter(
         .clk(clk),
         .reset(reset),
         .push(new_int),
         .pop(quit_int),
         .in(program_counter),
         .out(prev_counter));
-    asrm_stack #(.wordsize(3), .depth(4)) stack_level(
+    reflet_stack #(.wordsize(3), .depth(4)) stack_level(
         .clk(clk),
         .reset(reset),
         .push(new_int),

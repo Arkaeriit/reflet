@@ -147,8 +147,8 @@ end
 
 macro_assembler = function(arg)
     local help = function()
-        print("asrmmasm : the asrm macro-assembler.")
-        print("Usage : asrmmasm <assembly file> <output file>")
+        print("reflet-masm : the Reflet macro-assembler.")
+        print("Usage : reflet-masm <assembly file> <output file>")
     end
     if #arg == 1 and (arg[1] == "help" or arg[1] == "--help" or arg[1] == "-h") then --asking for help
         help()

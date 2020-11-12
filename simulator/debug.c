@@ -7,13 +7,13 @@
 #include "debug.h"
 
 //static functions
-static char* dataIntro(asrm* vm);
-static char* dataAboutInstruction(asrm* vm);
+static char* dataIntro(reflet* vm);
+static char* dataAboutInstruction(reflet* vm);
 
 /*
  * try to log the current state of the processor in the log file
  */
-void debugLog(asrm* vm){
+void debugLog(reflet* vm){
     if(!vm->debug->enable)
         return;
     char* intro = dataIntro(vm);
@@ -27,7 +27,7 @@ void debugLog(asrm* vm){
 /*
  * return a quick overview of the state of the processor
  */
-static char* dataIntro(asrm* vm){
+static char* dataIntro(reflet* vm){
     char* ret = malloc(1024);
     uint8_t instruction = (uint8_t) vm->ram[PC(vm)];
     sprintf(ret, "Instruction n°%" WORD_PX " , address: %" WORD_PX ", value :%x.",vm->debug->steps, PC(vm), instruction);
@@ -37,7 +37,7 @@ static char* dataIntro(asrm* vm){
 /*
  * return a description of the effetcs of the current instruction
  */
-static char* dataAboutInstruction(asrm* vm){
+static char* dataAboutInstruction(reflet* vm){
     char* ret = malloc(1024);
     uint8_t instruction = (uint8_t) vm->ram[PC(vm)];
     uint8_t opperand = (instruction & 0xF0) >> 4;

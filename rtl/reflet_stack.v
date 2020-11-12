@@ -3,7 +3,7 @@
 |track of the interruption nesting. |
 \----------------------------------*/
 
-module asrm_stack #(
+module reflet_stack #(
     parameter wordsize = 16,
     depth = 4
     )(

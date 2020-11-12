@@ -7,11 +7,11 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include "asrm.h"
+#include "reflet.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-void debugLog(asrm* vm);
+void debugLog(reflet* vm);
 
 #endif
 

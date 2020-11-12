@@ -14,7 +14,7 @@ static enum processLine_return preprocessLine(const char* line, char** ret);
  *      * If the config file can't be read, the program stops with the
  *      exit code RET_UNOPEN_FILE
  */
-void applyConfig(asrm* vm, const char* configFile){
+void applyConfig(reflet* vm, const char* configFile){
     //opening file
     FILE* f;
     if((f = fopen(configFile, "r")) == NULL){

@@ -1,16 +1,16 @@
-# ASRM
-A RISC ISA.
+# REFLET
+A RISC ISA. Reflet stands for **R**ISC **E**lementary **FLE**xible **T**inking machine.
 
 # This repository
-This repository contains a simulator for an ASRM processor, an assembler to create ASRM machine code, and a Verilog implementation of an ASRM processor.
+This repository contains a simulator for a Reflet processor, an assembler to create Reflet machine code, and a Verilog implementation of a Reflet processor.
 
 # The architecture
-ASRM is a RISC ISA. Each instruction is coded on a single byte and composed of a 4 or 5-bit operand, followed by an optional 4-bit register. This ISA can be used with a processor with words of any size superior which is 8 bits times a power of two. When the processor has a word size above 8 bits, it is little-endian.
+Reflet is a RISC ISA. Each instruction is coded on a single byte and composed of a 4 or 5-bit operand, followed by an optional 4-bit register. This ISA can be used with a processor with words of any size superior which is 8 bits times a power of two. When the processor has a word size above 8 bits, it is little-endian.
 
 Most operations are made between one of the 12 general-purpose registers and an implicit working register.
 
 ## Registers
-An ASRM processor got 16 registers.
+A Reflet processor got 16 registers.
 ### The working register
 R0 or WR is the working register.  This is the most important register, most operations will either copy its value into another register modify its content. Its use is never explicitly mentioned in the instructions as it is assumed that it is used most of the time. Its reset value is 0.
 ### General purpose registers
@@ -29,7 +29,7 @@ R14 or PC is the program counter. It contains the address of the current address
 R15 or SP is the stack pointer. It is updated when doing pop or push instructions and it points toward an address in RAM. Its reset value is 0 but it should be initialized if you intend to use the stack.
 
 ## Instructions
-Here is a list of the instruction of an ASRM processor. 
+Here is a list of the instruction of Reflet processor. 
 |Mnemonic|Operand|Followed by|Effect|
 |--|--|--|--|
 | slp | 0x00 | Nothing | Does nothing, wait for the next instruction |
@@ -63,16 +63,16 @@ Here is a list of the instruction of an ASRM processor.
 
 ## Connection to memory
 ### Word size
-To be able to work, an ASRM processor needs a connection to some RAM (or RAM and ROM) where values can be stored and machine code can be read. As this document describes no word size for an ASRM processor.
-The ASRM processor word size should be 8 bits times a power of two. The memory should have a data bus the same size as the processor word size. Each byte of the RAM should be addressable to fetch individual instructions in each byte. 
-Except in the case of overflows, ASRM machine code should work with ASRM processor of various word sizes.
+To be able to work, a Reflet processor needs a connection to some RAM (or RAM and ROM) where values can be stored and machine code can be read. As this document describes no word size for a Reflet processor.
+The Reflet processor word size should be 8 bits times a power of two. The memory should have a data bus the same size as the processor word size. Each byte of the RAM should be addressable to fetch individual instructions in each byte. 
+Except in the case of overflows, Reflet machine code should work with Reflet processor of various word sizes.
 
 
 ### Starting address
-Any byte is a valid ASRM instruction. To enable a minimal value of error-correcting, the 4 first byte of a machine code file can be reserved for the "ASRM" magic word. To enable the existence of the magic word, the program starts at the 5th byte, at address 4.
+Any byte is a valid Reflet instruction. To enable a minimal value of error-correcting, the 4 first byte of a machine code file can be reserved for the "Reflet" magic word. To enable the existence of the magic word, the program starts at the 5th byte, at address 4.
 
 ## Interruptions
-An ASRM processor can react to external interruption and do special routines. There are 4 different interruptions going from 0 (the highest priority to 3, the lowest priority).
+A Reflet processor can react to external interruption and do special routines. There are 4 different interruptions going from 0 (the highest priority to 3, the lowest priority).
 
 To use interrupts, you must first tell the processor what is its interrupt routine. To do so, you must use the setint instruction with the number of the instruction as an argument while the address of the interruption routine is in the working register. Then, you must enable the interruption by setting to 1 the correct bit on the status register. The interruption is now set and enabled.
 

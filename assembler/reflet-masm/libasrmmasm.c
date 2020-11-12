@@ -1,12 +1,12 @@
-/*--------------------------------------------------\
-|This file let us call asrmmasm's main fonction from|
-|an other program.                                  |
-\--------------------------------------------------*/
+/*------------------------------------------------\
+|This file let us call reflet-masm's main fonction|
+|from an other program.                           |
+\------------------------------------------------*/
 
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
-#include <asrmpasm.h>
+#include <reflet-pasm.h>
 
 //wrapper for mini_assembleFile
 int lua_mini_assembleFile(lua_State* L){
@@ -16,7 +16,7 @@ int lua_mini_assembleFile(lua_State* L){
     return 0;
 }
 
-int arsmmasm(const char* fileIn,const char* fileOut){
+int refletmasm(const char* fileIn,const char* fileOut){
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
 
@@ -25,16 +25,16 @@ int arsmmasm(const char* fileIn,const char* fileOut){
     lua_setglobal(L, "assembleFile");
 
     //oppening files
-    luaL_dofile(L, "/usr/share/asrm/lib.luac");
-    luaL_dofile(L, "/usr/share/asrm/link.luac");
-    luaL_dofile(L, "/usr/share/asrm/macro.luac");
-    luaL_dofile(L, "/usr/share/asrm/readingCode.luac");
-    luaL_dofile(L, "/usr/share/asrm/macro_assembler.luac");
-    luaL_dofile(L, "/usr/local/share/asrm/lib.luac");
-    luaL_dofile(L, "/usr/local/share/asrm/link.luac");
-    luaL_dofile(L, "/usr/local/share/asrm/macro.luac");
-    luaL_dofile(L, "/usr/local/share/asrm/readingCode.luac");
-    luaL_dofile(L, "/usr/local/share/asrm/macro_assembler.luac");
+    luaL_dofile(L, "/usr/share/reflet/lib.luac");
+    luaL_dofile(L, "/usr/share/reflet/link.luac");
+    luaL_dofile(L, "/usr/share/reflet/macro.luac");
+    luaL_dofile(L, "/usr/share/reflet/readingCode.luac");
+    luaL_dofile(L, "/usr/share/reflet/macro_assembler.luac");
+    luaL_dofile(L, "/usr/local/share/reflet/lib.luac");
+    luaL_dofile(L, "/usr/local/share/reflet/link.luac");
+    luaL_dofile(L, "/usr/local/share/reflet/macro.luac");
+    luaL_dofile(L, "/usr/local/share/reflet/readingCode.luac");
+    luaL_dofile(L, "/usr/local/share/reflet/macro_assembler.luac");
     luaL_dofile(L, "lib.lua");
     luaL_dofile(L, "link.lua");
     luaL_dofile(L, "macro.lua");

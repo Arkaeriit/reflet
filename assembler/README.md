@@ -1,17 +1,17 @@
-# ASRM assembler
+# Reflet assemblers
 
-An assembler to create ASRM machine code.
+Two assemblers to create Reflet machine code.
 
-This folder contains two programs, **asrmpasm** which is a very bare-bone assembler written in C, and **asrmmasm** which is a richer assembler written mostly in Lua.
+This folder contains two programs, **reflet-pasm** which is a very bare-bone assembler written in C, and **reflet-masm** which is a richer assembler written mostly in Lua.
 
 Both assemblers are case-insensitive for mnemonic but case-sensitive for anything else.
 
-## ASRMPASM
+## Reflet-PASM
 This is a pico-assembler. It can only assemble basic instruction as described in the main README.md. It would be very tedious to use it but you have total control over what instructions will be created.
 
 If you want to insert a byte into your program without having to write the instruction for it, you can write `rawbyte` followed by a single byte in base 10.
 
-## ASRMMASM
+## Reflet-MASM
 This is a macro-assembler. Not only can it assemble basic instructions but it can also assemble macro-instruction and manage labels. When using macro-instructions, the registers R11 and R12 might be used as temporary registers and overwritten. Furthermore, unless specified otherwise, the working registry will be modified.
 
 To run it, the pico-assembler must be installed. 
@@ -56,5 +56,22 @@ data "Hello, world!"
 rawbytes 13 10 ;\r\n
 rawbyte 0 ;null terminator
 
+```
+
+### Word size
+The various macro-instructions can be compiled differently depending on the target processor word size. Even if the code could be compatible with the various processor, using a smaller word size might not let make full use of the processor, and using a big one might create superfluous instruction. You should set the target word size by using the macro `wordsize` followed by the word size in bits in the first line of the assembly language file.
+
+### Example
+This example shows a program that adds 30 to the register R2 on a 16-bit processor in an infinite loop.
+```
+label start
+set 0
+cpy R2
+label loop
+set+ 30
+add R2
+cpy R2
+setlab loop
+jmp
 ```
 

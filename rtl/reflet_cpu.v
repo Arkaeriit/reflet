@@ -3,9 +3,9 @@
 |The register are defined here.    |
 \---------------------------------*/
 
-`include "asrm.vh"
+`include "reflet.vh"
 
-module asrm_cpu#(
+module reflet_cpu#(
     parameter wordsize = 16
     )(
     //main control signal
@@ -45,7 +45,7 @@ module asrm_cpu#(
     wire int;
     wire [wordsize-1:0] int_routine;
 
-    asrm_alu #(.wordsize(wordsize)) alu(
+    reflet_alu #(.wordsize(wordsize)) alu(
         .working_register(registers[`wr_id]),
         .other_register(registers[argument_id]),
         .status_register(registers[`sr_id]),
@@ -53,7 +53,7 @@ module asrm_cpu#(
         .out(content_alu),
         .out_reg(index_alu));
 
-    asrm_addr #(.wordsize(wordsize)) ram_interface(
+    reflet_addr #(.wordsize(wordsize)) ram_interface(
         .clk(clk),
         .reset(reset),
         //instruction from the CPU
@@ -73,7 +73,7 @@ module asrm_cpu#(
         .out_reg(index_addr),
         .ram_not_ready(ram_not_ready));
 
-    asrm_interrupt #(.wordsize(wordsize)) interrupt(
+    reflet_interrupt #(.wordsize(wordsize)) interrupt(
         .clk(clk),
         .reset(reset),
         .ext_int(ext_int),

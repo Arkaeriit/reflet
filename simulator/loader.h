@@ -10,9 +10,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "constants.h"
-#include "asrm.h"
+#include "reflet.h"
 
-bool load_file(const char* filename, asrm* vm);
+bool load_file(const char* filename, reflet* vm);
 
 #endif
 

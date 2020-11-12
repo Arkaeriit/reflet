@@ -24,8 +24,8 @@ int main(int argc, char** argv){
 }
 
 static void help(){
-    puts("asrmpas : the asrm pico-assembler\n"
-         "Usage : asrmpasm <assembly file> <output file>"
+    puts("reflet-pasm : the Reflet pico-assembler\n"
+         "Usage : reflet-pasm <assembly file> <output file>"
     );
 }
 

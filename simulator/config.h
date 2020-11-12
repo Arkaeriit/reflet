@@ -6,9 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "constants.h"
-#include "asrm.h"
+#include "reflet.h"
 
-void applyConfig(asrm* vm, const char* configFile);
+void applyConfig(reflet* vm, const char* configFile);
 
 #endif
 

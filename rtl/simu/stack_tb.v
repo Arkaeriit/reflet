@@ -1,6 +1,6 @@
 /*--------------------------\
 |This module is ment to test|
-|asrm_stack.                |
+|reflet_stack.                |
 \--------------------------*/
 
 module stack_tb();
@@ -14,7 +14,7 @@ module stack_tb();
     reg [7:0] in = 0;
     wire [7:0] out;
 
-    asrm_stack #(.wordsize(8), .depth(10)) stack(
+    reflet_stack #(.wordsize(8), .depth(10)) stack(
         .clk(clk),
         .reset(reset),
         .push(push),

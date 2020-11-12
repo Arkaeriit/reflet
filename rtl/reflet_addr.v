@@ -4,9 +4,9 @@
 |Updating the stackPointer is done by the CPU.|
 \--------------------------------------------*/
 
-`include "asrm.vh"
+`include "reflet.vh"
 
-module asrm_addr#(
+module reflet_addr#(
     parameter wordsize = 16
     )(
     input clk,
@@ -64,7 +64,7 @@ module asrm_addr#(
     assign write_en = (instruction == `inst_push || instruction == `inst_call || opperand == `opp_str) & !fetching_instruction & !(|ram_not_ready);
     
     //handeling reduced behavior
-    asrm_addr_reduced_behavior #(.wordsize(wordsize)) reduced_behavior(
+    reflet_addr_reduced_behavior #(.wordsize(wordsize)) reduced_behavior(
         .clk(clk),
         .reset(reset),
         .fetching_instruction(fetching_instruction),

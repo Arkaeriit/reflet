@@ -1,10 +1,10 @@
 /*--------------------------------------------\
-|This module is ment to offload from asrm_addr|
+|This module is ment to offload from reflet_addr|
 |the task of changing how the ram is handeled |
 |depending on the reduced behavior bits.      |
 \--------------------------------------------*/
 
-module asrm_addr_reduced_behavior #(
+module reflet_addr_reduced_behavior #(
     parameter wordsize = 16
     )(
     input clk,
@@ -16,7 +16,7 @@ module asrm_addr_reduced_behavior #(
     //ram connection
     input [wordsize-1:0] data_in,
     output [wordsize-1:0] data_out,
-    //asrm_addr connection
+    //reflet_addr connection
     input [wordsize-1:0] data_out_cpu,
     output [wordsize-1:0] data_in_cpu
     );

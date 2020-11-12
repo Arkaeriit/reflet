@@ -3,30 +3,30 @@
 |used to make the simulator.                |
 \------------------------------------------*/
 
-#include "asrm.h"
-static void run_inst(asrm* vm);
-static int byteExchanged(const asrm* vm, bool stack_b);
-static word_t loadWordRAM(const asrm* vm, word_t addr, bool stack_b);
-static void putRAMWord(asrm* vm, word_t addr, word_t content, bool stack_b);
-static void io(asrm* vm);
-static word_t new_int(asrm* vm, int interupt);
-static void check_int(asrm* vm);
-static void ret_int(asrm* vm);
-static bool enabled_int(asrm* vm, int interupt);
+#include "reflet.h"
+static void run_inst(reflet* vm);
+static int byteExchanged(const reflet* vm, bool stack_b);
+static word_t loadWordRAM(const reflet* vm, word_t addr, bool stack_b);
+static void putRAMWord(reflet* vm, word_t addr, word_t content, bool stack_b);
+static void io(reflet* vm);
+static word_t new_int(reflet* vm, int interupt);
+static void check_int(reflet* vm);
+static void ret_int(reflet* vm);
+static bool enabled_int(reflet* vm, int interupt);
 #define min(x, y) (x < y ? x : y)
 
 /*
- * Create an asrm struct with the content described in content.h
+ * Create a reflet struct with the content described in content.h
  *  return:
  *      A pointer to the struct
  */
-asrm* asrm_init(){
-    asrm* ret = malloc(sizeof(asrm));
+reflet* reflet_init(){
+    reflet* ret = malloc(sizeof(reflet));
     ret->reg = calloc(NUMBER_OF_REGISTERS, sizeof(word_t));
     ret->ram = NULL; //Left blank, should be written a value depending of its configuration
     ret->active = true;
     //default config
-    struct asrm_config* conf = malloc(sizeof(struct asrm_config));
+    struct reflet_config* conf = malloc(sizeof(struct reflet_config));
     conf->word_size = WORD_SIZE;
     conf->word_size_byte = WORD_SIZE_BYTE;
     conf->word_mask = WORD_MASK;
@@ -36,25 +36,25 @@ asrm* asrm_init(){
     conf->rx_cmd = RX_CMD;
     conf->rx_data = RX_DATA;
     for(int i=0; i<4; i++){
-        struct asrm_config_int* interupt = malloc(sizeof(struct asrm_config_int));
+        struct reflet_config_int* interupt = malloc(sizeof(struct reflet_config_int));
         interupt->enable = false;
         interupt->freq = 0;
         conf->ints[i] = interupt;
     }
     ret->config = conf;
     //default debug
-    struct asrm_debug* debug = malloc(sizeof(struct asrm_debug));
+    struct reflet_debug* debug = malloc(sizeof(struct reflet_debug));
     debug->enable = false;
     debug->steps = 1;
     ret->debug = debug;
     //Interruption data
     for(int i=0; i<4; i++){
-        struct asrm_int* interupt = malloc(sizeof(struct asrm_int));
+        struct reflet_int* interupt = malloc(sizeof(struct reflet_int));
         interupt->routine = 0;
         interupt->count_up = 0;
         ret->ints[i] = interupt;
     }
-    struct asrm_int_level* level = malloc(sizeof(struct asrm_int_level));
+    struct reflet_int_level* level = malloc(sizeof(struct reflet_int_level));
     level->level = LEVEL_NORMAL;
     level->stack_depth = 0;
     ret->int_level = level;
@@ -65,16 +65,16 @@ asrm* asrm_init(){
 }
 
 /*
- * Setup the ram of an ASRM struct depending of its configuration
+ * Setup the ram of a Reflet struct depending of its configuration
  */
-void asrm_initRAM(asrm* vm){
+void reflet_initRAM(reflet* vm){
     vm->ram = calloc(vm->config->ram_size, sizeof(ram_word_t));
 }
 
 /*
- * Free an asrm struct
+ * Free a reflet struct
  */
-void asrm_free(asrm* vm){
+void reflet_free(reflet* vm){
     for(int i=0; i<4; i++){
         free(vm->ints[i]);
         free(vm->config->ints[i]);
@@ -92,7 +92,7 @@ void asrm_free(asrm* vm){
 /*
  * Run the program in the vm's RAM
  */
-void asrm_run(asrm* vm){
+void reflet_run(reflet* vm){
     while((PC(vm) < vm->config->ram_size) && vm->active){
         debugLog(vm);
         check_int(vm);
@@ -104,7 +104,7 @@ void asrm_run(asrm* vm){
 /*
  * Run a single instruction from the RAM
  */
-static void run_inst(asrm* vm){
+static void run_inst(reflet* vm){
     word_t reg_mask = vm->config->word_mask;
     uint8_t instruction = (uint8_t) vm->ram[PC(vm)];
     uint8_t opperand = (instruction & 0xF0) >> 4;
@@ -218,14 +218,14 @@ static void run_inst(asrm* vm){
  * Compute how many byte of data the processor should
  * exchange with the RAM
  *  Argument :
- *      vm : the asrm struct
+ *      vm : the reflet struct
  *      stack_b : are we ignoring the behavior bits?
  *  return :
  *      The number of byte exchange with the RAM, depending on the
  *      processor's word size and the reduced behavior bits in the
  *      status register.
  */
-static int byteExchanged(const asrm* vm, bool stack_b){
+static int byteExchanged(const reflet* vm, bool stack_b){
     if(stack_b)
         return vm->config->word_size_byte;
     switch((SR(vm) & 0x6) >> 1){
@@ -246,13 +246,13 @@ static int byteExchanged(const asrm* vm, bool stack_b){
 /*
  * Fetches a full word from ram
  *  Arguments:
- *      vm : the asrm struct
+ *      vm : the reflet struct
  *      addr : the address of the word to be fetched
  *      stack_b : are we ignoring the behavior bits
  *  return:
  *      The word in RAM (the byte at the address and the following bytes)
  */
-static word_t loadWordRAM(const asrm* vm, word_t addr, bool stack_b){
+static word_t loadWordRAM(const reflet* vm, word_t addr, bool stack_b){
     word_t ret = 0;
     for(int a=addr + byteExchanged(vm, stack_b) - 1; a>=addr; a--){
         ret += vm->ram[a];
@@ -265,12 +265,12 @@ static word_t loadWordRAM(const asrm* vm, word_t addr, bool stack_b){
 /*
  * Put a whole word in RAM
  *  Arguments:
- *      vm : the asrm struct
+ *      vm : the reflet struct
  *      addr : the startin address of where we must put the word
  *      content : the word to be put in RAM
  *      stack_b : are we ignoring the behavior bits
  */
-static void putRAMWord(asrm* vm, word_t addr, word_t content, bool stack_b){
+static void putRAMWord(reflet* vm, word_t addr, word_t content, bool stack_b){
     for(int offset=0; offset<byteExchanged(vm, stack_b); offset++){
         uint8_t byteToSend = (uint8_t) (content >> (offset * 8)) & 0xFF;
         vm->ram[addr+offset] = byteToSend;
@@ -282,7 +282,7 @@ static void putRAMWord(asrm* vm, word_t addr, word_t content, bool stack_b){
  * If the address 0 in ram is 0, the content of address 1 is printed.
  * If the address 2 in ram is 0, a char is read and put in address 3.
  */
-static void io(asrm* vm){
+static void io(reflet* vm){
     if(!vm->ram[vm->config->tx_cmd]){
         printf("%c",vm->ram[vm->config->tx_data]);
         vm->ram[vm->config->tx_cmd] = 'A';
@@ -297,12 +297,12 @@ static void io(asrm* vm){
  * When a nex interrupt is activated, this function
  * update the stacks and returns the address of the interrupt routine
  *  Arguments:
- *      vm: the asrm struct
+ *      vm: the reflet struct
  *      interupt: the number of the interrupt being activated
  *  returns:
  *      The address of the routine to engage because of the interrupt
  */
-static word_t new_int(asrm* vm, int interupt){
+static word_t new_int(reflet* vm, int interupt){
     word_t ret = vm->ints[interupt]->routine;
     vm->int_level->level_stack[vm->int_level->stack_depth] = vm->int_level->level;
     vm->int_level->routine_stack[vm->int_level->stack_depth] = PC(vm);
@@ -317,7 +317,7 @@ static word_t new_int(asrm* vm, int interupt){
  *  Arguments:
  *      vm: If you read the code, you know what it is
  */
-static void check_int(asrm* vm){
+static void check_int(reflet* vm){
     for(int i=0; i<4; i++) //increasing each timer
         vm->ints[i]->count_up++;
     for(int i=0; i<4; i++){
@@ -336,7 +336,7 @@ static void check_int(asrm* vm){
  * If there is no interrupts to return from, print a message
  * but do not do anything else.
  */
-static void ret_int(asrm* vm){
+static void ret_int(reflet* vm){
     if(vm->int_level->stack_depth){ //We are in an interrupt context, everything is fine
         vm->int_level->stack_depth--;
         vm->int_level->level = vm->int_level->level_stack[vm->int_level->stack_depth];
@@ -349,7 +349,7 @@ static void ret_int(asrm* vm){
 /*
  * Check if the interrup the enabled in the status register
  */
-static bool enabled_int(asrm* vm, int interupt){
+static bool enabled_int(reflet* vm, int interupt){
     char flags = (SR(vm) >> 3) & 0xF;
     bool ret = (flags >> interupt) & 1;
     return ret;
