@@ -6,10 +6,10 @@ INCLUDEPATH = /usr/include
 
 all : reflet-masm.bin libreflet-masm.so
 
-libreflet-masm.so : libreflet-masm.o lib.luac link.luac macro.luac readingCode.luac macro_assembler.luac
+libreflet-masm.so : libreflet-masm.o lib.luac link.luac macro.luac readingCode.luac macro_assembler.luac argFlags.luac
 	gcc -shared libreflet-masm.o $(REFLETPASM) -o libreflet-masm.so
 
-reflet-masm.bin : macro_assembler.o lib.luac link.luac macro.luac readingCode.luac macro_assembler.luac
+reflet-masm.bin : macro_assembler.o lib.luac link.luac macro.luac readingCode.luac macro_assembler.luac argFlags.luac
 	gcc macro_assembler.o $(LUA) $(REFLETPASM) -o reflet-masm.bin
 
 macro_assembler.o : macro_assembler.c
@@ -20,6 +20,9 @@ libreflet-masm.o : libreflet-masm.c libreflet-masm.h
 
 lib.luac : lib.lua
 	luac -o lib.luac lib.lua
+
+argFlags.luac : argFlags.lua
+	luac -o argFlags.luac argFlags.lua
 
 link.luac : link.lua
 	luac -o link.luac link.lua
@@ -38,7 +41,7 @@ install : install_macro install_lib
 install_macro :
 	mkdir -p /usr/local/share/reflet
 	cp -f reflet-masm.bin /usr/local/bin/reflet-masm
-	cp -f lib.luac link.luac macro.luac readingCode.luac macro_assembler.luac /usr/local/share/reflet/
+	cp -f lib.luac link.luac macro.luac readingCode.luac macro_assembler.luac argFlags.luac /usr/local/share/reflet/
 
 install_lib :
 	mkdir -p $(LIBPATH) $(INCLUDEPATH)
@@ -49,7 +52,7 @@ uninstall : uninstall_macro uninstall_lib
 
 uninstall_macro :
 	rm -f /usr/local/bin/reflet-masm
-	rm -f /usr/local/share/reflet/lib.luac /usr/local/share/reflet/link.luac /usr/local/share/reflet/macro.luac /usr/local/share/reflet/readingCode.luac /usr/local/share/reflet/macro_assembler.luac 
+	rm -f /usr/local/share/reflet/lib.luac /usr/local/share/reflet/link.luac /usr/local/share/reflet/macro.luac /usr/local/share/reflet/readingCode.luac /usr/local/share/reflet/macro_assembler.luac /usr/local/share/reflet/argFlags.luac
 
 uninstall_lib :
 	rm -f $(INCLUDEPATH)/reflet-masm.h

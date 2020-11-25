@@ -7,12 +7,14 @@
 #include <lualib.h>
 #include <lauxlib.h>
 #include <reflet-pasm.h>
+#include <stdbool.h>
 
 //wrapper for mini_assembleFile
 int lua_mini_assembleFile(lua_State* L){
-    const char* fileIn = luaL_checkstring(L, -2);
-    const char* fileOut = luaL_checkstring(L, -1);
-    mini_assembleFile(fileIn, fileOut);
+    const char* fileIn = luaL_checkstring(L, -3);
+    const char* fileOut = luaL_checkstring(L, -2);
+    bool set_prefix = lua_toboolean(L, -1);
+    mini_assembleFile(fileIn, fileOut, set_prefix);
     return 0;
 }
 

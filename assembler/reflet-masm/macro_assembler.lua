@@ -30,21 +30,24 @@ Unlike in most other file in this project, here wordsize is in bytes.
 
 ----- main steps -----
 
-local reading = function(filename, wordsize)
-    local f = io.open(filename, "r")
+local reading = function(fileList, wordsize)
     local ret = {}
     --Setting the stack pointer and jumping to start
     ret[1] = "setlab ##@@stack@@##"
     ret[2] = "cpy SP"
     ret[3] = "setlab start"
     ret[4] = "jmp" 
-    --The content of the file
-    local str = f:read()
-    while str do 
-        ret[#ret+1] = str
-        str = f:read()
+    --The content of the files
+    for i=1,#fileList do
+        print(fileList, fileList[i])
+        local f = io.open(fileList[i], "r")
+        local str = f:read()
+        while str do 
+            ret[#ret+1] = str
+            str = f:read()
+        end
+        f:close()
     end
-    f:close()
     --The stack is iitialised at the end of the code
     local firstFree = 4 + #ret --A 4 word majic word starts the binary programm
     while firstFree%wordsize ~= 0 do
@@ -126,7 +129,7 @@ local linking = function(tab, wordsize)
     return false
 end
 
-local compiling = function(tab, outFile)
+local compiling = function(tab, outFile, set_prefix)
     math.randomseed(os.time())
     local tmpFile = "/tmp/asrmasm"..tostring(math.random(10000))
     local f = io.open(tmpFile,"w")
@@ -134,10 +137,10 @@ local compiling = function(tab, outFile)
         f:write(tab[i].content)
     end
     f:close()
-    assembleFile(tmpFile, outFile)
+    assembleFile(tmpFile, outFile, set_prefix)
 end
 
------ function usable outside of the fine -----
+----- function usable outside of the file -----
 
 --create an ellement that will be put in the code list
 createElem = function(str, size, type)
@@ -150,42 +153,43 @@ macro_assembler = function(arg)
         print("reflet-masm : the Reflet macro-assembler.")
         print("Usage : reflet-masm <assembly file> <output file>")
     end
-    if #arg == 1 and (arg[1] == "help" or arg[1] == "--help" or arg[1] == "-h") then --asking for help
+    local flags = runArgs(arg)
+    if flags.help then
         help()
         return RET_OK
-    elseif #arg == 2 then --normal usage
-        local f = io.open(arg[1])
-        if not f then --checking for OK file
-            io.stderr:write("Error: unable to open ",arg[1], "\n")
-            return RET_UNOPEN_FILE
-        end
-        local frstLine = f:read():splitLine() --checking for word size
-        local wordsize = 2
-        if #frstLine == 2 and math.tointeger(frstLine[2]) and tonumber(frstLine[2]) > 0 and frstLine[1] == "wordsize" and math.tointeger(math.tointeger(frstLine[2]/8)) then
-            wordsize = math.tointeger(frstLine[2])/8 --wordsize in cunted in byte in all the files here but enterd in bits in the source file
-            if wordsize ~= 1 and wordsize ~= 2 and wordsize ~= 4 and wordsize ~= 8 then
-                io.stderr:write("Warning: non standart word size.\n")
-            end
-        else
-            io.stderr:write("Warning: no word size specified, used 2 bytes as default.\n")
-        end
-        f:close()
-        --assembling
-        local filetab = reading(arg[1], wordsize)
-        local tab,err = basicASM(filetab, wordsize)
-        if err then
-            return RET_ERROR_COMPILATION
-        end
-        err = linking(tab, wordsize)
-        if err then
-            return RET_ERROR_LINK
-        end
-        compiling(tab, arg[2])
-        return RET_OK
-    else --error
+    end
+    if flags.error then
         io.stderr:write("Error: invalid arguments.\n\n")
         help()
         return RET_INVALID_ARGS
     end
+    if flags.error_file then
+        return RET_UNOPEN_FILE
+    end
+    --checking for a valid wordsize
+    local f = io.open(flags.input[1],"r")
+    local frstLine = f:read():splitLine() --checking for word size
+    f:close()
+    local wordsize = 2
+    if #frstLine == 2 and math.tointeger(frstLine[2]) and tonumber(frstLine[2]) > 0 and frstLine[1] == "wordsize" and math.tointeger(math.tointeger(frstLine[2]/8)) then
+        wordsize = math.tointeger(frstLine[2])/8 --wordsize in cunted in byte in all the files here but enterd in bits in the source file
+        if wordsize ~= 1 and wordsize ~= 2 and wordsize ~= 4 and wordsize ~= 8 then
+            io.stderr:write("Warning: non standart word size.\n")
+        end
+    else
+        io.stderr:write("Warning: no word size specified, used 2 bytes as default.\n")
+    end
+    --assembling
+    local filetab = reading(flags.input, wordsize)
+    local tab,err = basicASM(filetab, wordsize)
+    if err then
+        return RET_ERROR_COMPILATION
+    end
+    err = linking(tab, wordsize)
+    if err then
+        return RET_ERROR_LINK
+    end
+    compiling(tab, flags.output, flags.set_prefix)
+    return RET_OK
 end
 
