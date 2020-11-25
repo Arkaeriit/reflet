@@ -159,8 +159,14 @@ end
 
 macro_assembler = function(arg)
     local help = function()
-        print("reflet-masm : the Reflet macro-assembler.")
-        print("Usage : reflet-masm <assembly file> <output file>")
+        print([[reflet-masm <input files> <options> -o <output file>
+reflet-masm -help
+
+The possible options are the following:
+* -no-prefix : does not put the 'ASRM' prefix at the beginning of the output file.
+* -no-stack-init : does not initialize the stack pointer. When not used, the stack pointer is by default initialized to just after the program.
+* -set-stack-to xxx : set the stack pointer to the address given just after the flag. Incompatible with -no-stack-init.
+* -start-addr xxx : tell the linker that the code should start at the given address.]])
     end
     local flags = runArgs(arg)
     if flags.help then

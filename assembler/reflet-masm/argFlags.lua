@@ -46,6 +46,9 @@ local defaults = function()
     --run along all the arguments and updates the table acordingle
     ret.readArgs = function(flags, arg)
         local ptn = 1
+        if #arg == 0 then
+            flags.help = true
+        end
         while ptn <= #arg do
             local isFlag, flag = readFlag(arg[ptn])
             if isFlag then

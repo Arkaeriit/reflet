@@ -1,5 +1,5 @@
 # REFLET
-A RISC ISA. Reflet stands for **R**ISC **E**lementary **FLE**xible **T**hinking machine.
+A RISC ISA. Reflet stands for **R**ISC **E**lementary **FLE**xible **T**hinking machine. To see a Reflet processor in action, see my implementation of a Reflet processor in a microcontroller here: https://github.com/Arkaeriit/Reflet-microcontroler.
 
 # This repository
 This repository contains a simulator for a Reflet processor, an assembler to create Reflet machine code, and a Verilog implementation of a Reflet processor.

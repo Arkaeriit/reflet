@@ -16,6 +16,17 @@ This is a macro-assembler. Not only can it assemble basic instructions but it ca
 
 To run it, the pico-assembler must be installed. 
 
+Usage:
+```
+reflet-masm <input files> <options> -o <output file>
+reflet-masm -help
+```
+The possible options are the following:
+* -no-prefix : does not put the 'ASRM' prefix at the beginning of the output file.
+* -no-stack-init : does not initialize the stack pointer. When not used, the stack pointer is by default initialized to just after the program.
+* -set-stack-to xxx : set the stack pointer to the address given just after the flag. Incompatible with -no-stack-init.
+* -start-addr xxx : tell the linker that the code should start at the given address. 
+
 ### Macro instructions
 Macro instructions let you combine multiples instructions in one line to make your code cleaner. They are useful because the instruction size of 8 bits limits a lot what can be done with basic instructions. 
 |Mnemonic|Followed by|Effect|
