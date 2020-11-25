@@ -113,12 +113,12 @@ end
 --Run the args and test for errors
 runArgs = function(arg)
     local ret = defaults()
-    ret:debugPrintFlags()
-    print()
+    --ret:debugPrintFlags()
+    --print()
     ret:readArgs(arg)
     ret:testFlags()
     ret:testFiles()
-    ret:debugPrintFlags()
+    --ret:debugPrintFlags()
     return ret
 end
 

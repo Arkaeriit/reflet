@@ -30,16 +30,21 @@ Unlike in most other file in this project, here wordsize is in bytes.
 
 ----- main steps -----
 
-local reading = function(fileList, wordsize)
+local reading = function(fileList, wordsize, set_stack, stack_value)
     local ret = {}
     --Setting the stack pointer and jumping to start
-    ret[1] = "setlab ##@@stack@@##"
-    ret[2] = "cpy SP"
-    ret[3] = "setlab start"
-    ret[4] = "jmp" 
+    if set_stack then
+        if stack_value then
+            ret[1] = "set+ "..tostring(stack_value)
+        else
+            ret[1] = "setlab ##@@stack@@##"
+        end
+        ret[2] = "cpy SP"
+    end
+    ret[#ret+1] = "setlab start"
+    ret[#ret+1] = "jmp" 
     --The content of the files
     for i=1,#fileList do
-        print(fileList, fileList[i])
         local f = io.open(fileList[i], "r")
         local str = f:read()
         while str do 
@@ -89,9 +94,13 @@ local basicASM = function(filetab, wordsize)
     return ret,false
 end
 
-local linking = function(tab, wordsize)
+local linking = function(tab, wordsize, start_addr, set_prefix)
     local labelMap = {}
-    local currentPointer = 4 --the first instruction is at addr 4
+    local offset_prefix= 0
+    if set_prefix then
+        offset_prefix = 4
+    end
+    local currentPointer = start_addr + offset_prefix --the first instruction is at addr 4
     --getting label positions
     for i=1,#tab do
         if tab[i].type == INST_LABEL then
@@ -180,12 +189,12 @@ macro_assembler = function(arg)
         io.stderr:write("Warning: no word size specified, used 2 bytes as default.\n")
     end
     --assembling
-    local filetab = reading(flags.input, wordsize)
+    local filetab = reading(flags.input, wordsize, flags.set_stack, flags.stack_value)
     local tab,err = basicASM(filetab, wordsize)
     if err then
         return RET_ERROR_COMPILATION
     end
-    err = linking(tab, wordsize)
+    err = linking(tab, wordsize, flags.start_addr, flags.set_prefix)
     if err then
         return RET_ERROR_LINK
     end
