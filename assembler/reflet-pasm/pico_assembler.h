@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-void mini_assembleFile(const char* fileIn, const char* fileOut);
+void mini_assembleFile(const char* fileIn, const char* fileOut, bool set_prefix);
 
 #define RET_INVALID_ARGS 1
 #define RET_UNOPEN_FILE 3

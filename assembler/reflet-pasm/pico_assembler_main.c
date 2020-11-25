@@ -14,7 +14,7 @@ int main(int argc, char** argv){
             return RET_INVALID_ARGS;
         }
     }else if(argc == 3){
-        mini_assembleFile(argv[1], argv[2]);
+        mini_assembleFile(argv[1], argv[2], true);
     }else{
         fprintf(stderr, "Error: invalid arguments.\n");
         help();

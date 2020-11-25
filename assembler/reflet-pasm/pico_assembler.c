@@ -6,7 +6,14 @@ static enum processLine_return preprocessLine(const char* line, char** ret);
 static bool makeInst(uint8_t opperand, bool isRegister, char* arg, uint8_t* ret);
 static void toLowerCase(char* str);
 
-void mini_assembleFile(const char* fileIn, const char* fileOut){
+/*
+ * Assemble a file
+ *  Arguments:
+ *      fileIn : path of the assembly file
+ *      fileOut : path of the binary output file
+ *      set_prefix : if true, will put "ASRM" at the beguiningof the file
+ */
+void mini_assembleFile(const char* fileIn, const char* fileOut, bool set_prefix){
     //opening files
     FILE* in;
     FILE* out;
@@ -19,10 +26,12 @@ void mini_assembleFile(const char* fileIn, const char* fileOut){
         exit(RET_UNOPEN_FILE);
     }
     //writing magic word
-    fputc('A', out);
-    fputc('S', out);
-    fputc('R', out);
-    fputc('M', out);
+    if(set_prefix){
+        fputc('A', out);
+        fputc('S', out);
+        fputc('R', out);
+        fputc('M', out);
+    }
     //assembling
     char* line = malloc(LINE_BUFF);
     int lineNumber = 1;
