@@ -7,7 +7,7 @@ end
 
 --check if a string is decribing a register
 local isreg = function(reg)
-    if reg == "WR" or reg == "SR" or reg == "PC3" or reg == "SP" then
+    if reg == "WR" or reg == "SR" or reg == "PC" or reg == "SP" then
         return true
     else
         return (reg:chat(1) == 'R' or reg:chat(1) == 'r') and validNum(reg:sub(2,#reg))
