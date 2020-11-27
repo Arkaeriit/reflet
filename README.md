@@ -69,7 +69,7 @@ Except in the case of overflows, Reflet machine code should work with Reflet pro
 
 
 ### Starting address
-Any byte is a valid Reflet instruction. To enable a minimal value of error-correcting, the 4 first byte of a machine code file can be reserved for the "Reflet" magic word. To enable the existence of the magic word, the program starts at the 5th byte, at address 4.
+Any byte is a valid Reflet instruction. To enable a minimal value of error-correcting, the 4 first byte of a machine code file can be reserved for the "ASRM" magic word. To enable the existence of the magic word, the program starts at the 5th byte, at address 4.
 
 ## Interruptions
 A Reflet processor can react to external interruption and do special routines. There are 4 different interruptions going from 0 (the highest priority to 3, the lowest priority).
