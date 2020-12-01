@@ -44,8 +44,8 @@ Here is a list of the instruction of Reflet processor.
 | not | 0x9 | A register | Put in the working register the bit-wise not of the argument register |
 | lsl | 0xA | A register | Shit the bits in working register to the left n times, where n is the content of the argument register |
 | lsr | 0xB | A register | Shit the bits in working register to the right n times, where n is the content of the argument register |
-| eq | 0xC | A register | If the content of the working register is the same as the one in the argument registers, set all the bits of the comparison register to one. Otherwise, they are set to 0 |
-| les | 0xD | A register | If the content of the working register is less than the one in the argument registers, set all the bits of the comparison register to one. Otherwise, they are set to 0 |
+| eq | 0xC | A register | If the content of the working register is the same as the one in the argument registers, sets the comparison bit of the status register to 1. Otherwise, sets it to 0 |
+| les | 0xD | A register | If the content of the working register is less than the one in the argument registers, sets the comparison bit of the status register to 1. Otherwise, sets it to 0 |
 | str | 0xE | A register with an address | Store the value in the working register to the address given in the argument register |
 | load | 0xF | A register with an address | Put in the working register the value at the address given in the argument register |
 | jmp | 0x08 | Nothing | Jump to the address in the working register, does not affect the stack. |
