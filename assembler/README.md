@@ -6,17 +6,22 @@ This folder contains two programs, **reflet-pasm** which is a very bare-bone ass
 
 Both assemblers are case-insensitive for mnemonic but case-sensitive for anything else.
 
-## Reflet-PASM
-This is a pico-assembler. It can only assemble basic instruction as described in the main README.md. It would be very tedious to use it but you have total control over what instructions will be created.
+## RefletPASM
+This is a pico-assembler. It can only assemble basic instructions as described in the main README.md. It would be very tedious to use it but you have total control over what instructions will be created.
 
 If you want to insert a byte into your program without having to write the instruction for it, you can write `rawbyte` followed by a single byte in base 10.
 
-## Reflet-MASM
+Usage:
+```
+reflet-pasm <input file> <output file>
+```
+
+## RefletMASM
 This is a macro-assembler. Not only can it assemble basic instructions but it can also assemble macro-instruction and manage labels. When using macro-instructions, the registers R11 and R12 might be used as temporary registers and overwritten. Furthermore, unless specified otherwise, the working registry will be modified.
 
 To run it, the pico-assembler must be installed. 
 
-Usage:
+### Usage
 ```
 reflet-masm <input files> <options> -o <output file>
 reflet-masm -help
@@ -26,6 +31,7 @@ The possible options are the following:
 * -no-stack-init : does not initialize the stack pointer. When not used, the stack pointer is by default initialized to just after the program.
 * -set-stack-to xxx : set the stack pointer to the address given just after the flag. Incompatible with -no-stack-init.
 * -start-addr xxx : tell the linker that the code should start at the given address. 
+* -ignore-start : if set, the program will not start at the "start" label but at the beginning of the first input file.
 
 ### Macro instructions
 Macro instructions let you combine multiples instructions in one line to make your code cleaner. They are useful because the instruction size of 8 bits limits a lot what can be done with basic instructions. 
@@ -70,7 +76,7 @@ rawbyte 0 ;null terminator
 ```
 
 ### Word size
-The various macro-instructions can be compiled differently depending on the target processor word size. Even if the code could be compatible with the various processor, using a smaller word size might not let make full use of the processor, and using a big one might create superfluous instruction. You should set the target word size by using the macro `wordsize` followed by the word size in bits in the first line of the assembly language file.
+The various macro-instructions can be compiled differently depending on the target processor's word size. Even if the code could be compatible with the various processor, using a smaller word size might not let make full use of the processor, and using a big one might create superfluous instruction. You should set the target word size by using the macro `wordsize` followed by the word size in bits in the first line of the assembly language file.
 
 ### Example
 This example shows a program that adds 30 to the register R2 on a 16-bit processor in an infinite loop.

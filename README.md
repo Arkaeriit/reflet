@@ -1,5 +1,5 @@
 # REFLET
-A RISC ISA. Reflet stands for **R**ISC **E**lementary **FLE**xible **T**hinking machine. To see a Reflet processor in action, see my implementation of a Reflet processor in a microcontroller here: https://github.com/Arkaeriit/Reflet-microcontroler.
+A RISC ISA. Reflet stands for **R**ISC **E**lementary **FLE**xible **T**hinking machine. To see a Reflet processor in action, see my implementation of a Reflet processor in a microcontroller here: https://github.com/Arkaeriit/Reflet-microcontroller. 
 
 # This repository
 This repository contains a simulator for a Reflet processor, an assembler to create Reflet machine code, and a Verilog implementation of a Reflet processor.
@@ -11,20 +11,23 @@ Most operations are made between one of the 12 general-purpose registers and an 
 
 ## Registers
 A Reflet processor got 16 registers.
+
 ### The working register
 R0 or WR is the working register.  This is the most important register, most operations will either copy its value into another register modify its content. Its use is never explicitly mentioned in the instructions as it is assumed that it is used most of the time. Its reset value is 0.
+
 ### General purpose registers
 R1 to r12 are the 12 general-purpose registers. They are meant to store values used to interact with the working register. Their reset values are 0.
+
 ### Status register
 R13 or SR is the status register. 
 * The first bit is the comparison bit. It is set to 1 when a comparison instruction is realized and 0 otherwise. The comparison bit is used for conditional jumps.  
 * The bits 2 and 1 are the reduced behaviors bits. When they are both set to 0, the processor behaves normally. When they are set to `b01`, if the word size of the processor is above 32 bits, the processor will act as a 32-bit processor when interfacing with memory. When they are set to `b10`, if the word size of the processor is above 16 bits, the processor will act as a 16-bit processor when interfacing with memory. When they are set to `b11`, the processor will act as an 8-bit processor when interfacing with memory.
-* The bits 3 to 6 are the flags to enable interrupts. Bit 3 enables interrupt 0, the bit 4 enables interrupt 1 up to bit 6 which enable interrupt 4.
-
+* The bits 3 to 6 are the flags to enable interrupts. Bit 3 enables interrupt 0, the bit 4 enables interrupt 1 up to bit 6 which enables interrupt 4.
 Its reset value is  0x1.
 
 ### Program counter
 R14 or PC is the program counter. It contains the address of the current address. It can also be used to jump to a specific code address when forcefully modified by the user. Its reset value is 4.
+
 ### Stack pointer
 R15 or SP is the stack pointer. It is updated when doing pop or push instructions and it points toward an address in RAM. Its reset value is 0 but it should be initialized if you intend to use the stack.
 
@@ -57,7 +60,7 @@ Here is a list of the instruction of Reflet processor.
 | quit | 0x0E | Nothing | Reset the processor or stop it. |
 | debug | 0x0F | Nothing | Does not modify any registers but the processor sends a signal to tell it is executing a debug instruction. |
 | cmpnot | 0x01 | Nothing | Flip the comparison bit of the status register. |
-| retint | 0X02 | Nothing | Return from an interruption context. | 
+| retint | 0x02 | Nothing | Return from an interruption context. | 
 | setint | b000001 | A two-bit number | Set the routine of the interruption of the given number to the address in the working register. |
 | *reserved* | 0x03 | Nothing | Reserved. |
 
