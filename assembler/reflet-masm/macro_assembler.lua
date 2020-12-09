@@ -30,7 +30,7 @@ Unlike in most other file in this project, here wordsize is in bytes.
 
 ----- main steps -----
 
-local reading = function(fileList, wordsize, set_stack, stack_value)
+local reading = function(fileList, wordsize, set_stack, stack_value, ignore_start)
     local ret = {}
     --Setting the stack pointer and jumping to start
     if set_stack then
@@ -41,8 +41,10 @@ local reading = function(fileList, wordsize, set_stack, stack_value)
         end
         ret[2] = "cpy SP"
     end
-    ret[#ret+1] = "setlab start"
-    ret[#ret+1] = "jmp" 
+    if not ignore_start then
+        ret[#ret+1] = "setlab start"
+        ret[#ret+1] = "jmp" 
+    end
     --The content of the files
     for i=1,#fileList do
         local f = io.open(fileList[i], "r")
@@ -166,7 +168,8 @@ The possible options are the following:
 * -no-prefix : does not put the 'ASRM' prefix at the beginning of the output file.
 * -no-stack-init : does not initialize the stack pointer. When not used, the stack pointer is by default initialized to just after the program.
 * -set-stack-to xxx : set the stack pointer to the address given just after the flag. Incompatible with -no-stack-init.
-* -start-addr xxx : tell the linker that the code should start at the given address.]])
+* -start-addr xxx : tell the linker that the code should start at the given address.
+* -ignore-start : if set, the program will not start at the "start" label but at the beginning of the first input file.]])
     end
     local flags = runArgs(arg)
     if flags.help then
@@ -195,7 +198,7 @@ The possible options are the following:
         io.stderr:write("Warning: no word size specified, used 2 bytes as default.\n")
     end
     --assembling
-    local filetab = reading(flags.input, wordsize, flags.set_stack, flags.stack_value)
+    local filetab = reading(flags.input, wordsize, flags.set_stack, flags.stack_value, flags.ignore_start)
     local tab,err = basicASM(filetab, wordsize)
     if err then
         return RET_ERROR_COMPILATION

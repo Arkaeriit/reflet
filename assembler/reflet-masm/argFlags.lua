@@ -4,7 +4,8 @@ The table resuming the arguments will contain a boolean field 'set_prefix'
 , a intger field 'start_addr', a string field 'output' containing the
 path of the output file, 'input' wich is a list of all the input files,
 a boolean "set_stack", "stack_value" which can be either nul or an
-integer, "error", "error_file" and "help" which are two booleans.
+integer, "error", "error_file", "ignore_start" and "help" which are
+two booleans.
 ]]
 
 --return if the string is a flag and if so, returns its name
@@ -28,7 +29,8 @@ local defaults = function()
         stack_value = nil,
         error = false,
         error_file = false,
-        help = false
+        help = false,
+        ignore_start = false
     }
 
     --print a the content of the flag struct
@@ -75,6 +77,8 @@ local defaults = function()
                     else
                         flags.error = true
                     end
+                elseif flag == "ignore-start" then
+                    flags.ignore_start = true
                 else --unknow flag
                     io.stderr:write("Error, unknow flag: ",flag, "\n")
                     flags.error = true
@@ -86,7 +90,7 @@ local defaults = function()
         end
     end
 
-    --check that there is no inconsistency il the flag givens
+    --check that there is no inconsistency in the flag givens
     ret.testFlags = function(flags)
         if not flags.help and 
         (((not flags.set_stack) and flags.stack_value ~= nil) or
