@@ -70,7 +70,7 @@ case(addr)
   7'h3b : ret = 8'h7b;
   7'h3c : ret = 8'h3f;
   7'h3d : ret = 8'h14; //cpy SP
-  7'h3e : ret = 8'h3c; //set+ 43947
+  7'h3e : ret = 8'h3c; //set+ 43981 ;0xABCD
   7'h3f : ret = 8'h10;
   7'h40 : ret = 8'h3b;
   7'h41 : ret = 8'h1a;
@@ -81,11 +81,11 @@ case(addr)
   7'h46 : ret = 8'h7b;
   7'h47 : ret = 8'hac;
   7'h48 : ret = 8'h3b;
-  7'h49 : ret = 8'h1a;
+  7'h49 : ret = 8'h1c;
   7'h4a : ret = 8'h7b;
   7'h4b : ret = 8'hac;
   7'h4c : ret = 8'h3b;
-  7'h4d : ret = 8'h1b;
+  7'h4d : ret = 8'h1d;
   7'h4e : ret = 8'h7b;
   7'h4f : ret = 8'hb;  //push
   7'h50 : ret = 8'h16; //set 6

@@ -22,22 +22,22 @@ module simu3();
         .write_en(write_en),
         .ext_int(4'h0));
 
-    //The rom got the addresses between 0x00 and 0x7F
+    //The rom got the addresses between 0x0000 and 0x7FFF
     wire [7:0] dataRom;
     rom3 rom3(
         .clk(clk), 
         .enable_out(!addr[15]), 
         .addr(addr[7:0]), 
         .dataOut(dataRom));
-    //The ram got the addresses between 0x80 and 0xFF
+    //The ram got the addresses between 0x8000 and 0xFFFF
     wire [15:0] dataRam;
-    ram16 #(.addrSize(15)) ram(
+    reflet_ram16 #(.addrSize(15)) ram(
         .clk(clk), 
         .reset(reset), 
-        .output_en(addr[15]), 
+        .enable(addr[15]), 
         .addr(addr[14:0]), 
         .data_in(dOut), 
-        .write_rq(write_en), 
+        .write_en(write_en), 
         .data_out(dataRam));
 
     assign dIn = dataRam | {8'h0, dataRom};

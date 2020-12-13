@@ -31,13 +31,13 @@ module simu4();
         .dataOut(dataRom));
     //The ram got the addresses between 0x80 and 0xFF
     wire [15:0] dataRam;
-    ram16 #(.addrSize(15)) ram(
+    reflet_ram16 #(.addrSize(15)) ram(
         .clk(clk), 
         .reset(reset), 
-        .output_en(addr[15]), 
+        .enable(addr[15]), 
         .addr(addr[14:0]), 
         .data_in(dOut), 
-        .write_rq(write_en), 
+        .write_en(write_en), 
         .data_out(dataRam));
 
     assign dIn = dataRam | {8'h0, dataRom};

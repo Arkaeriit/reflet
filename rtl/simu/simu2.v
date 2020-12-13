@@ -20,7 +20,7 @@ module simu2();
         .addr(addr), 
         .data_out(dOut), 
         .write_en(write_en),
-        .extint(4'h0));
+        .ext_int(4'h0));
 
     //The rom got the addresses between 0x00 and 0x7F
     wire [7:0] dataRom;
@@ -31,13 +31,13 @@ module simu2();
         .out(dataRom));
     //The ram got the addresses between 0x80 and 0xFF
     wire [7:0] dataRam;
-    ram #(.addrSize(7), .contentSize(8)) ram(
+    reflet_ram8 #(.addrSize(7)) ram(
         .clk(clk), 
         .reset(reset), 
-        .output_en(addr[7]), 
+        .enable(addr[7]), 
         .addr(addr[6:0]), 
         .data_in(dOut), 
-        .write_rq(write_en), 
+        .write_en(write_en), 
         .data_out(dataRam));
 
     assign dIn = dataRam | dataRom;
