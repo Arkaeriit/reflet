@@ -254,9 +254,9 @@ static int byteExchanged(const reflet* vm, bool stack_b){
  */
 static word_t loadWordRAM(const reflet* vm, word_t addr, bool stack_b){
     word_t ret = 0;
-    for(int a=addr + byteExchanged(vm, stack_b) - 1; a>=addr; a--){
-        ret += vm->ram[a];
-        if(a != addr)
+    for(size_t a=addr + byteExchanged(vm, stack_b); a>addr; a--){
+        ret += vm->ram[a-1];
+        if(a-1 != addr)
             ret = ret << 8;
     }
     return ret;
@@ -271,7 +271,7 @@ static word_t loadWordRAM(const reflet* vm, word_t addr, bool stack_b){
  *      stack_b : are we ignoring the behavior bits
  */
 static void putRAMWord(reflet* vm, word_t addr, word_t content, bool stack_b){
-    for(int offset=0; offset<byteExchanged(vm, stack_b); offset++){
+    for(size_t offset=0; offset<byteExchanged(vm, stack_b); offset++){
         uint8_t byteToSend = (uint8_t) (content >> (offset * 8)) & 0xFF;
         vm->ram[addr+offset] = byteToSend;
     }
