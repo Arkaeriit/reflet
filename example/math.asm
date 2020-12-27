@@ -40,7 +40,7 @@ label intMult
 
 ;--------------------------
 ;Put the quotient of the integer division of R1 by R2 into R1 and the modulo in R2
-label intDiv:
+label intDiv
     pushr R3 ;quotient tmp
     pushr R5
     pushr R6

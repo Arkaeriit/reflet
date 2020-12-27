@@ -14,7 +14,7 @@ label printc
         load R2 ;testing that R2 is 0 to see if we are ready to print
         cpy R12
         set 0
-        less
+        les R12
         read R4 ;until ready, go back
         jif
     set 1    ;computing the data addr
@@ -30,6 +30,36 @@ label printc
         
 ;----------------------
 ;compute the length of a 0-terminated string in R1 and write the result in R1
-label strlength
-    
-    
+label strlen
+    pushr R2 ;str pointer
+    pushr R3 ;loop pointer
+    pushr R4 ;buffer register to store a null byte as a comparaison test
+    pushr SR ;We need to be in byte-mode for the reading
+    set 6    ;getting tn byte-mode
+    cpy SR
+    mov R2 R3 ;init registers
+    setlab strlenLoop 
+    cpy R3
+    set 0
+    cpy R4
+    label strlenLoop
+        load R2 ;reading byte
+        eq R4   ;comparing
+        cmpnot
+        set 1   ;incresing the str pointer
+        add R2
+        cpy R2
+        read R3 ;jumping back if needed
+        jif
+    set 1 ;decreasing the str pointer by 1 as we increased it even if not needed
+    cpy R3
+    read R2
+    sub R3
+    sub R1 ;computing the offset
+    cpy R1 ;puting the result
+    popr SR ;restauring tmp registers
+    popr R4
+    popr R3
+    popr R2
+    ret
+
