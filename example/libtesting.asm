@@ -6,12 +6,14 @@ data "Reflet is a neat ISA!"
 rawbytes 10 0
 
 label start
-    callf testingMath
+    ;callf testingMath
+    ;debug
     callf testingPrinting
+    ;debug
     quit
 
 label testingMath
-    set+ 40 ;testing intMult
+    set 13 ;testing intMult
     cpy R1
     set 15
     cpy R2
@@ -31,12 +33,15 @@ label testingMath
     cpy R1
     set 4
     cpy R2
+    debug
     callf intPow
     read R1
     debug
     ret
 
 label testingPrinting
+    ;read SP
+    ;debug
     set+ 64
     cpy R1
     callf printc
@@ -45,5 +50,7 @@ label testingPrinting
     callf strlen
     read R1
     debug
+    ;read SP
+    ;debug
     ret
 

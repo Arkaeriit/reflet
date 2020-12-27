@@ -135,7 +135,7 @@ static void run_inst(reflet* vm){
             }else if(instruction == QUIT){
                 vm->active = false;
             }else if(instruction == DEBUG){
-                printf("Debug instruction reached at address %" WORD_PX ". The content of the working register is %" WORD_PX "\n", PC(vm)-1, WR(vm));
+                printf("Debug instruction reached at address %" WORD_PX ". The content of the working register is 0x%" WORD_PX "\n", PC(vm)-1, WR(vm));
             }else if(instruction == CMPNOT){
                 if(SR(vm) & 1)
                     SR(vm) = (SR(vm) >> 1) << 1; //We want to turn the LSB into a 0

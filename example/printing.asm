@@ -6,15 +6,19 @@
 label printc
     pushr R2 ;addrs
     pushr R4 ;waiting loop pointer
+    pushr SR ;using byte mode
+    set 6
+    cpy SR
     set+ 0 ;UART tx_cmd addr
     cpy R2
     setlab printcLoop
     cpy R4
     label printcLoop
+        read R2
         load R2 ;testing that R2 is 0 to see if we are ready to print
         cpy R12
         set 0
-        les R12
+        eq R12
         read R4 ;until ready, go back
         jif
     set 1    ;computing the data addr
@@ -24,6 +28,7 @@ label printc
     str R12
     set 0   ;sending command
     str R2
+    popr SR
     popr R4 ;restoring registers
     popr R2
     ret

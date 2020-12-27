@@ -14,9 +14,9 @@ RET_UNOPEN_FILE = 3
 RET_ERROR_COMPILATION = 5
 RET_ERROR_LINK = 6
 
------ auxyliary functions -----
+----- auxiliary functions -----
 
---idexes a single char from a string
+--indexes a single char from a string
 string.chat = function(str, index)
     return str:sub(index, index)
 end

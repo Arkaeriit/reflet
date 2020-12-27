@@ -56,7 +56,7 @@ local reading = function(fileList, wordsize, set_stack, stack_value, ignore_star
         f:close()
     end
     --The stack is iitialised at the end of the code
-    local firstFree = 4 + #ret --A 4 word majic word starts the binary programm
+    local firstFree = 4 + #ret --A 4 word magic word starts the binary programm
     while firstFree%wordsize ~= 0 do
         ret[#ret+1] = "slp"
         firstFree = 4 + #ret
