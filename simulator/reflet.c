@@ -110,10 +110,11 @@ static void run_inst(reflet* vm){
     uint8_t opperand = (instruction & 0xF0) >> 4;
     uint8_t reg = instruction & 0x0F;
     word_t debug_helper[16];
-     /*
+    // /*
     for(int i=0; i<16; i++) //Comment out this line and the following when not doing tests with a debuger
         debug_helper[i] = vm->reg[i];
-     */
+    uint8_t* stack = vm->ram + PC(vm);
+    // */
         PC(vm)++;
     switch(opperand){
         case 0:
@@ -258,11 +259,12 @@ static int byteExchanged(const reflet* vm, bool stack_b){
  *      The word in RAM (the byte at the address and the following bytes)
  */
 static word_t loadWordRAM(const reflet* vm, word_t addr, bool stack_b){
+    uint8_t* target = vm->ram + addr;
+    int exchanged = byteExchanged(vm, stack_b);
     word_t ret = 0;
-    for(size_t a=addr + byteExchanged(vm, stack_b); a>addr; a--){
-        ret += vm->ram[a-1];
-        if(a-1 != addr)
-            ret = ret << 8;
+    for(size_t i=0; i<exchanged; i++){
+        ret = ret << 8;
+        ret += target[exchanged-i-1];
     }
     return ret;
 }
@@ -276,9 +278,10 @@ static word_t loadWordRAM(const reflet* vm, word_t addr, bool stack_b){
  *      stack_b : are we ignoring the behavior bits
  */
 static void putRAMWord(reflet* vm, word_t addr, word_t content, bool stack_b){
+    uint8_t* target = vm->ram + addr;
     for(size_t offset=0; offset<byteExchanged(vm, stack_b); offset++){
         uint8_t byteToSend = (uint8_t) (content >> (offset * 8)) & 0xFF;
-        vm->ram[addr+offset] = byteToSend;
+        target[offset] = byteToSend;
     }
 }
 

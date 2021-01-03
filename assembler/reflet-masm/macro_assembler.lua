@@ -73,7 +73,7 @@ local basicASM = function(filetab, wordsize)
         local type = analyzeLine(str)
         --print(type, str)
         if type == INST_ERR then
-            io.stderr:write("Syntax error line ",line - 4,"\n") -- -4 is not to bither the user with the 4 line runtime
+            io.stderr:write("Syntax error line ",line - 4,": ", str,"\n") -- -4 is not to bither the user with the 4 line runtime
             return nil,true
         elseif type == INST_BAS then
             ret[#ret+1] = createElem(str..'\n', 1, INST_BAS)

@@ -9,11 +9,17 @@ libtesting : libtesting.bin
 exampleIO : exampleIO.bin
 	reflet-sim exampleIO.bin
 
-libtesting.bin : libtesting.asm
+primes : primes.bin
+	reflet-sim primes.bin config16
+
+libtesting.bin : libtesting.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm 
 	reflet-masm libtesting.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm -o libtesting.bin
 
 exampleIO.bin : exampleIO.asm
 	reflet-masm exampleIO.asm -o exampleIO.bin
+
+primes.bin : primes.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm 
+	reflet-masm primes.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm -o primes.bin -wordsize 16
 
 clean :
 	rm -f *.bin
