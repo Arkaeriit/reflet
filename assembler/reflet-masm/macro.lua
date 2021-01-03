@@ -95,7 +95,7 @@ expandMacro = function(str, wordsize)
     elseif mnemonic == "mov" then
         return mov(tabInst)
     elseif mnemonic == "setr" then
-        return setr(tabInst)
+        return setr(tabInst, wordsize)
     elseif mnemonic == "rawbytes" then
         return rawbytes(tabInst)
     elseif mnemonic == "data" then
