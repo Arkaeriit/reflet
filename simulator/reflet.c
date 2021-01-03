@@ -109,7 +109,12 @@ static void run_inst(reflet* vm){
     uint8_t instruction = (uint8_t) vm->ram[PC(vm)];
     uint8_t opperand = (instruction & 0xF0) >> 4;
     uint8_t reg = instruction & 0x0F;
-    PC(vm)++;
+    word_t debug_helper[16];
+    /*
+    for(int i=0; i<16; i++) //Comment out this line and the following when not doing tests with a debuger
+        debug_helper[i] = vm->reg[i];
+    */
+        PC(vm)++;
     switch(opperand){
         case 0:
             if(instruction == SLP){
@@ -120,17 +125,17 @@ static void run_inst(reflet* vm){
                 if(SR(vm) & 1)
                     PC(vm) = WR(vm);
             }else if(instruction == POP){
-                SP(vm) = (SP(vm) - 1) & reg_mask;
-                WR(vm) = loadWordRAM(vm, SP(vm), true);
+                SP(vm) = (SP(vm) - byteExchanged(vm, false)) & reg_mask;
+                WR(vm) = loadWordRAM(vm, SP(vm), false);
             }else if(instruction == PUSH){
-                putRAMWord(vm, SP(vm), WR(vm), true);
-                SP(vm) = (SP(vm) + 1) & reg_mask;
+                putRAMWord(vm, SP(vm), WR(vm), false);
+                SP(vm) = (SP(vm) + byteExchanged(vm, false)) & reg_mask;
             }else if(instruction == CALL){
-                putRAMWord(vm, SP(vm), PC(vm), true); //-1 because we already updated the PC and we want to store the address of the call
-                SP(vm) = (SP(vm) + 1) & reg_mask;
+                putRAMWord(vm, SP(vm), PC(vm), true);
+                SP(vm) = (SP(vm) + byteExchanged(vm, true)) & reg_mask;
                 PC(vm) = WR(vm);
             }else if(instruction == RET){
-                SP(vm) = (SP(vm) - 1) & reg_mask;
+                SP(vm) = (SP(vm) - byteExchanged(vm, true)) & reg_mask;
                 PC(vm) = loadWordRAM(vm, SP(vm), true);
             }else if(instruction == QUIT){
                 vm->active = false;
