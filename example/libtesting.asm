@@ -62,5 +62,9 @@ label testingPrinting
     cpy R1
     callf printNum ;expecting '34567'
     callf CR
+    set 0
+    cpy R1
+    callf printNum ;expecting '0'
+    callf CR
     ret
 

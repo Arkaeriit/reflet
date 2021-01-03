@@ -11,12 +11,15 @@ label (print)
     pushr R3 ;loop pointer
     pushr R4 ;end loop pointer
     pushr R5 ;contain the constant 1
+    pushr R6 ;pointer to printc
     setlab (print)-loop
     cpy R3
     setlab (print)-endloop
     cpy R4
     set 1
     cpy R5
+    setlab printc
+    cpy R6
     label (print)-loop
         set 0 ;testing for the end of the loop
         eq R2
@@ -26,7 +29,8 @@ label (print)
         cpy R12 ;saving R1 while calling the function printc
         pushr R1
         mov R1 R12
-        callf printc  ;as reflet is litle-endian, no need for further process
+        read R6 ;calling printc
+        call  ;as reflet is litle-endian, no need for further process
         popr R1 ;restoring R1
         read R1 ;updating R1 and R2
         add R5
@@ -37,7 +41,8 @@ label (print)
         read R3 ;going back on top of the loop
         jmp
     label (print)-endloop
-    popr R5 ;restauring registers
+    popr R6 ;restauring registers
+    popr R5
     popr R4
     popr R3
     popr R2
@@ -70,14 +75,18 @@ label num2dec
     pushr R4 ;R4 will hold 10 to to division
     pushr R5 ;R5 will hold 48 to convert numbers to ASCII
     pushr R6 ;loop pointer
+    pushr R7 ;pointer to intDiv
     mov R3 R2 ;init registers
     setlab num2decLoop
     cpy R6
     setr R4 10
     setr R5 48
+    setlab intDiv
+    cpy R7
     label num2decLoop
         mov R2 R4 ;preparing the division
-        callf intDiv
+        read R7 ;calling intDiv
+        call
         read R2 ;converting modulo to ASCII
         add R5
         str R3 ;writing result in string. Reflet is little endian so no need for masks
@@ -91,7 +100,8 @@ label num2dec
         jif
     set 0  ;Null-terminating the string
     str R3
-    popr R6 ;restoring registers
+    popr R7 ;restoring registers
+    popr R6
     popr R5
     popr R4
     popr R3

@@ -10,6 +10,7 @@ label isPrime
     pushr R4 ;end pointer
     pushr R5 ;loop pointer
     pushr R6 ;other end pointer
+    pushr R7 ;intDiv
     set 2 ;init registers
     cpy R3
     setlab isPrimeNot
@@ -18,6 +19,8 @@ label isPrime
     cpy R5
     setlab isPrimeYes
     cpy R6
+    setlab intDiv
+    cpy R7
     label isPrimeLoop
         read R3 ;if we tried all numbers, is prime
         eq R1
@@ -25,7 +28,8 @@ label isPrime
         jif
         pushr R1 ;testing R1%R3
         mov R2 R3
-        callf intDiv
+        read R7 ;calling intDiv
+        call
         popr R1
         set 0
         eq R2
@@ -37,6 +41,7 @@ label isPrime
         read R5 ;going back
         jmp
     label isPrimeYes ;in case of a prime
+    popr R7
     popr R6
     popr R5
     popr R4
@@ -45,6 +50,7 @@ label isPrime
     cpy R2
     ret
     label isPrimeNot ;in case of not a prime
+    popr R7
     popr R6
     popr R5
     popr R4
