@@ -96,6 +96,8 @@ label num2dec
     popr R4
     popr R3
     popr R2
+    mov R1 R2 ;fliping the string
+    callf strFlip
     popr R1
     ret
     label num2dec0 ;If the number to convert is 0
@@ -106,5 +108,20 @@ label num2dec
     str R12
     set 0
     str R12
+    ret
+
+;-----------------------
+;Print in decimal the number in R1
+label printNum
+    pushr R2 ;string
+    set+ 100 ;creating a string on the stack to store the result
+    add SP
+    cpy R2
+    callf num2dec ;filling the string with the decimal number
+    pushr R1 
+    mov R1 R2 ;printing it
+    callf print
+    popr R1
+    popr R2
     ret
     

@@ -85,3 +85,72 @@ label memset
     popr R1
     ret
 
+;-------------------------------------------
+;Flip the string in R1
+label strFlip
+    pushr R2 ;length
+    pushr R3 ;current offset
+    pushr R4 ;max offset
+    pushr R5 ;loop pointer
+    pushr R6
+    pushr R7 ;save status register
+    pushr R8 ;scratch register
+    pushr R1 ;init registers
+    callf strlen
+    read R1
+    cpy R2
+    popr R1
+    set 0
+    cpy R3
+    set 1
+    cpy R12
+    read R2
+    lsr R12
+    cpy R4
+    setlab strFlipLoop
+    cpy R5
+    setlab strFlipLoopEnd
+    cpy R6
+    mov R7 SR ;byte mode
+    set 6
+    cpy SR
+    label strFlipLoop
+        read R3 ;if done, go to the end
+        eq R4
+        read R6
+        jif
+        read R1 ;geting the start char
+        add R3
+        cpy R11 ;copy of the start index
+        load WR
+        push
+        set 1 ;getting the end char
+        cpy R12
+        read R1
+        add R2
+        sub R3
+        sub R12
+        cpy R12 ;copy of the end index
+        load R12
+        cpy R8
+        pop  ;putting the front char at the end
+        str R12
+        read R8 ;putting the end char at the front
+        str R11
+        set 1 ;updating R3
+        add R3
+        cpy R3
+        read R5 ;jumping back
+        jmp
+    label strFlipLoopEnd
+    read R7 ;restoring SR
+    cpy SR
+    popr R8 ;restoring registers
+    popr R7
+    popr R6
+    popr R5
+    popr R4
+    popr R3
+    popr R2
+    ret
+

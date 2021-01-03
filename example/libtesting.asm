@@ -56,10 +56,11 @@ label testingPrinting
     cpy R2
     set+ 1234
     cpy R1
-    debug
-    callf num2dec
-    mov R1 R2
-    callf print
+    callf printNum ;expecting '1234'
+    callf CR
+    set+ 34567
+    cpy R1
+    callf printNum ;expecting '34567'
     callf CR
     ret
 
