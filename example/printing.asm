@@ -76,3 +76,66 @@ label strlen
     popr R2
     ret
 
+;----------------------
+;Print a string whose pointer is in R1 and whose length is in R2
+label (print)
+    pushr R1
+    pushr R2
+    pushr R3 ;loop pointer
+    pushr R4 ;end loop pointer
+    pushr R5 ;contain the constant 1
+    setlab (print)-loop
+    cpy R3
+    setlab (print)-endloop
+    cpy R4
+    set 1
+    cpy R5
+    label (print)-loop
+        set 0 ;testing for the end of the loop
+        eq R2
+        read R4
+        jif
+        load R1 ;printing the char pointed at R1
+        cpy R12 ;saving R1 while calling the function printc
+        pushr R1
+        mov R1 R12
+        callf printc  ;as reflet is litle-endian, no need for further process
+        popr R1 ;restoring R1
+        read R1 ;updating R1 and R2
+        add R5
+        cpy R1
+        read R2
+        sub R5
+        cpy R2
+        read R3 ;going back on top of the loop
+        jmp
+    label (print)-endloop
+    popr R5 ;restauring registers
+    popr R4
+    popr R3
+    popr R2
+    popr R1
+    ret
+
+;--------------------------
+;print the 0-terminated string in R1
+label print
+    pushr R2
+    pushr R1
+    callf strlen
+    mov R2 R1
+    popr R1
+    callf (print)
+    popr R2
+    ret
+
+;----------------------------
+;print \n
+label CR
+    pushr R1
+    set 10
+    cpy R1
+    callf printc
+    popr R1
+    ret
+

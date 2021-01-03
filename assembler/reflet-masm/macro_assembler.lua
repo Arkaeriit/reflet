@@ -169,7 +169,8 @@ The possible options are the following:
 * -no-stack-init : does not initialize the stack pointer. When not used, the stack pointer is by default initialized to just after the program.
 * -set-stack-to xxx : set the stack pointer to the address given just after the flag. Incompatible with -no-stack-init.
 * -start-addr xxx : tell the linker that the code should start at the given address.
-* -ignore-start : if set, the program will not start at the "start" label but at the beginning of the first input file.]])
+* -ignore-start : if set, the program will not start at the "start" label but at the beginning of the first input file.
+* -wordsize xxx : set the wordsize to xxx (a number in bits). This overrides any information about wordsize written in the assembly file.]])
     end
     local flags = runArgs(arg)
     if flags.help then
@@ -189,13 +190,17 @@ The possible options are the following:
     local frstLine = f:read():splitLine() --checking for word size
     f:close()
     local wordsize = 2
-    if #frstLine == 2 and math.tointeger(frstLine[2]) and tonumber(frstLine[2]) > 0 and frstLine[1] == "wordsize" and math.tointeger(math.tointeger(frstLine[2]/8)) then
-        wordsize = math.tointeger(frstLine[2])/8 --wordsize in cunted in byte in all the files here but enterd in bits in the source file
-        if wordsize ~= 1 and wordsize ~= 2 and wordsize ~= 4 and wordsize ~= 8 then
-            io.stderr:write("Warning: non standart word size.\n")
-        end
+    if flags.wordsize then
+        wordsize = flags.wordsize/8
     else
-        io.stderr:write("Warning: no word size specified, used 2 bytes as default.\n")
+        if #frstLine == 2 and math.tointeger(frstLine[2]) and tonumber(frstLine[2]) > 0 and frstLine[1] == "wordsize" and math.tointeger(math.tointeger(frstLine[2]/8)) then
+            wordsize = math.tointeger(frstLine[2])/8 --wordsize in cunted in byte in all the files here but enterd in bits in the source file
+            if wordsize ~= 1 and wordsize ~= 2 and wordsize ~= 4 and wordsize ~= 8 then
+                io.stderr:write("Warning: non standart word size.\n")
+            end
+        else
+            io.stderr:write("Warning: no word size specified, used 2 bytes as default.\n")
+        end
     end
     --assembling
     local filetab = reading(flags.input, wordsize, flags.set_stack, flags.stack_value, flags.ignore_start)

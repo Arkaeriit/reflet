@@ -42,10 +42,14 @@ label testingPrinting
     set+ 64
     cpy R1
     callf printc ;should print '@'
+    callf CR ;should print a newline
     setlab testString
     cpy R1
     callf strlen
     read R1
     debug ;expecting the length of the string which is 22 = 0x16
+    setlab testString
+    cpy R1
+    callf print ;should print "Reflet is a neat ISA!\n"
     ret
 

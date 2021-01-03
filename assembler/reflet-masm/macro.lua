@@ -31,8 +31,7 @@ end
 local rawbytes = function(tabInst)
     local str = ""
     for i=2,#tabInst do
-        if not math.tointeger(tabInst[i]) or math.tointeger(tabInst[i]) >= 255 then
-            print(math.tointeger(tabInst[i]), math.tointeger(tabInst[i] >= 255))
+        if not math.tointeger(tabInst[i]) or math.tointeger(tabInst[i]) > 255 then
             io.stderr:write(tabInst[i], " is not a valid byte\n")
             return nil
         end

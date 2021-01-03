@@ -1,7 +1,7 @@
 wordsize 8
 ; This small program is ment to be assembled with reflet-masm
 ; it asks a character from the user and print it 10 times
-; To assemble it, do reflet-masm exampleIO.asm exampleIO.bin
+; To assemble it, do reflet-masm exampleIO.asm -o exampleIO.bin
 ; To run it, do reflet-sim exampleIO.rbin
 ; (As this is a 8 bit program, the default configuration is enought)
 
@@ -29,8 +29,7 @@ pop
 sub r1 ; Substracting one
 eq r2 ; are we equal to 0 ?
 push
-not CR
-cpy CR
+cmpnot
 setlab loop
 jif
 

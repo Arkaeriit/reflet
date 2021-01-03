@@ -4,8 +4,8 @@ The table resuming the arguments will contain a boolean field 'set_prefix'
 , a intger field 'start_addr', a string field 'output' containing the
 path of the output file, 'input' wich is a list of all the input files,
 a boolean "set_stack", "stack_value" which can be either nul or an
-integer, "error", "error_file", "ignore_start" and "help" which are
-two booleans.
+integer, "wordsize" which can evaluate to false or a number,
+"error", "error_file", "ignore_start" and "help" which are booleans.
 ]]
 
 --return if the string is a flag and if so, returns its name
@@ -27,6 +27,7 @@ local defaults = function()
         input = {},
         set_stack = true,
         stack_value = nil,
+        wordsize = nil,
         error = false,
         error_file = false,
         help = false,
@@ -56,6 +57,13 @@ local defaults = function()
             if isFlag then
                 if flag == "help" or flag == "h" then
                     flags.help = true
+                elseif flag == "wordsize" then
+                    if math.tointeger(arg[ptn+1]) then
+                        flags.wordsize = math.tointeger(arg[ptn+1])
+                        ptn = ptn + 1
+                    else
+                        flags.error = true
+                    end
                 elseif flag == "no-prefix" then
                     flags.set_prefix = false
                 elseif flag == "no-stack-init" then
@@ -95,6 +103,7 @@ local defaults = function()
         if not flags.help and 
         (((not flags.set_stack) and flags.stack_value ~= nil) or
         (#flags.input == 0) or 
+        (flags.wordsize and flags.wordsize % 8 ~= 0) or
         (flags.output == "")) then
             flags.error = true
         end

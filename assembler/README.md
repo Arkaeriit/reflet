@@ -32,6 +32,7 @@ The possible options are the following:
 * -set-stack-to xxx : set the stack pointer to the address given just after the flag. Incompatible with -no-stack-init.
 * -start-addr xxx : tell the linker that the code should start at the given address. 
 * -ignore-start : if set, the program will not start at the "start" label but at the beginning of the first input file.
+* -wordsize xxx : set the wordsize to xxx (a number in bits). This overrides any information about wordsize written in the assembly file.
 
 ### Macro instructions
 Macro instructions let you combine multiples instructions in one line to make your code cleaner. They are useful because the instruction size of 8 bits limits a lot what can be done with basic instructions. 
