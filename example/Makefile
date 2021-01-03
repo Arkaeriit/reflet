@@ -10,7 +10,7 @@ exampleIO : exampleIO.bin
 	reflet-sim exampleIO.bin
 
 libtesting.bin : libtesting.asm
-	reflet-masm libtesting.asm math.asm printing.asm -o libtesting.bin
+	reflet-masm libtesting.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm -o libtesting.bin
 
 exampleIO.bin : exampleIO.asm
 	reflet-masm exampleIO.asm -o exampleIO.bin

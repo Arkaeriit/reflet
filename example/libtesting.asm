@@ -51,5 +51,15 @@ label testingPrinting
     setlab testString
     cpy R1
     callf print ;should print "Reflet is a neat ISA!\n"
+    set+ 200
+    add SP
+    cpy R2
+    set+ 1234
+    cpy R1
+    debug
+    callf num2dec
+    mov R1 R2
+    callf print
+    callf CR
     ret
 
