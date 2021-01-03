@@ -1,8 +1,8 @@
-/*--------------------------------------------\
+/*----------------------------------------------\
 |This module is ment to offload from reflet_addr|
-|the task of changing how the ram is handeled |
-|depending on the reduced behavior bits.      |
-\--------------------------------------------*/
+|the task of changing how the ram is handeled   |
+|depending on the reduced behavior bits.        |
+\----------------------------------------------*/
 
 module reflet_addr_reduced_behavior #(
     parameter wordsize = 16

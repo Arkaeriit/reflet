@@ -32,7 +32,6 @@ label intMult
     label intMultLoopEnd
     read R3
     cpy R1
-    ;debug
     popr R6
     popr R5
     popr R4
@@ -93,7 +92,6 @@ label intPow
     set 0
     cpy R4
     label intPowLoopStart
-        ;debug
         read R4  ;testing loop
         eq R2
         read R5
@@ -121,9 +119,5 @@ label intPow
     popr R5
     popr R4
     popr R3
-    ;debug
     ret
         
-
-    ;debug
-

@@ -110,10 +110,10 @@ static void run_inst(reflet* vm){
     uint8_t opperand = (instruction & 0xF0) >> 4;
     uint8_t reg = instruction & 0x0F;
     word_t debug_helper[16];
-    /*
+     /*
     for(int i=0; i<16; i++) //Comment out this line and the following when not doing tests with a debuger
         debug_helper[i] = vm->reg[i];
-    */
+     */
         PC(vm)++;
     switch(opperand){
         case 0:

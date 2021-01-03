@@ -53,7 +53,7 @@ string.splitLine = function(str)
 end
 
 setsize = function(wordsize)
-    return wordsize * 8 + 2
+    return wordsize * 4 * 2 + 2
 end
 
 --Return the code to set a value in the vorking register
