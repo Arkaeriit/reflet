@@ -1,9 +1,11 @@
 ;This program prints each prime numbers representable on the 
 ;processor's registers
+;As this is not very efficient, it is more ment to be a proof of 
+;concept than anything else.
 
 ;-----------------------
 ;Put 1 in R2 if the number in R1 is prime and put 0 otherwise
-label isprime
+label isPrime
     pushr R3 ;loop counter
     pushr R4 ;end pointer
     pushr R5 ;loop pointer
@@ -51,21 +53,58 @@ label isprime
     cpy R2
     ret
 
+;-------------------------
+;Test if the number in R1 is prime and if so, print it
+label processNum
+    pushr R2
+    callf isPrime
+    set 0
+    eq R2
+    setlab processNumEnd
+    jif
+    callf printNum ;we have a prime
+    callf CR
+    label processNumEnd
+    popr R2
+    ret
+
+;------------------------
+;Loop throught all the integers from 3 to the 
+;bigest one and call processNum on them
+label runNumbers
+    pushr R1 ;scratch register
+    pushr R2 ;The function
+    pushr R3 ;loop counter
+    pushr R4 ;loop pointer
+    setlab processNum ;init registers
+    cpy R2
+    set 3
+    cpy R3
+    setlab runNumbersLoop
+    cpy R4
+    label runNumbersLoop
+        mov R1 R3 ;calling the func
+        read R2
+        call
+        set 1 ;updating R3
+        add R3
+        cpy R3
+        set 0 ;testing for the end of the loop
+        eq R3
+        cmpnot
+        read R4
+        jif
+    popr R4 ;restauring registers
+    popr R3
+    popr R2
+    popr R1
+    ret
+
 label start
-    set 4
+    set 2 ;The main loop starts at 3 so we manualy print 2
     cpy R1
-    callf isprime
-    read R2
-    debug
-    set 8
-    cpy R1
-    callf isprime
-    read R2
-    debug
-    set 13
-    cpy R1
-    callf isprime
-    read R2
-    debug
+    callf printNum
+    callf CR
+    callf runNumbers
     quit
     

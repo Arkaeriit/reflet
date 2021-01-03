@@ -3,7 +3,7 @@ FLAGS = -Wall -g
 CONSTANTS = opperand.h constants.h
 
 reflet-sim.bin : main.o reflet.o loader.o config.o debug.o
-	gcc reflet.o main.o loader.o config.o debug.o -o reflet-sim.bin
+	gcc reflet.o main.o loader.o config.o debug.o $(FLAGS) -o reflet-sim.bin
 
 main.o : main.c
 	gcc -c main.c $(FLAGS) -o main.o
