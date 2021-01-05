@@ -24,6 +24,8 @@ module stack_tb();
 
     initial
     begin
+        $dumpfile("stack_tb.vcd");
+        $dumpvars();
         #10;
         reset = 1;
         in = 8'hAA;
@@ -47,6 +49,8 @@ module stack_tb();
         pop = 1;
         #2;
         pop = 0;
+        #10;
+        $finish;
     end
 
 endmodule
