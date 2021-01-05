@@ -25,8 +25,12 @@ module simu1();
 
     initial
     begin
+        $dumpfile("simu1.vcd");
+        $dumpvars();
         #10;
         reset = 1;
+        #100;
+        $finish;
     end
 
     always @ (posedge clk)
