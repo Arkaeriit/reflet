@@ -5,7 +5,7 @@
 
 `include "reflet.vh"
 
-module reflet_cpu#(
+module reflet_cpu #(
     parameter wordsize = 16
     )(
     //main control signal

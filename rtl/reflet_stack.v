@@ -20,7 +20,7 @@ module reflet_stack #(
     reg [depth-1:0] index; //point to the next updated element of data
     assign out = data[index-1];
 
-    always @ (posedge clk)
+    always @ (posedge clk) 
         if(!reset)
         begin
             index = 0;

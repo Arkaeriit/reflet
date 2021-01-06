@@ -12,12 +12,14 @@ module simu5();
     wire quit;
     reg int0 = 0;
     wire [3:0] int = {3'b000, int0};
+    wire debug;
     
     
     reflet_cpu #(.wordsize(8)) cpu(
         .clk(clk), 
         .reset(reset), 
         .quit(quit), 
+        .debug(debug),
         .data_in(dIn), 
         .addr(addr), 
         .data_out(dOut), 
@@ -33,12 +35,16 @@ module simu5();
 
     initial
     begin
+        $dumpfile("simu5.vcd");
+        $dumpvars();
         #10;
         reset = 1;
         #600;
         int0 = 1;
         #10;
         int0 = 0;
+        #100;
+        $finish;
     end
 
 endmodule

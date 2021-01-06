@@ -31,9 +31,9 @@ simu2 : simu2.vcd
 simu2.vcd : simu2.vvp
 	vvp simu2.vvp
 
-simu2.vvp : simu2.v $(REFLET)
+simu2.vvp : simu2.v $(REFLET) reflet_ram8.v
 	cp ../reflet.vh ./
-	iverilog simu2.v rom2.v $(REFLET) -o simu2.vvp
+	iverilog simu2.v rom2.v reflet_ram8.v $(REFLET) -o simu2.vvp
 	rm ./reflet.vh
 
 simu3 : simu3.vcd
@@ -42,9 +42,9 @@ simu3 : simu3.vcd
 simu3.vcd : simu3.vvp
 	vvp simu3.vvp
 
-simu3.vvp : simu3.v $(REFLET)
+simu3.vvp : simu3.v $(REFLET) reflet_ram16.v reflet_ram8.v
 	cp ../reflet.vh ./
-	iverilog simu3.v rom3.v $(REFLET) -o simu3.vvp
+	iverilog simu3.v rom3.v reflet_ram16.v reflet_ram8.v $(REFLET) -o simu3.vvp
 	rm ./reflet.vh
 
 simu4 : simu4.vcd
@@ -53,9 +53,9 @@ simu4 : simu4.vcd
 simu4.vcd : simu4.vvp
 	vvp simu4.vvp
 
-simu4.vvp : simu4.v $(REFLET)
+simu4.vvp : simu4.v reflet_ram16.v reflet_ram8.v $(REFLET)
 	cp ../reflet.vh ./
-	iverilog simu4.v rom4.v $(REFLET) -o simu4.vvp
+	iverilog simu4.v rom4.v $(REFLET) reflet_ram8.v reflet_ram16.v -o simu4.vvp
 	rm ./reflet.vh
 
 simu5 : simu5.vcd

@@ -44,8 +44,12 @@ module simu3();
 
     initial
     begin
+        $dumpfile("simu3.vcd");
+        $dumpvars();
         #10;
         reset = 1;
+        #800;
+        $finish;
     end
 
     always @ (posedge clk)

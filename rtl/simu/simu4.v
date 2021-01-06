@@ -44,8 +44,12 @@ module simu4();
 
     initial
     begin
+        $dumpfile("simu4.vcd");
+        $dumpvars();
         #10;
         reset = 1;
+        #700;
+        $finish;
     end
 
     always @ (posedge clk)
