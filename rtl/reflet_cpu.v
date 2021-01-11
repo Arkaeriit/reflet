@@ -105,12 +105,12 @@ module reflet_cpu #(
     always @ (posedge clk)
         if(!reset)
         begin
-           registers[`wr_id] = `wr_reset;
-           registers[`sr_id] = `sr_reset;
-           registers[`pc_id] = `pc_reset;
-           registers[`sp_id] = `sp_reset;
+           registers[`wr_id] <= `wr_reset;
+           registers[`sr_id] <= `sr_reset;
+           registers[`pc_id] <= `pc_reset;
+           registers[`sp_id] <= `sp_reset;
            for(i=`gp_start; i<=`gp_end; i=i+1)
-               registers[i] = `gp_reset;
+               registers[i] <= `gp_reset;
            quit = 0;
         end
         else
@@ -119,32 +119,32 @@ module reflet_cpu #(
             begin
                 if(int)
                 begin
-                    registers[`pc_id] = int_routine;
+                    registers[`pc_id] <= int_routine;
                 end
                 else
                 begin
                     case(instruction)
-                        `inst_quit : quit = 1;
+                        `inst_quit : quit <= 1;
                         `inst_pop :
                         begin
-                            registers[`sp_id] = registers[`sp_id] - increase_data;
-                            registers[index] = content;
+                            registers[`sp_id] <= registers[`sp_id] - increase_data;
+                            registers[index] <= content;
                         end
                         `inst_ret :
                         begin
-                            registers[`sp_id] = registers[`sp_id] - default_increase;
-                            registers[index] = content;
+                            registers[`sp_id] <= registers[`sp_id] - default_increase;
+                            registers[index] <= content;
                         end
-                        `inst_push : registers[`sp_id] = registers[`sp_id] + increase_data;
+                        `inst_push : registers[`sp_id] <= registers[`sp_id] + increase_data;
                         `inst_call : 
                         begin
-                            registers[`sp_id] = registers[`sp_id] + default_increase;
-                            registers[index] = content;
+                            registers[`sp_id] <= registers[`sp_id] + default_increase;
+                            registers[index] <= content;
                         end
-                        default : registers[index] = content;
+                        default : registers[index] <= content;
                     endcase
                     if(index != `pc_id) //When changing the pc, no need to increment it
-                        registers[`pc_id] = registers[`pc_id] + 1;
+                        registers[`pc_id] <= registers[`pc_id] + 1;
                 end
             end
         end

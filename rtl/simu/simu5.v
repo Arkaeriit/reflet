@@ -2,7 +2,7 @@
 module simu5();
 
     reg clk = 1;
-    always #1 clk = !clk;
+    always #1 clk <= !clk;
 
     reg reset = 0;
     wire [7:0] dIn;
@@ -38,11 +38,15 @@ module simu5();
         $dumpfile("simu5.vcd");
         $dumpvars();
         #10;
-        reset = 1;
+        reset <= 1;
         #600;
-        int0 = 1;
+        int0 <= 1;
         #10;
-        int0 = 0;
+        int0 <= 0;
+        #100;
+        int0 <= 1;
+        #10;
+        int0 <= 0;
         #100;
         $finish;
     end

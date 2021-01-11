@@ -47,14 +47,14 @@ module reflet_interrupt#(
     wire quit_int = !new_int && cpu_update && instruction == `inst_retint;
     always @ (posedge clk)
         if(!reset)
-            level = 4;
+            level <= 4;
         else
         begin
             if(new_int)
-                level = target_level;
+                level <= target_level;
             else
                 if(quit_int)
-                    level = prev_level_slow;
+                    level <= prev_level_slow;
         end
 
     //Storing interruption routines' addresses
@@ -63,10 +63,10 @@ module reflet_interrupt#(
     always @ (posedge clk)
         if(!reset)
             for(i=0; i<4; i=i+1)
-                routines[i] = 0;
+                routines[i] <= 0;
         else
             if(setint_opp == `opp_setint)
-                routines[arg] = working_register;
+                routines[arg] <= working_register;
     
     //Storing the program counter and the level of interrupts
     wire [wordsize-1:0] prev_counter;

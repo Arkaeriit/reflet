@@ -27,7 +27,7 @@ module reflet_addr_reduced_behavior #(
     wire reduced_behavior = (reduced_behavior_bits != 2'b00) && ( (reduced_behavior_bits == 2'b01 && wordsize > 32) || (reduced_behavior_bits == 2'b10 && wordsize > 16) || (reduced_behavior_bits == 2'b11 && wordsize > 8) );
     always @ (posedge clk)
         if(!reset)
-            data_in_buff = 0;
+            data_in_buff <= 0;
         else
             if(/*returning_value &*/ !fetching_instruction)
             begin
@@ -35,22 +35,22 @@ module reflet_addr_reduced_behavior #(
                     case(reduced_behavior_bits)
                         2'b01 : 
                         begin
-                            data_in_buff[31:0] = data_in_wide[31:0];
-                            data_in_buff[127:32] = 0;
+                            data_in_buff[31:0] <= data_in_wide[31:0];
+                            data_in_buff[127:32] <= 0;
                         end
                         2'b10 : 
                         begin
-                            data_in_buff[15:0] = data_in_wide[15:0];
-                            data_in_buff[127:16] = 0;
+                            data_in_buff[15:0] <= data_in_wide[15:0];
+                            data_in_buff[127:16] <= 0;
                         end
                         2'b11 : 
                         begin
-                            data_in_buff[7:0] = data_in_wide[7:0];
-                            data_in_buff[127:8] = 0;
+                            data_in_buff[7:0] <= data_in_wide[7:0];
+                            data_in_buff[127:8] <= 0;
                         end
                     endcase
                 else //normal behavior
-                    data_in_buff[wordsize-1:0] = data_in_wide;
+                    data_in_buff[wordsize-1:0] <= data_in_wide;
             end
 
     assign data_in_raw = data_in;
@@ -61,7 +61,7 @@ module reflet_addr_reduced_behavior #(
     reg [127:0] data_out_buff;
     always @ (posedge clk)
         if(!reset)
-            data_out_buff = 0;
+            data_out_buff <= 0;
         else
             if(/*returning_value &*/ !fetching_instruction)
             begin
@@ -69,22 +69,22 @@ module reflet_addr_reduced_behavior #(
                     case(reduced_behavior_bits)
                         2'b01 : 
                         begin
-                            data_out_buff[31:0] = data_out_wide[31:0];
-                            data_out_buff[127:32] = data_in_wide[127:32];
+                            data_out_buff[31:0] <= data_out_wide[31:0];
+                            data_out_buff[127:32] <= data_in_wide[127:32];
                         end
                         2'b10 : 
                         begin
-                            data_out_buff[15:0] = data_out_wide[15:0];
-                            data_out_buff[127:16] = data_in_wide[127:16];
+                            data_out_buff[15:0] <= data_out_wide[15:0];
+                            data_out_buff[127:16] <= data_in_wide[127:16];
                         end
                         2'b11 : 
                         begin
-                            data_out_buff[7:0] = data_out_wide[7:0];
-                            data_out_buff[127:8] = data_in_wide[127:8];
+                            data_out_buff[7:0] <= data_out_wide[7:0];
+                            data_out_buff[127:8] <= data_in_wide[127:8];
                         end
                     endcase
                 else //normal behavior
-                    data_out_buff[wordsize-1:0] = data_out_wide;
+                    data_out_buff[wordsize-1:0] <= data_out_wide;
             end
 
     //Assigning data

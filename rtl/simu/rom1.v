@@ -1,5 +1,5 @@
 /*-------------------------\
-|This ROM test the baasic  |
+|This ROM test the basic   |
 |functionalities of the ALU|
 \-------------------------*/
 

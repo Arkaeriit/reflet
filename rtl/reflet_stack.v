@@ -25,18 +25,18 @@ module reflet_stack #(
         begin
             index = 0;
             for(i=0; i<depth; i=i+1)
-                data[i] = 0;
+                data[i] <= 0;
         end
         else
         begin
             if(push)
             begin
-                data[index] = in;
-                index = index + 1;
+                data[index] <= in;
+                index <= index + 1;
             end
             else
                 if(pop)
-                    index = index - 1;
+                    index <= index - 1;
         end
 
 endmodule

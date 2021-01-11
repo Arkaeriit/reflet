@@ -2,7 +2,7 @@
 module simu2();
 
     reg clk = 1;
-    always #1 clk = !clk;
+    always #1 clk <= !clk;
 
     reg reset = 0;
     wire [7:0] dIn;
