@@ -14,6 +14,7 @@ Here is a list of all its connections:
 |------|------|-------|
 |clk     |input|The main clock.|
 |reset |input|Reset the CPU when flipped to low.|
+|enable|input|When set to 0, the processor keeps its states but stops working until enable is set back to 1.|
 |debug|output|Turned on for a clock cycle when the CPU executes a `debug` instruction.|
 |quit|output|Is turned on from the moment the CPU executes a quit instruction and stops itself.|
 |ext\_int| 4-bit input | The 4 instructions lines.|

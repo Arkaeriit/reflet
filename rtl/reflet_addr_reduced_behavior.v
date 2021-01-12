@@ -9,6 +9,7 @@ module reflet_addr_reduced_behavior #(
     )(
     input clk,
     input reset,
+    input enable,
     input fetching_instruction,
     input [7:0] instruction,
     input [1:0] reduced_behavior_bits,
@@ -28,7 +29,8 @@ module reflet_addr_reduced_behavior #(
     always @ (posedge clk)
         if(!reset)
             data_in_buff <= 0;
-        else
+        else if(enable)
+        begin
             if(/*returning_value &*/ !fetching_instruction)
             begin
                 if(reduced_behavior)
@@ -52,6 +54,7 @@ module reflet_addr_reduced_behavior #(
                 else //normal behavior
                     data_in_buff[wordsize-1:0] <= data_in_wide;
             end
+        end
 
     assign data_in_raw = data_in;
     assign data_in_reduced = data_in_buff[wordsize-1:0];
@@ -62,7 +65,8 @@ module reflet_addr_reduced_behavior #(
     always @ (posedge clk)
         if(!reset)
             data_out_buff <= 0;
-        else
+        else if(enable)
+        begin
             if(/*returning_value &*/ !fetching_instruction)
             begin
                 if(reduced_behavior)
@@ -86,6 +90,7 @@ module reflet_addr_reduced_behavior #(
                 else //normal behavior
                     data_out_buff[wordsize-1:0] <= data_out_wide;
             end
+        end
 
     //Assigning data
     assign data_out = ( instruction == `inst_call ? data_out_cpu : data_out_buff[wordsize-1:0] ); 

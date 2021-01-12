@@ -5,6 +5,7 @@ module simu5();
     always #1 clk <= !clk;
 
     reg reset = 0;
+    reg enable = 1;
     wire [7:0] dIn;
     wire [7:0] dOut;
     wire [7:0] addr;
@@ -18,6 +19,7 @@ module simu5();
     reflet_cpu #(.wordsize(8)) cpu(
         .clk(clk), 
         .reset(reset), 
+        .enable(enable),
         .quit(quit), 
         .debug(debug),
         .data_in(dIn), 
@@ -47,6 +49,14 @@ module simu5();
         int0 <= 1;
         #10;
         int0 <= 0;
+        #100;
+        enable <= 0;
+        #10;
+        int0 <= 1;
+        #10;
+        int0 <= 0;
+        #10;
+        enable <= 1;
         #100;
         $finish;
     end

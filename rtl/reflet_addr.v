@@ -6,11 +6,12 @@
 
 `include "reflet.vh"
 
-module reflet_addr#(
+module reflet_addr #(
     parameter wordsize = 16
     )(
     input clk,
     input reset,
+    input enable,
     //instructions from the CPU
     input [wordsize-1:0] workingRegister,
     input [wordsize-1:0] programCounter,
@@ -76,6 +77,7 @@ module reflet_addr#(
             reflet_addr_reduced_behavior #(.wordsize(wordsize)) reduced_behavior(
                 .clk(clk),
                 .reset(reset),
+                .enable(enable),
                 .fetching_instruction(fetching_instruction),
                 .instruction(instruction),
                 .reduced_behavior_bits(reduced_behaviour_bits),
@@ -95,7 +97,7 @@ module reflet_addr#(
             instruction <= 0;
             hide_ready <= 0;
         end
-        else
+        else if(enable)
         begin
             case(not_ready)
                 0 : //we are ready and thus must addapt the time of not ready to engage the communication with the ram

@@ -15,6 +15,7 @@ module simu4();
     reflet_cpu #(.wordsize(16)) cpu(
         .clk(clk), 
         .reset(reset), 
+        .enable(1'b1),
         .quit(quit), 
         .data_in(dIn), 
         .addr(addr), 

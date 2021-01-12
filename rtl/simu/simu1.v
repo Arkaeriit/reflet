@@ -5,6 +5,7 @@ module simu1();
     always #1 clk <= !clk;
 
     reg reset = 0;
+    reg enable = 1;
     wire [7:0] dIn;
     wire [7:0] dOut;
     wire [7:0] addr;
@@ -14,6 +15,7 @@ module simu1();
     reflet_cpu #(.wordsize(8)) cpu(
         .clk(clk), 
         .reset(reset), 
+        .enable(enable),
         .quit(quit), 
         .data_in(dIn), 
         .addr(addr), 
@@ -29,6 +31,10 @@ module simu1();
         $dumpvars();
         #10;
         reset = 1;
+        #20;
+        enable = 0;
+        #30;
+        enable = 1;
         #100;
         $finish;
     end

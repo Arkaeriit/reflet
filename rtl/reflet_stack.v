@@ -9,6 +9,7 @@ module reflet_stack #(
     )(
     input clk,
     input reset,
+    input enable,
     input push,
     input [wordsize-1:0] in,
     input pop,
@@ -27,7 +28,7 @@ module reflet_stack #(
             for(i=0; i<depth; i=i+1)
                 data[i] <= 0;
         end
-        else
+        else if(enable)
         begin
             if(push)
             begin

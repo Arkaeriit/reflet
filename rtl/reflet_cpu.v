@@ -11,6 +11,7 @@ module reflet_cpu #(
     //main control signal
     input clk,
     input reset,
+    input enable,
     //System bus connection
     input [wordsize-1:0] data_in,
     output [wordsize-1:0] addr,
@@ -56,6 +57,7 @@ module reflet_cpu #(
     reflet_addr #(.wordsize(wordsize)) ram_interface(
         .clk(clk),
         .reset(reset),
+        .enable(enable),
         //instruction from the CPU
         .workingRegister(registers[`wr_id]),
         .programCounter(registers[`pc_id]),
@@ -76,6 +78,7 @@ module reflet_cpu #(
     reflet_interrupt #(.wordsize(wordsize)) interrupt(
         .clk(clk),
         .reset(reset),
+        .enable(enable),
         .ext_int(ext_int),
         .instruction(instruction),
         .working_register(registers[`wr_id]),
@@ -101,7 +104,7 @@ module reflet_cpu #(
     //debug signal
     assign debug = instruction == `inst_debug && !ram_not_ready;
     
-    //updating reegisters
+    //updating registers
     always @ (posedge clk)
         if(!reset)
         begin
@@ -113,7 +116,7 @@ module reflet_cpu #(
                registers[i] <= `gp_reset;
            quit = 0;
         end
-        else
+        else if(enable)
         begin
             if(!ram_not_ready & !quit)
             begin

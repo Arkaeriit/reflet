@@ -10,6 +10,7 @@ module reflet_interrupt#(
     )(
     input clk,
     input reset,
+    input enable,
     //external interrupt signals
     input [3:0] ext_int, //ext_int[0] is the signal for the interrupt 0
     //Connection with the CPU
@@ -48,7 +49,7 @@ module reflet_interrupt#(
     always @ (posedge clk)
         if(!reset)
             level <= 4;
-        else
+        else if(enable)
         begin
             if(new_int)
                 level <= target_level;
@@ -83,6 +84,7 @@ module reflet_interrupt#(
     reflet_stack #(.wordsize(wordsize), .depth(4)) stack_counter(
         .clk(clk),
         .reset(reset),
+        .enable(enable),
         .push(new_int),
         .pop(quit_int),
         .in(program_counter),
@@ -90,6 +92,7 @@ module reflet_interrupt#(
     reflet_stack #(.wordsize(3), .depth(4)) stack_level(
         .clk(clk),
         .reset(reset),
+        .enable(enable),
         .push(new_int),
         .pop(quit_int),
         .in(current_level_slow_slow),
