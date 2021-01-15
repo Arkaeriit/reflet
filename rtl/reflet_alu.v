@@ -45,9 +45,9 @@ module reflet_alu
 
 
     //comparaisons
-    wire cmp_eq  = ( opperand == `opp_eq ? working_register == other_register : defaultValue );
-    wire cmp_les = ( opperand == `opp_les ? working_register <  other_register : defaultValue );
-    wire cmp_cmpnot = ( instruction == `inst_cmpnot ? !status_register[0] : defaultValue );
+    wire cmp_eq  = ( opperand == `opp_eq ? working_register == other_register : 1'b0 );
+    wire cmp_les = ( opperand == `opp_les ? working_register <  other_register : 1'b0 );
+    wire cmp_cmpnot = ( instruction == `inst_cmpnot ? !status_register[0] : 1'b0 );
     wire cmp = cmp_eq | cmp_les | cmp_cmpnot;
     wire [wordsize-1:0] out_cmp = {status_register[wordsize-1:1], cmp};
 

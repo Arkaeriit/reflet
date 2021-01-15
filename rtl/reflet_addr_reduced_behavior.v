@@ -52,12 +52,9 @@ module reflet_addr_reduced_behavior #(
                         end
                     endcase
                 else //normal behavior
-                    data_in_buff[wordsize-1:0] <= data_in_wide;
+                    data_in_buff[wordsize-1:0] <= data_in_wide[wordsize-1:0];
             end
         end
-
-    assign data_in_raw = data_in;
-    assign data_in_reduced = data_in_buff[wordsize-1:0];
 
     //handling data_out
     wire [127:0] data_out_wide = data_out_cpu;
@@ -88,13 +85,13 @@ module reflet_addr_reduced_behavior #(
                         end
                     endcase
                 else //normal behavior
-                    data_out_buff[wordsize-1:0] <= data_out_wide;
+                    data_out_buff[wordsize-1:0] <= data_out_wide[wordsize-1:0];
             end
         end
 
     //Assigning data
     assign data_out = ( instruction == `inst_call ? data_out_cpu : data_out_buff[wordsize-1:0] ); 
-    assign data_in_cpu = ( instruction == `inst_ret ? data_in : data_in_buff );
+    assign data_in_cpu = ( instruction == `inst_ret ? data_in : data_in_buff[wordsize-1:0] );
     assign pop_offset = ( reduced_behavior  && instruction != `inst_ret && instruction != `inst_call ? 
                             ( reduced_behavior_bits == 2'b01 ? 4 :
                                 (reduced_behavior_bits == 2'b10 ? 2 :

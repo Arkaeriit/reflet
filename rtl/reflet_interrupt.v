@@ -22,7 +22,7 @@ module reflet_interrupt#(
     output [3:0] out_reg,
     output [wordsize-1:0] out_routine,
     input cpu_update,
-    output int
+    output interrupt
     );
     integer i; //loop counter
 
@@ -99,7 +99,7 @@ module reflet_interrupt#(
         .out(prev_level));
 
     //Telling the CPU about a new instruction
-    assign int = new_int;
+    assign interrupt = new_int;
     assign out_routine = routines[target_level]; 
 
 endmodule

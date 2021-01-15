@@ -41,9 +41,9 @@ module reflet_cpu #(
     //submodules
     wire ram_not_ready;
     wire [7:0] instruction;
-    wire [3:0] opperand = instruction[7:4];
+    //wire [3:0] opperand = instruction[7:4];
     wire [3:0] argument_id = instruction[3:0];
-    wire int;
+    wire interrupt;
     wire [wordsize-1:0] int_routine;
 
     reflet_alu #(.wordsize(wordsize)) alu(
@@ -75,7 +75,7 @@ module reflet_cpu #(
         .out_reg(index_addr),
         .ram_not_ready(ram_not_ready));
 
-    reflet_interrupt #(.wordsize(wordsize)) interrupt(
+    reflet_interrupt #(.wordsize(wordsize)) interrupt_ctrl (
         .clk(clk),
         .reset(reset),
         .enable(enable),
@@ -88,13 +88,13 @@ module reflet_cpu #(
         .out_reg(index_int),
         .out_routine(int_routine),
         .cpu_update(!ram_not_ready),
-        .int(int));
+        .interrupt(interrupt));
 
     //computing how much the stack pointer should evolve when using it
     integer default_increase = wordsize/8; //Progression when handling addressis or with no reduced behavious
     integer increase11 = 1; //A separate value for each conbinaison of reduced behaviour
-    wire [7:0] increase01 = ( wordsize > 32 ? 4 : default_increase );
-    wire [7:0] increase10 = ( wordsize > 16 ? 2 : default_increase );
+    wire [7:0] increase01 = ( wordsize > 32 ? 7'h4 : default_increase );
+    wire [7:0] increase10 = ( wordsize > 16 ? 7'h2 : default_increase );
     wire [1:0] reduced_behavior = registers[`sr_id][2:1];
     wire [7:0] increase_data = ( reduced_behavior == 2'b00 ? default_increase :
                                     ( reduced_behavior == 2'b01 ? increase01 :
@@ -120,14 +120,14 @@ module reflet_cpu #(
         begin
             if(!ram_not_ready & !quit)
             begin
-                if(int)
+                if(interrupt)
                 begin
                     registers[`pc_id] <= int_routine;
                 end
                 else
                 begin
                     case(instruction)
-                        `inst_quit : quit <= 1;
+                        `inst_quit : quit <= 1'b1;
                         `inst_pop :
                         begin
                             registers[`sp_id] <= registers[`sp_id] - increase_data;

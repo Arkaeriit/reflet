@@ -93,8 +93,8 @@ module reflet_addr #(
     always @ (posedge clk)
         if(!reset)
         begin
-            not_ready <= 2;
-            instruction <= 0;
+            not_ready <= 4'h2;
+            instruction <= 8'h0;
             hide_ready <= 0;
         end
         else if(enable)
@@ -105,21 +105,21 @@ module reflet_addr #(
                     if(using_ram)
                     begin
                         if(hide_ready) //About to fetch an instruction
-                            not_ready <= 2;
+                            not_ready <= 4'h2;
                         else //Interfacing whith RAM
-                            not_ready <= 2;
+                            not_ready <= 4'h2;
                         hide_ready <= !hide_ready;
                     end
                     else
-                        not_ready <= 2;
+                        not_ready <= 4'h2;
                 end
                 1 : 
                 begin 
                     if(!hide_ready)
                         instruction <= data_in[7:0];
-                    not_ready <= not_ready - 1;
+                    not_ready <= not_ready - 4'h1;
                 end
-                default : not_ready <= not_ready - 1;
+                default : not_ready <= not_ready - 4'h1;
             endcase
         end
 
