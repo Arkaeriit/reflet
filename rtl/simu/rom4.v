@@ -49,7 +49,7 @@ case(addr)
   7'h26 : ret = 8'h3b;
   7'h27 : ret = 8'h1a;
   7'h28 : ret = 8'h7b;
-  7'h29 : ret = 8'h8;  
+  7'h29 : ret = 8'h3E;  
   7'h2a : ret = 8'h14; //label start : set+ 40000
   7'h2b : ret = 8'h3c;
   7'h2c : ret = 8'h10;

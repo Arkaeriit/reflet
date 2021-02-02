@@ -80,7 +80,7 @@ case(addr)
   8'h26 : ret = 8'h3b;
   8'h27 : ret = 8'h1f;
   8'h28 : ret = 8'h7b;
-  8'h29 : ret = 8'h8;
+  8'h29 : ret = 8'h3E;
   8'h2a : ret = 8'h28; //mult by two : read R8
   8'h2b : ret = 8'h3a; //cpy R10
   8'h2c : ret = 8'h4a; //add R10

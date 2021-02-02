@@ -47,7 +47,7 @@ case(addr)
   7'h26 : ret = 8'h3b;
   7'h27 : ret = 8'h1c;
   7'h28 : ret = 8'h7b;
-  7'h29 : ret = 8'h8;
+  7'h29 : ret = 8'h3E;
   7'h2a : ret = 8'hf;  //label intRoutine : debug
   7'h2b : ret = 8'h2;  //retint
   7'h2c : ret = 8'h14; //label start: setlab intRoutine
@@ -90,7 +90,7 @@ case(addr)
   7'h51 : ret = 8'h11;
   7'h52 : ret = 8'h7b;
   7'h53 : ret = 8'h0;  //slp
-  7'h54 : ret = 8'h8;  //jmp
+  7'h54 : ret = 8'h3E;  //jmp
   7'h55 : ret = 8'h0;
   default: ret = 0;
 endcase
