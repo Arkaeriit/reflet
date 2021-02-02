@@ -44,32 +44,46 @@ static char* dataAboutInstruction(reflet* vm){
     uint8_t reg = instruction & 0x0F;
     switch(opperand){
         case 0:
-            if(instruction == SLP){
-                sprintf(ret, "SLP: sleeping, value of the working register: %" WORD_PX "", WR(vm));
-            }else if(instruction == CC2){
-                sprintf(ret,"CC2: Computing the two's complement of 0x%" WORD_PX "",WR(vm));
-            }else if(instruction == JIF){
-                sprintf(ret,"JIF: conditional jump to 0x%" WORD_PX ". Status register: 0x%" WORD_PX "",WR(vm), SR(vm));
-            }else if(instruction == POP){
-                sprintf(ret,"POP: poping stack");
-            }else if(instruction == PUSH){
-                sprintf(ret, "PUSH: pushing value to stack");
-            }else if(instruction == CALL){
-                sprintf(ret,"CALL: calling function at 0x%" WORD_PX "",WR(vm));
-            }else if(instruction == RET){
-                sprintf(ret, "RET: returning from last call");
-            }else if(instruction == QUIT){
-                sprintf(ret, "QUIT: stopping the simulation");
-            }else if(instruction == DEBUG){
-                sprintf(ret, "DEBUG: printing a debug message");
-            }else if(instruction == CMPNOT){
-                sprintf(ret, "CMPNOT: flipping the comparaison bit of the status register (%" WORD_PX ")", SR(vm));
-            }else if(instruction == RETINT){
-                sprintf(ret, "RETINT: returning from interruption routine");
-            }else if(isSETINT(instruction)){
-                sprintf(ret, "SETINT: setting the routine of interrupt %i to %" WORD_PX, instruction & 3, WR(vm));
-            }else{
-                sprintf(ret, "Unknown instruction");
+            switch(instruction) {
+                case SLP:
+                    sprintf(ret, "SLP: sleeping, value of the working register: %" WORD_PX "", WR(vm));
+                    break;
+                case CC2:
+                    sprintf(ret,"CC2: Computing the two's complement of 0x%" WORD_PX "",WR(vm));
+                    break;
+                case JIF:
+                    sprintf(ret,"JIF: conditional jump to 0x%" WORD_PX ". Status register: 0x%" WORD_PX "",WR(vm), SR(vm));
+                    break;
+                case POP:
+                    sprintf(ret,"POP: poping stack");
+                    break;
+                case PUSH:
+                    sprintf(ret, "PUSH: pushing value to stack");
+                    break;
+                case CALL:
+                    sprintf(ret,"CALL: calling function at 0x%" WORD_PX "",WR(vm));
+                    break;
+                case RET:
+                    sprintf(ret, "RET: returning from last call");
+                    break;
+                case QUIT:
+                    sprintf(ret, "QUIT: stopping the simulation");
+                    break;
+                case DEBUG:
+                    sprintf(ret, "DEBUG: printing a debug message");
+                    break;
+                case CMPNOT:
+                    sprintf(ret, "CMPNOT: flipping the comparaison bit of the status register (%" WORD_PX ")", SR(vm));
+                    break;
+                case RETINT:
+                    sprintf(ret, "RETINT: returning from interruption routine");
+                    break;
+                default:
+                    if(isSETINT(instruction)){
+                        sprintf(ret, "SETINT: setting the routine of interrupt %i to %" WORD_PX, instruction & 3, WR(vm));
+                    }else{
+                        sprintf(ret, "Unknown instruction");
+                    }
             }
             break;
         case SET:

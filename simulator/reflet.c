@@ -118,42 +118,54 @@ static void run_inst(reflet* vm){
         PC(vm)++;
     switch(opperand){
         case 0:
-            if(instruction == SLP){
-                break;
-            }else if(instruction == CC2){
-                WR(vm) = ~WR(vm) + 1;
-            }else if(instruction == JIF){
-                if(SR(vm) & 1)
+            switch(instruction){
+                case SLP:
+                    break;
+                case CC2:
+                    WR(vm) = ~WR(vm) + 1;
+                    break;
+                case JIF:
+                    if(SR(vm) & 1)
+                        PC(vm) = WR(vm);
+                    break;
+                case POP:
+                    SP(vm) = (SP(vm) - byteExchanged(vm, false)) & reg_mask;
+                    WR(vm) = loadWordRAM(vm, SP(vm), false);
+                    break;
+                case PUSH:
+                    putRAMWord(vm, SP(vm), WR(vm), false);
+                    SP(vm) = (SP(vm) + byteExchanged(vm, false)) & reg_mask;
+                    break;
+                case CALL:
+                    putRAMWord(vm, SP(vm), PC(vm), true);
+                    SP(vm) = (SP(vm) + byteExchanged(vm, true)) & reg_mask;
                     PC(vm) = WR(vm);
-            }else if(instruction == POP){
-                SP(vm) = (SP(vm) - byteExchanged(vm, false)) & reg_mask;
-                WR(vm) = loadWordRAM(vm, SP(vm), false);
-            }else if(instruction == PUSH){
-                putRAMWord(vm, SP(vm), WR(vm), false);
-                SP(vm) = (SP(vm) + byteExchanged(vm, false)) & reg_mask;
-            }else if(instruction == CALL){
-                putRAMWord(vm, SP(vm), PC(vm), true);
-                SP(vm) = (SP(vm) + byteExchanged(vm, true)) & reg_mask;
-                PC(vm) = WR(vm);
-            }else if(instruction == RET){
-                SP(vm) = (SP(vm) - byteExchanged(vm, true)) & reg_mask;
-                PC(vm) = loadWordRAM(vm, SP(vm), true);
-            }else if(instruction == QUIT){
-                vm->active = false;
-            }else if(instruction == DEBUG){
-                printf("Debug instruction reached at address %" WORD_PX ". The content of the working register is 0x%" WORD_PX "\n", PC(vm)-1, WR(vm));
-            }else if(instruction == CMPNOT){
-                if(SR(vm) & 1)
-                    SR(vm) = (SR(vm) >> 1) << 1; //We want to turn the LSB into a 0
-                else
-                    SR(vm) |= 1;
-            }else if(isSETINT(instruction)){
-                uint8_t int_number = instruction & 3;
-                vm->ints[int_number]->routine = WR(vm);
-            }else if(instruction == RETINT){
-                ret_int(vm);
-            }else{
-                fprintf(stderr, "Warning, unknow instruction (%X) at address %" WORD_P ".\n",instruction, PC(vm) - 1);
+                    break;
+                case RET:
+                    SP(vm) = (SP(vm) - byteExchanged(vm, true)) & reg_mask;
+                    PC(vm) = loadWordRAM(vm, SP(vm), true);
+                    break;
+                case QUIT:
+                    vm->active = false;
+                    break;
+                case DEBUG:
+                    printf("Debug instruction reached at address %" WORD_PX ". The content of the working register is 0x%" WORD_PX "\n", PC(vm)-1, WR(vm));
+                    break;
+                case CMPNOT:
+                    if(SR(vm) & 1)
+                        SR(vm) = (SR(vm) >> 1) << 1; //We want to turn the LSB into a 0
+                    else
+                        SR(vm) |= 1;
+                    break;
+                default:
+                    if(isSETINT(instruction)){
+                        uint8_t int_number = instruction & 3;
+                        vm->ints[int_number]->routine = WR(vm);
+                    }else if(instruction == RETINT){
+                        ret_int(vm);
+                    }else{
+                        fprintf(stderr, "Warning, unknow instruction (%X) at address %" WORD_P ".\n",instruction, PC(vm) - 1);
+                    }
             }
             break;
         case SET:
