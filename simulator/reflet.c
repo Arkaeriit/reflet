@@ -120,8 +120,8 @@ static void run_inst(reflet* vm){
         case 0:
             if(instruction == SLP){
                 break;
-            }else if(instruction == JMP){
-                PC(vm) = WR(vm);
+            }else if(instruction == CC2){
+                WR(vm) = ~WR(vm) + 1;
             }else if(instruction == JIF){
                 if(SR(vm) & 1)
                     PC(vm) = WR(vm);

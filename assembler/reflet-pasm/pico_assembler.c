@@ -111,6 +111,8 @@ static enum processLine_return processLine(const char* line, uint8_t* ret){
             instOK = makeInst(STR, true, toPrePross[1], ret);
         }else if(mnLOAD(toPrePross[0])){
             instOK = makeInst(LOAD, true, toPrePross[1], ret);
+        }else if(mnCC2(toPrePross[0])){
+            *ret = CC2;
         }else if(mnJMP(toPrePross[0])){
             *ret = JMP;
         }else if(mnJIF(toPrePross[0])){

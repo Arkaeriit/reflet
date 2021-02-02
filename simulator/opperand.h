@@ -24,7 +24,7 @@
 #define LES  0xD
 #define STR  0xE
 #define LOAD 0xF
-#define JMP  0x08
+#define CC2  0x08
 #define JIF  0x09
 #define POP  0x0A
 #define PUSH 0x0B

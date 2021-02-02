@@ -46,8 +46,8 @@ static char* dataAboutInstruction(reflet* vm){
         case 0:
             if(instruction == SLP){
                 sprintf(ret, "SLP: sleeping, value of the working register: %" WORD_PX "", WR(vm));
-            }else if(instruction == JMP){
-                sprintf(ret,"JMP: jumping to 0x%" WORD_PX "",WR(vm));
+            }else if(instruction == CC2){
+                sprintf(ret,"CC2: Computing the two's complement of 0x%" WORD_PX "",WR(vm));
             }else if(instruction == JIF){
                 sprintf(ret,"JIF: conditional jump to 0x%" WORD_PX ". Status register: 0x%" WORD_PX "",WR(vm), SR(vm));
             }else if(instruction == POP){

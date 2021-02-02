@@ -51,7 +51,7 @@ Here is a list of the instruction of Reflet processor.
 | les | 0xD | A register | If the content of the working register is less than the one in the argument registers, sets the comparison bit of the status register to 1. Otherwise, sets it to 0 |
 | str | 0xE | A register with an address | Store the value in the working register to the address given in the argument register |
 | load | 0xF | A register with an address | Put in the working register the value at the address given in the argument register |
-| jmp | 0x08 | Nothing | Jump to the address in the working register, does not affect the stack. |
+| cc2 | 0x08 | Nothing | Put in the working register the opposite in two-complement of the working reister. |
 | jif | 0x09 | Nothing | Jump to the address in the working register if the comparison register is not equal to 0, does not affect the stack |
 | pop | 0x0A | Nothing | Put the content of the working register on the stack and updates the stack pointer. |
 | push | 0x0B | Nothing | Put the value on top of the stack in the working register and updates the stack pointer. |

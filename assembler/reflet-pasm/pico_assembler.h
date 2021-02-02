@@ -36,7 +36,8 @@ void mini_assembleFile(const char* fileIn, const char* fileOut, bool set_prefix)
 #define LES  0xD
 #define STR  0xE
 #define LOAD 0xF
-#define JMP  0x08
+#define CC2  0x08
+#define JMP  0x3E
 #define JIF  0x09
 #define POP  0x0A
 #define PUSH 0x0B
@@ -66,6 +67,7 @@ void mini_assembleFile(const char* fileIn, const char* fileOut, bool set_prefix)
 #define mnLES(mn) !(strcmp(mn, "LES") && strcmp(mn, "les"))
 #define mnSTR(mn) !(strcmp(mn, "STR") && strcmp(mn, "str"))
 #define mnLOAD(mn) !(strcmp(mn, "LOAD") && strcmp(mn, "load"))
+#define mnCC2(mn) !(strcmp(mn, "CC2") && strcmp(mn, "cc2"))
 #define mnJMP(mn) !(strcmp(mn, "JMP") && strcmp(mn, "jmp"))
 #define mnJIF(mn) !(strcmp(mn, "JIF") && strcmp(mn, "jif"))
 #define mnPOP(mn) !(strcmp(mn, "POP") && strcmp(mn, "pop"))

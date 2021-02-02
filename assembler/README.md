@@ -11,6 +11,8 @@ This is a pico-assembler. It can only assemble basic instructions as described i
 
 If you want to insert a byte into your program without having to write the instruction for it, you can write `rawbyte` followed by a single byte in base 10.
 
+If you want to jump to the address pointed in the working register, you can write `jmp` instead of `cpy R14`
+
 Usage:
 ```
 reflet-pasm <input file> <output file>
