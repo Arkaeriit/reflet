@@ -66,5 +66,10 @@ label testingPrinting
     cpy R1
     callf printNum ;expecting '0'
     callf CR
+    callf getch  ;Ask for a char
+    callf printc ;Print it 3 times
+    callf printc
+    callf printc
+    callf CR
     ret
 
