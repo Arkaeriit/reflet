@@ -1,45 +1,49 @@
-FLAGS = -Wall -Werror -g
-LIBPATH = /usr/lib64
-INCLUDEPATH = /usr/include
+# Flags
+FLAGS := -Wall -Werror -g -fPIC
 
-all : reflet-pasm.bin libreflet-pasm.so
+# Files lists
+C_SRC := pico_assembler.c pico_assembler_main.c
+C_OBJS := $(C_SRC:%.c=%.o)
+TARGET := reflet-pasm
 
-libreflet-pasm.so : pico_assembler_shared.o
-	gcc -shared pico_assembler.o -o libreflet-pasm.so
+# Install targets
+TARGET_DIR_BIN := /usr/local/bin
+TARGET_BIN := $(TARGET_DIR_BIN)/$(TARGET)
+LIBPATH := /usr/lib64
+INCLUDEPATH := /usr/include
+TARGET_LIB := $(INCLUDEPATH)/lib$(TARGET).so
 
-pico_assembler_shared.o : pico_assembler.h pico_assembler.c
-	gcc -c -fPIC pico_assembler.c $(FLAGS) -o pico_assembler.o
+# Commands
+CC := gcc
+CP := cp -f
+RM := rm -rf
 
-reflet-pasm.bin : pico_assembler_main.o pico_assembler.o
-	gcc pico_assembler.o pico_assembler_main.o -o reflet-pasm.bin
+all : $(TARGET).bin lib$(TARGET).so
 
-pico_assembler.o : pico_assembler.h pico_assembler.c $(CONSTANTS)
-	gcc -c pico_assembler.c $(FLAGS) -o pico_assembler.o
+%.o : %.c
+	$(CC) -c $< $(FLAGS) -o $@
 
-pico_assembler_main.o : pico_assembler_main.c
-	gcc -c pico_assembler_main.c $(FLAGS) -o pico_assembler_main.o
+$(TARGET).bin : $(C_OBJS)
+	$(CC) $(C_OBJS) $(FLAGS) -o $@
 
-install : install_pico install_lib
+lib$(TARGET).so : $(C_OBJS)
+	$(CC) $(C_OBJS) $(FLAGS) -shared -o $@
 
-install_pico :
-	cp -f reflet-pasm.bin /usr/local/bin/reflet-pasm
+install :
+	mkdir -p $(TARGET_DIR_BIN)
+	$(CP) $(TARGET).bin $(TARGET_BIN)
+	mkdir -p $(INCLUDEPATH)
+	$(CP) pico_assembler.h $(INCLUDEPATH)/reflet-pasm.h
+	mkdir -p $(LIBPATH)
+	$(CP) lib$(TARGET).so $(LIBPATH)
 
-install_lib :
-	mkdir -p $(LIBPATH) $(INCLUDEPATH)
-	cp -f pico_assembler.h $(INCLUDEPATH)/reflet-pasm.h
-	cp -f libreflet-pasm.so $(LIBPATH)/libreflet-pasm.so
+uninstall :
+	$(RM) $(TARGET_BIN)
+	$(RM) $(INCLUDEPATH)/reflet-pasm.h
+	$(RM) $(LIBPATH)/lib$(TARGET).so
 
-uninstall : uninstall_lib uninstall_pico
-
-uninstall_pico : 
-	rm -f /usr/local/bin/reflet-pasm
-
-uninstall_lib :
-	rm -f $(INCLUDEPATH)/reflet-pasm.h
-	rm -f $(LIBPATH)/libreflet-pasm.so
-
-clean:
-	rm -f *.o
-	rm -f *.so
-	rm -f *.bin
+clean : 
+	$(RM) *.bin
+	$(RM) *.o
+	$(RM) *.so
 

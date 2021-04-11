@@ -1,32 +1,36 @@
-#FLAGS = -Wall -Werror -g
-FLAGS = -Wall -g
-CONSTANTS = opperand.h constants.h
+# Flags
+FLAGS := -Wall -g
 
-reflet-sim.bin : main.o reflet.o loader.o config.o debug.o
-	gcc reflet.o main.o loader.o config.o debug.o $(FLAGS) -o reflet-sim.bin
+# Files lists
+C_SRC := config.c debug.c loader.c main.c reflet.c
+C_OBJS := $(C_SRC:%.c=%.o)
+TARGET := reflet-sim
 
-main.o : main.c
-	gcc -c main.c $(FLAGS) -o main.o
+# Install targets
+TARGET_DIR_BIN := /usr/local/bin
+TARGET_BIN := $(TARGET_DIR_BIN)/$(TARGET)
 
-reflet.o : reflet.c reflet.h $(CONSTANTS)
-	gcc -c reflet.c $(FLAGS) -o reflet.o
+# Commands
+CC := gcc
+CP := cp -f
+RM := rm -rf
 
-loader.o : loader.h loader.c $(CONSTANTS)
-	gcc -c loader.c $(FLAGS) -o loader.o
+all : $(TARGET).bin
 
-config.o : config.h config.c $(CONSTANTS)
-	gcc -c config.c $(FLAGS) -o config.o	
+%.o : %.c
+	$(CC) -c $< $(FLAGS) -o $@
 
-debug.o : debug.h debug.c $(CONSTANTS)
-	gcc -c debug.c $(FLAGS) -o debug.o	
+$(TARGET).bin : $(C_OBJS)
+	$(CC) $(C_OBJS) $(FLAGS) -o $@
 
 install :
-	cp -f reflet-sim.bin /usr/local/bin/reflet-sim
+	mkdir -p $(TARGET_DIR_BIN)
+	$(CP) $(TARGET).bin $(TARGET_BIN)
 
 uninstall :
-	rm -f /usr/local/bin/reflet-sim
+	$(RM) $(TARGET_BIN)
 
-clean:
-	rm -f *.o
-	rm -f *.bin
+clean : 
+	$(RM) *.bin
+	$(RM) *.o
 
