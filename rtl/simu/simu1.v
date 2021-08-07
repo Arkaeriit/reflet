@@ -28,7 +28,7 @@ module simu1();
     initial
     begin
         $dumpfile("simu1.vcd");
-        $dumpvars();
+        $dumpvars(0, simu1);
         #10;
         reset = 1;
         #20;

@@ -25,7 +25,7 @@ module stack_tb();
     initial
     begin
         $dumpfile("stack_tb.vcd");
-        $dumpvars();
+        $dumpvars(0, stack_tb);
         #10;
         reset = 1;
         in = 8'hAA;

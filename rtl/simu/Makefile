@@ -1,75 +1,40 @@
 # This makefile is used to use the various tesbenches vith icarus verilog
 # And then show graphs with gtkwave
 
-REFLET = ../reflet.vh ../reflet_addr.v ../reflet_addr_reduced_behavior.v ../reflet_alu.v ../reflet_cpu.v ../reflet_interrupt.v ../reflet_stack.v
+REFLET       := ../reflet.vh ../reflet_addr.v ../reflet_addr_reduced_behavior.v ../reflet_alu.v ../reflet_cpu.v ../reflet_interrupt.v ../reflet_stack.v
+SIM_TOOLS    := rom1.v rom2.v rom3.v rom4.v rom5.v reflet_ram8.v reflet_ram16.v
+TEST_BENCHES := stack_tb simu1 simu2 simu3 simu4 simu5
+HEADERS      := ../reflet.vh
+
+all:
+
+define test_bench_template
+$(1).vvp: $$(REFLET) $$(SIM_TOOLS) $$(HEADERS) $(1).v
+	iverilog $$(REFLET) $$(SIM_TOOLS) $(1).v -o $(1).vvp
+
+$(1).vcd: $(1).vvp
+	vvp $$<
+
+.PHONY: $(1).vcd
+$(1): $(1).vcd
+	gtkwave $$<
+
+ALL_VCD += $(1).vcd
+
+$(1)_clean:
+	rm -f $(1).vcd
+	rm -f $(1).vvp
+
+.PHONY: $(1)_clean
+ALL_CLEAN += $(1)_clean
+
+endef
+
+$(foreach tb, $(TEST_BENCHES), $(eval $(call test_bench_template, $(tb))))
+
+all: $(ALL_VCD)
+
+clean : $(ALL_CLEAN)
 
 all : stack_tb.vcd simu1.vcd simu2.vcd simu3.vcd simu4.vcd simu5.vcd
-
-stack_tb.vcd : stack_tb.vvp
-	vvp stack_tb.vvp
-
-stack_tb.vvp : stack_tb.v ../reflet_stack.v
-	iverilog stack_tb.v ../reflet_stack.v -o stack_tb.vvp
-
-stack_tb : stack_tb.vcd
-	gtkwave stack_tb.vcd
-
-simu1 : simu1.vcd
-	gtkwave simu1.vcd
-
-simu1.vcd : simu1.vvp
-	vvp simu1.vvp
-
-simu1.vvp : simu1.v $(REFLET)
-	cp ../reflet.vh ./
-	iverilog simu1.v rom1.v $(REFLET) -o simu1.vvp
-	rm ./reflet.vh
-
-simu2 : simu2.vcd
-	gtkwave simu2.vcd
-
-simu2.vcd : simu2.vvp
-	vvp simu2.vvp
-
-simu2.vvp : simu2.v $(REFLET) reflet_ram8.v
-	cp ../reflet.vh ./
-	iverilog simu2.v rom2.v reflet_ram8.v $(REFLET) -o simu2.vvp
-	rm ./reflet.vh
-
-simu3 : simu3.vcd
-	gtkwave simu3.vcd
-
-simu3.vcd : simu3.vvp
-	vvp simu3.vvp
-
-simu3.vvp : simu3.v $(REFLET) reflet_ram16.v reflet_ram8.v
-	cp ../reflet.vh ./
-	iverilog simu3.v rom3.v reflet_ram16.v reflet_ram8.v $(REFLET) -o simu3.vvp
-	rm ./reflet.vh
-
-simu4 : simu4.vcd
-	gtkwave simu4.vcd
-
-simu4.vcd : simu4.vvp
-	vvp simu4.vvp
-
-simu4.vvp : simu4.v reflet_ram16.v reflet_ram8.v $(REFLET)
-	cp ../reflet.vh ./
-	iverilog simu4.v rom4.v $(REFLET) reflet_ram8.v reflet_ram16.v -o simu4.vvp
-	rm ./reflet.vh
-
-simu5 : simu5.vcd
-	gtkwave simu5.vcd
-
-simu5.vcd : simu5.vvp
-	vvp simu5.vvp
-
-simu5.vvp : simu5.v $(REFLET)
-	cp ../reflet.vh ./
-	iverilog simu5.v rom5.v $(REFLET) -o simu5.vvp
-	rm ./reflet.vh
-
-clean :
-	rm -f *.vvp
-	rm -f *.vcd
 
