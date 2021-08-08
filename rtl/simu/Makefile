@@ -1,9 +1,9 @@
 # This makefile is used to use the various tesbenches vith icarus verilog
 # And then show graphs with gtkwave
 
-REFLET       := ../reflet.vh ../reflet_addr.v ../reflet_addr_reduced_behavior.v ../reflet_alu.v ../reflet_cpu.v ../reflet_interrupt.v ../reflet_stack.v
+REFLET       := ../reflet.vh ../reflet_addr.v ../reflet_addr_reduced_behavior.v ../reflet_alu.v ../reflet_cpu.v ../reflet_interrupt.v ../reflet_stack.v ../reflet_alignement_fixer.v
 SIM_TOOLS    := rom1.v rom2.v rom3.v rom4.v rom5.v reflet_ram8.v reflet_ram16.v
-TEST_BENCHES := stack_tb simu1 simu2 simu3 simu4 simu5
+TEST_BENCHES := stack_tb simu1 simu2 simu3 simu4 simu5 alignement_fixer_tb
 HEADERS      := ../reflet.vh
 
 all:
