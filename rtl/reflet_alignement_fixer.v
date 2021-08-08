@@ -9,7 +9,7 @@ module reflet_alignement_fixer #(
     input clk,
     input reset,
     input [$clog2(word_size/8):0] size_used,
-    output ready,
+    output reg ready,
     output allignement_error,
     //Bus to the CPU
     input [addr_size-1:0] cpu_addr,
@@ -32,12 +32,32 @@ module reflet_alignement_fixer #(
     wire [word_size-1:0] data_mask = (1 << byte_shift * 8) - 1; //Mask of the usable byte
 
     //Computing real output addr
-    wire [addr_size-1:0] addr_mask = ~$clog2(word_size/8);
+    wire [addr_size-1:0] addr_mask = ~(word_size/8 - 1);
     assign ram_addr = cpu_addr & addr_mask;
     wire [addr_size-1:0] addr_diff = cpu_addr - ram_addr;
 
     //Reading shift
     assign cpu_data_in = (ram_data_in >> (addr_diff * 8)) & data_mask;
+
+    //Writing data to RAM
+    wire missaligned_access = |addr_diff; //Not erroneous data access
+    wire [word_size-1:0] shifted_write = (cpu_data_out & data_mask) << (addr_diff * 8); //Data to write shifted to its right position
+    wire [word_size-1:0] data_copy = ~(data_mask << (addr_diff * 8)) & ram_data_in; //Data from the bytes that will not be changed in the current write
+    wire [word_size-1:0] fixed_data_out_ram = data_copy | shifted_write; //Completa data to write to RAM
+    assign ram_data_out = (missaligned_access ? fixed_data_out_ram : cpu_data_out);
+    assign ram_write_en = ready & cpu_write_en;
+
+    //Compuing when ready
+    always @ (posedge clk)
+        if(!reset)
+            ready <= 1;
+        else
+        begin
+            if(!missaligned_access)
+                ready <= 1;
+            else
+                ready <= !ready;
+        end
     
 endmodule
 
