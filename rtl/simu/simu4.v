@@ -24,11 +24,11 @@ module simu4();
         .ext_int(4'h0));
 
     //The rom got the addresses between 0x00 and 0x7F
-    wire [7:0] dataRom;
+    wire [15:0] dataRom;
     rom4 rom4(
         .clk(clk), 
         .enable_out(!addr[15]), 
-        .addr(addr[7:0]), 
+        .addr(addr[6:0]), 
         .dataOut(dataRom));
     //The ram got the addresses between 0x80 and 0xFF
     wire [15:0] dataRam;
@@ -41,7 +41,7 @@ module simu4();
         .write_en(write_en), 
         .data_out(dataRam));
 
-    assign dIn = dataRam | {8'h0, dataRom};
+    assign dIn = dataRam | dataRom;
 
     initial
     begin

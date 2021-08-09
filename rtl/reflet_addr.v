@@ -37,6 +37,7 @@ module reflet_addr #(
     wire using_ram = instruction == `inst_pop || instruction == `inst_push || instruction == `inst_call || instruction == `inst_ret || opperand == `opp_str || opperand == `opp_load;
     assign ram_not_ready = |not_ready | (!hide_ready & using_ram);
     wire fetching_instruction = (not_ready == 2 || not_ready == 1 || not_ready == 0) & !hide_ready;
+    wire alignement_fixer_ready;
 
 
     //addr selection
@@ -44,7 +45,7 @@ module reflet_addr #(
     wire [wordsize-1:0] addr_pop = ( instruction == `inst_pop || instruction == `inst_ret ? stackPointer - pop_offset : 0 ); //We need the -1 because the CPU updated the stack pointer
     wire [wordsize-1:0] addr_push = ( instruction == `inst_push || instruction == `inst_call ? stackPointer : 0 );
     wire [wordsize-1:0] addr_reg = ( opperand == `opp_str || opperand == `opp_load ? otherRegister : 0 );
-    assign addr = ( !fetching_instruction ? addr_reg | addr_pop | addr_push : programCounter); //The defaut behaviour is to seek the address of the next piece of code
+    wire [wordsize-1:0] cpu_addr = ( !fetching_instruction ? addr_reg | addr_pop | addr_push : programCounter); //The defaut behaviour is to seek the address of the next piece of code
 
     //selecting the data to send
     wire [wordsize-1:0] data_wr = ( instruction == `inst_push || opperand == `opp_str ? workingRegister : 0 );
@@ -62,30 +63,47 @@ module reflet_addr #(
     assign out_reg = ( instruction == `inst_ret || instruction == `inst_call ? `pc_id : 0 ); 
 
     //write enable
-    assign write_en = (instruction == `inst_push || instruction == `inst_call || opperand == `opp_str) & !fetching_instruction & !(|ram_not_ready);
+    wire cpu_write_en = (instruction == `inst_push || instruction == `inst_call || opperand == `opp_str) & !fetching_instruction & !(|ram_not_ready);
     
     //handeling reduced behavior
     generate
-        if(wordsize == 8) //no reduce behavior possible
+        if(wordsize == 8) //no reduced behavior possible
         begin
             assign data_in_cpu = data_in;
             assign data_out = data_out_cpu;
+            assign addr = cpu_addr;
+            assign write_en = cpu_write_en;
+            assign alignement_fixer_ready = 1;
             assign pop_offset = 1;
         end
         else
         begin
-            reflet_addr_reduced_behavior #(.wordsize(wordsize)) reduced_behavior(
+            wire [15:0] size_used = ( fetching_instruction ? 0 :
+                                      ( reduced_behaviour_bits == 2'b00 ? (wordsize/8 - 1) :
+                                        ( reduced_behaviour_bits == 2'b01 ? 2 : //TODO, make the value 2 depends on the wordsize as it is currentely broken in 32 bit CPU
+                                          ( reduced_behaviour_bits == 2'b10 ? 1 : 0 ))));
+            reflet_alignement_fixer #(.word_size(wordsize), .addr_size(wordsize)) alignement_fixer (
                 .clk(clk),
-                .reset(reset),
-                .enable(enable),
-                .fetching_instruction(fetching_instruction),
-                .instruction(instruction),
-                .reduced_behavior_bits(reduced_behaviour_bits),
-                .pop_offset(pop_offset),
-                .data_in(data_in),
-                .data_out(data_out),
-                .data_out_cpu(data_out_cpu),
-                .data_in_cpu(data_in_cpu));
+                .size_used(size_used[$clog2(wordsize/8):0]),
+                .ready(alignement_fixer_ready),
+                .alignement_error(), //TODO
+                //Bus to the CPU
+                .cpu_addr(cpu_addr),
+                .cpu_data_out(data_out_cpu),
+                .cpu_data_in(data_in_cpu),
+                .cpu_write_en(cpu_write_en),
+                //Bus to the RAM
+                .ram_addr(addr),
+                .ram_data_out(data_out),
+                .ram_data_in(data_in),
+                .ram_write_en(write_en));
+            wire reduced_behaviour = (reduced_behaviour_bits != 2'b00) && ( (reduced_behaviour_bits == 2'b01 && wordsize > 32) || (reduced_behaviour_bits == 2'b10 && wordsize > 16) || (reduced_behaviour_bits == 2'b11 && wordsize > 8) );
+            assign pop_offset = ( reduced_behaviour  && instruction != `inst_ret && instruction != `inst_call ? 
+                            ( reduced_behaviour_bits == 2'b01 ? 4 :
+                                (reduced_behaviour_bits == 2'b10 ? 2 :
+                                    1))
+                        : wordsize/8 );
+
         end
     endgenerate
 
@@ -97,7 +115,7 @@ module reflet_addr #(
             instruction <= 8'h0;
             hide_ready <= 0;
         end
-        else if(enable)
+        else if(enable & alignement_fixer_ready)
         begin
             case(not_ready)
                 0 : //we are ready and thus must addapt the time of not ready to engage the communication with the ram
@@ -116,7 +134,7 @@ module reflet_addr #(
                 1 : 
                 begin 
                     if(!hide_ready)
-                        instruction <= data_in[7:0];
+                        instruction <= data_in_cpu[7:0];
                     not_ready <= not_ready - 4'h1;
                 end
                 default : not_ready <= not_ready - 4'h1;

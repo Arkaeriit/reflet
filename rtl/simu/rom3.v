@@ -35,7 +35,7 @@ quit
 */
 
 
-module rom3(input clk, input enable_out,input [7:0] addr, output [7:0] dataOut);
+module rom3_byte_access(input clk, input enable_out,input [7:0] addr, output [7:0] dataOut);
 reg [7:0] ret; assign dataOut = (enable_out ? ret : 8'h0);
 always @ (posedge clk)
 case(addr)
@@ -175,3 +175,12 @@ case(addr)
   default: ret = 0;
 endcase
 endmodule
+
+module rom3(input clk, input enable_out,input [7:0] addr, output [15:0] dataOut);
+    wire [7:0] data_even;
+    wire [7:0] data_odd;
+    rom3_byte_access rom_even(clk, enable_out, addr, data_even);
+    rom3_byte_access rom_odd(clk, enable_out, addr+8'b1, data_odd);
+    assign dataOut = {data_odd, data_even};
+endmodule
+

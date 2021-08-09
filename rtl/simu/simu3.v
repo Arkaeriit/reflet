@@ -24,7 +24,7 @@ module simu3();
         .ext_int(4'h0));
 
     //The rom got the addresses between 0x0000 and 0x7FFF
-    wire [7:0] dataRom;
+    wire [15:0] dataRom;
     rom3 rom3(
         .clk(clk), 
         .enable_out(!addr[15]), 
@@ -41,12 +41,16 @@ module simu3();
         .write_en(write_en), 
         .data_out(dataRam));
 
-    assign dIn = dataRam | {8'h0, dataRom};
+    assign dIn = dataRam | dataRom;
+
+    integer i;
 
     initial
     begin
         $dumpfile("simu3.vcd");
         $dumpvars(0, simu3);
+        for(i = 0; i<16; i=i+1)
+            $dumpvars(0, cpu.registers[i]);
         #10;
         reset = 1;
         #800;
