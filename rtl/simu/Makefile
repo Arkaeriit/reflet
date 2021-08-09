@@ -10,14 +10,17 @@ all:
 
 define test_bench_template
 $(1).vvp: $$(REFLET) $$(SIM_TOOLS) $$(HEADERS) $(1).v
-	iverilog $$(REFLET) $$(SIM_TOOLS) $(1).v -o $(1).vvp
+	@echo "[IVERILOG] $(1).v"
+	@iverilog $$(REFLET) $$(SIM_TOOLS) $(1).v -o $(1).vvp
 
 $(1).vcd: $(1).vvp
-	vvp $$<
+	@echo "[VDC]      $(1).vvp"
+	@vvp $$<
 
 .PHONY: $(1).vcd
 $(1): $(1).vcd
-	gtkwave $$<
+	@echo "[GTKWAVE]  $(1).vcd"
+	@gtkwave $$<
 
 ALL_VCD += $(1).vcd
 
