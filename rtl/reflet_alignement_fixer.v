@@ -15,9 +15,8 @@ module reflet_alignement_fixer #(
     addr_size = 32
     )(
     input clk,
-    input reset,
     input [$clog2(word_size/8):0] size_used,
-    output reg ready,
+    output ready,
     output alignement_error,
     //Bus to the CPU
     input [addr_size-1:0] cpu_addr,
@@ -53,19 +52,15 @@ module reflet_alignement_fixer #(
     wire [word_size-1:0] data_copy = ~(data_mask << (addr_diff * 8)) & ram_data_in; //Data from the bytes that will not be changed in the current write
     wire [word_size-1:0] fixed_data_out_ram = data_copy | shifted_write; //Completa data to write to RAM
     assign ram_data_out = (missaligned_access ? fixed_data_out_ram : cpu_data_out);
-    assign ram_write_en = (!ready | !missaligned_access) & cpu_write_en;
+    assign ram_write_en = cpu_write_en & ready;
 
-    //Compuing when ready
+    //Detecting changes in inputs
+    wire [word_size+addr_size-1:0] all_inputs = {cpu_addr, cpu_data_out};
+    reg [word_size+addr_size-1:0] old_input;
+    wire new_input = all_inputs != old_input;
     always @ (posedge clk)
-        if(!reset)
-            ready <= 1;
-        else
-        begin
-            if(!missaligned_access)
-                ready <= 1;
-            else
-                ready <= !ready;
-        end
-    
+        old_input <= all_inputs;
+    assign ready = !missaligned_access | !cpu_write_en | !new_input;
+
 endmodule
 

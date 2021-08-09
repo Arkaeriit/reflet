@@ -6,10 +6,10 @@ module alignement_fixer_tb();
     reg reset = 0;
 
     //Cpu ctrl
-    reg [63:0] cpu_addr = 0;
-    reg [63:0] cpu_data_out = 0;
-    reg [3:0] size_reduction = 0;
-    reg cpu_write_en = 0;
+    wire [63:0] cpu_addr;
+    wire [63:0] cpu_data_out;
+    wire [3:0] size_used;
+    wire cpu_write_en;
 
     //Other links
     wire [63:0] ram_addr;
@@ -21,7 +21,6 @@ module alignement_fixer_tb();
 
     reflet_alignement_fixer #(.word_size(64), .addr_size(64)) fix (
         .clk(clk),
-        .reset(reset),
         .cpu_addr(cpu_addr),
         .cpu_data_out(cpu_data_out),
         .cpu_data_in(cpu_data_in),
@@ -30,7 +29,7 @@ module alignement_fixer_tb();
         .ram_data_in(ram_data_in),
         .ram_data_out(ram_data_out),
         .ram_write_en(ram_write_en),
-        .size_used(size_reduction));
+        .size_used(size_used));
 
     dummyMem mem (
         .clk(clk),
@@ -39,41 +38,22 @@ module alignement_fixer_tb();
         .data_out(ram_data_in),
         .write_en(ram_write_en));
 
+    dummyCPU cpu (
+        .clk(clk),
+        .reset(reset),
+        .data_out(cpu_data_out),
+        .addr(cpu_addr),
+        .size_used(size_used),
+        .write_en(cpu_write_en));
+
     initial
     begin
         $dumpfile("alignement_fixer_tb.vcd");
         $dumpvars(0, alignement_fixer_tb);
-        #1;
-        //Testing allignement error
-        size_reduction <= 3;
-        cpu_addr <= 1;
         //Filling the begining of the ram
         #10;
-        cpu_addr <= 0;
-        size_reduction <= 3;
         reset <= 1;
-        cpu_write_en <= 1;
-        cpu_data_out <= 64'h1212121212121212;
-        #10;
-        cpu_addr <= 8;
-        cpu_data_out <= 64'hABABABABABABABAB;
-        #10;
-        cpu_addr <= 16;
-        cpu_data_out <= 64'hFDFDFDFDFDFDFDFD;
-        //Testing 16 bit access
-        #6;
-        cpu_addr <= 0;
-        cpu_write_en <= 0;
-        #10;
-        cpu_write_en <= 1;
-        size_reduction <= 1;
-        cpu_addr <= 2;
-        cpu_data_out <= 64'h5678;
-        #10;
-        cpu_addr <= 10;
-        #10;
-        cpu_write_en <= 0;
-        #10;
+        #300;
         $finish;
     end
 
@@ -117,6 +97,67 @@ module dummyMem (
     end
 
     assign data_out = data_out_of_ram;
+
+endmodule
+
+module dummyCPU (
+    input clk,
+    input reset,
+    output reg [63:0] addr = 0,
+    output reg [63:0] data_out = 0,
+    output reg [3:0] size_used = 0,
+    output reg write_en = 0
+    );
+
+    reg [63:0] cnt;
+
+    always @ (posedge clk)
+        if(!reset)
+            cnt <= 0;
+        else
+            cnt <= cnt + 1;
+
+    always @ (posedge clk)
+        case(cnt)
+            1: begin //Testing alignement error
+                size_used <= 3;
+                addr <= 1;
+            end
+            4: begin //Filling the begining of the ram
+                addr <= 0;
+                write_en <= 1;
+                data_out <= 64'h1212121212121212;
+            end
+            5: begin
+                data_out <= 64'hABABABABABABABAB;
+                addr <= 8;
+            end
+            6: begin
+                data_out <= 64'hFDFDFDFDFDFDFDFD;
+                addr <= 16;
+            end
+            7: begin //Testing reading
+                write_en <= 0;
+                addr <= 0;
+            end
+            9: begin //Testing missalligned read
+                addr <= 2;
+                size_used <= 1;
+                write_en <= 1;
+                data_out <= 64'h6789;
+            end
+            11: begin
+                write_en <= 0;
+            end
+            12: begin
+                write_en <= 1;
+                addr <= 10;
+                data_out <= 64'h1234;
+            end
+            14: begin
+                write_en <= 0;
+            end
+        endcase
 
 endmodule
 
