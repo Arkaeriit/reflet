@@ -1,6 +1,14 @@
-/*
-|This module is meant to handle misaligned read or write to a memory that requires access aligned to the word size. It is ment to work on little endian systems. The granularity of the operations in a byte. The input size_used tells the size of the data to transfer. For example, when size_used is equal to 1, the data is a byte wide and should be aligned to a byte. When size_used is 1, the data is two bytes wide and should be aligned to 16 bits.
-    */
+/*--------------------------------------------------\
+|This module is meant to handle misaligned read or  |
+|write to a memory that requires access aligned to  |
+|the word size. It is meant to work on little endian|
+|systems. The granularity of the operations in a    |
+|byte. The input size_used tells the size of the    |
+|data to transfer. For example, when size_used is   |
+|equal to 1, the data is a byte wide and should be  |
+|aligned to a byte. When size_used is 1, the data is|
+|two bytes wide and should be aligned to 16 bits.   |
+\--------------------------------------------------*/
 
 module reflet_alignement_fixer #(
     parameter word_size = 32,
@@ -10,7 +18,7 @@ module reflet_alignement_fixer #(
     input reset,
     input [$clog2(word_size/8):0] size_used,
     output reg ready,
-    output allignement_error,
+    output alignement_error,
     //Bus to the CPU
     input [addr_size-1:0] cpu_addr,
     input [word_size-1:0] cpu_data_out,
@@ -25,7 +33,7 @@ module reflet_alignement_fixer #(
 
     //Checking alignment errors
     wire [addr_size-1:0] invalid_addr_mask = (1 << size_used) - 1;
-    assign allignement_error = |(cpu_addr & invalid_addr_mask);
+    assign alignement_error = |(cpu_addr & invalid_addr_mask);
 
     //Various masks used by the system
     wire [word_size/8-1:0] byte_shift = 1 << size_used;
@@ -45,7 +53,7 @@ module reflet_alignement_fixer #(
     wire [word_size-1:0] data_copy = ~(data_mask << (addr_diff * 8)) & ram_data_in; //Data from the bytes that will not be changed in the current write
     wire [word_size-1:0] fixed_data_out_ram = data_copy | shifted_write; //Completa data to write to RAM
     assign ram_data_out = (missaligned_access ? fixed_data_out_ram : cpu_data_out);
-    assign ram_write_en = ready & cpu_write_en;
+    assign ram_write_en = (!ready | !missaligned_access) & cpu_write_en;
 
     //Compuing when ready
     always @ (posedge clk)
