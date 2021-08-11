@@ -44,6 +44,7 @@
 `define inst_slp    8'h00
 `define inst_cmpnot 8'h01
 `define inst_retint 8'h02
+`define inst_tbm    8'h03
 `define inst_cc2    8'h08
 `define inst_jif    8'h09
 `define inst_pop    8'h0A

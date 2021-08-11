@@ -98,7 +98,18 @@ case(addr)
   7'h57 : ret = 8'h3d; //cpy SR
   7'h58 : ret = 8'ha;  //pop
   7'h59 : ret = 8'h0;  //slp
-  7'h5a : ret = 8'he;  //quit
+  7'h5A : ret = 8'hb;  //push
+  7'h59 : ret = 8'h0;  //slp
+  7'h5B : ret = 8'h10; //set 0
+  7'h5C : ret = 8'h3;  //tbm
+  7'h5D : ret = 8'ha;  //pop
+  7'h5E : ret = 8'hb;  //push
+  7'h5F : ret = 8'h0;  //slp
+  7'h60 : ret = 8'h10; //set 0
+  7'h61 : ret = 8'h3;  //tbm
+  7'h62 : ret = 8'ha;  //pop
+  7'h63 : ret = 8'hb;  //push
+  7'h64 : ret = 8'he;  //quit
   default: ret = 0;
 endcase
 endmodule

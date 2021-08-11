@@ -26,6 +26,7 @@ module reflet_addr #(
     input [wordsize-1:0] data_in,
     output write_en,
     //output to the CPU
+    output byte_mode,
     output [wordsize-1:0] out,
     output [3:0] out_reg,
     output ram_not_ready
@@ -49,7 +50,7 @@ module reflet_addr #(
     wire [wordsize-1:0] cpu_addr = ( !fetching_instruction ? addr_reg | addr_pop | addr_push : programCounter); //The defaut behaviour is to seek the address of the next piece of code
 
     //selecting the data to send
-    wire [wordsize-1:0] data_wr = ( instruction == `inst_push || opperand == `opp_str ? workingRegister : 0 );
+    wire [wordsize-1:0] data_wr = ( instruction == `inst_push || opperand == `opp_str || instruction == `inst_tbm ? workingRegister : 0 );
     wire [wordsize-1:0] data_pc = ( instruction == `inst_call ? programCounter : 0 );
     wire [wordsize-1:0] data_out_cpu = data_wr | data_pc;
 
@@ -76,10 +77,22 @@ module reflet_addr #(
             assign write_en = cpu_write_en;
             assign alignement_fixer_ready = 1;
             assign pop_offset = 1;
+            assign byte_mode = 0;
         end
         else
         begin
-            wire [15:0] size_used = ( fetching_instruction ? 0 :
+            //Handleling the toggle of byte mode
+            reg byte_mode_r;
+            always @ (posedge clk)
+                if(!reset)
+                    byte_mode_r <= 0;
+                else
+                    if(instruction == `inst_tbm && !ram_not_ready)
+                        byte_mode_r <= !byte_mode_r;
+            assign byte_mode = byte_mode_r;
+
+            //Controling the width of data to get
+            wire [15:0] size_used = ( fetching_instruction | byte_mode ? 0 :
                                       ( reduced_behaviour_bits == 2'b00 ? (wordsize/8 - 1) :
                                         ( reduced_behaviour_bits == 2'b01 ? 2 : //TODO, make the value 2 depends on the wordsize as it is currentely broken in 32 bit CPU
                                           ( reduced_behaviour_bits == 2'b10 ? 1 : 0 ))));
@@ -98,11 +111,11 @@ module reflet_addr #(
                 .ram_data_out(data_out),
                 .ram_data_in(data_in),
                 .ram_write_en(write_en));
-            wire reduced_behaviour = (reduced_behaviour_bits != 2'b00) && ( (reduced_behaviour_bits == 2'b01 && wordsize > 32) || (reduced_behaviour_bits == 2'b10 && wordsize > 16) || (reduced_behaviour_bits == 2'b11 && wordsize > 8) );
-            assign pop_offset = ( reduced_behaviour  && instruction != `inst_ret && instruction != `inst_call ? 
-                            ( reduced_behaviour_bits == 2'b01 ? 4 :
+            wire reduced_behaviour = ((reduced_behaviour_bits != 2'b00) && ( (reduced_behaviour_bits == 2'b01 && wordsize > 32) || (reduced_behaviour_bits == 2'b10 && wordsize > 16) || (reduced_behaviour_bits == 2'b11 && wordsize > 8) )) || byte_mode;
+            assign pop_offset = ( reduced_behaviour && instruction != `inst_ret && instruction != `inst_call ? 
+                            ( reduced_behaviour_bits == 2'b11 || byte_mode ? 1 :
                                 (reduced_behaviour_bits == 2'b10 ? 2 :
-                                    1))
+                                    4))
                         : wordsize/8 );
 
         end

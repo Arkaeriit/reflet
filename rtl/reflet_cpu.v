@@ -47,6 +47,7 @@ module reflet_cpu #(
     wire [wordsize-1:0] int_routine;
     wire alignement_error;
     wire [3:0] used_int = {ext_int[3:1], ext_int[0] | (registers[`sr_id][7] & alignement_error)}; //External interrupt or notification for alignement error
+    wire byte_mode;
 
     reflet_alu #(.wordsize(wordsize)) alu(
         .working_register(registers[`wr_id]),
@@ -74,6 +75,7 @@ module reflet_cpu #(
         .data_in(data_in),
         .write_en(write_en),
         //Out to the CPU
+        .byte_mode(byte_mode),
         .out(content_addr),
         .out_reg(index_addr),
         .ram_not_ready(ram_not_ready));
@@ -99,10 +101,10 @@ module reflet_cpu #(
     wire [7:0] increase01 = ( wordsize > 32 ? 7'h4 : default_increase );
     wire [7:0] increase10 = ( wordsize > 16 ? 7'h2 : default_increase );
     wire [1:0] reduced_behavior = registers[`sr_id][2:1];
-    wire [7:0] increase_data = ( reduced_behavior == 2'b00 ? default_increase :
+    wire [7:0] increase_data = ( reduced_behavior == 2'b11 || byte_mode ? increase11 :
                                     ( reduced_behavior == 2'b01 ? increase01 :
                                         ( reduced_behavior == 2'b10 ? increase10 :
-                                            increase11)));
+                                            default_increase)));
 
     //debug signal
     assign debug = instruction == `inst_debug && !ram_not_ready;
