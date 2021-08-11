@@ -13,6 +13,7 @@ TARGET := reflet-masm
 # Install targets
 TARGET_DIR_BIN := /usr/local/bin
 TARGET_BIN := $(TARGET_DIR_BIN)/$(TARGET)
+SHARE_DIR := /usr/local/share/reflet
 LIBPATH := /usr/lib64
 INCLUDEPATH := /usr/include
 TARGET_LIB := $(INCLUDEPATH)/lib$(TARGET).so
@@ -22,12 +23,12 @@ CC := gcc
 CP := cp -f
 RM := rm -rf
 
-all : $(TARGET).bin lib$(TARGET).so
+all : $(TARGET).bin lib$(TARGET).so $(LUA_OBJS)
 
 %.o : %.c
 	$(CC) -c $< $(FLAGS) -o $@
 
-%.lua : %.c
+%.luac : %.lua
 	luac -o $@ $<
 
 $(TARGET).bin : macro_assembler.o
@@ -43,14 +44,16 @@ install :
 	$(CP) libreflet-masm.h $(INCLUDEPATH)/reflet-masm.h
 	mkdir -p $(LIBPATH)
 	$(CP) lib$(TARGET).so $(LIBPATH)
+	$(CP) $(LUA_OBJS) $(SHARE_DIR)/
 
 uninstall :
 	$(RM) $(TARGET_BIN)
-	$(RM) $(INCLUDEPATH)/reflet-pasm.h
 	$(RM) $(LIBPATH)/lib$(TARGET).so
+	$(RM) $(SHARE_DIR)/*.luac
 
 clean : 
 	$(RM) *.bin
 	$(RM) *.o
 	$(RM) *.so
+	$(RM) *.luac
 

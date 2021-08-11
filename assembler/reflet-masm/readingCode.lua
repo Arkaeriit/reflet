@@ -18,7 +18,7 @@ end
 -- return INST_ERR in case of an error, INST_BAS in case it is a basic instruction and INST_UKN otherwise
 local isBasic = function(tabInst)
     mnemonic = tabInst[1]:lower()
-    if mnemonic == "slp" or mnemonic == "cc2" or mnemonic == "jif" or mnemonic == "jmp" or mnemonic == "pop" or mnemonic == "push" or mnemonic == "ret" or mnemonic == "call" or mnemonic == "quit" or mnemonic == "debug" or mnemonic == "cmpnot" or mnemonic == "retint" then
+    if mnemonic == "slp" or mnemonic == "cc2" or mnemonic == "jif" or mnemonic == "jmp" or mnemonic == "pop" or mnemonic == "push" or mnemonic == "ret" or mnemonic == "call" or mnemonic == "quit" or mnemonic == "debug" or mnemonic == "cmpnot" or mnemonic == "retint" or mnemonic == "tbm" then
         if #tabInst == 1 then
             return INST_BAS
         else

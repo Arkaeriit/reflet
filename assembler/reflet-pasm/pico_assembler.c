@@ -133,6 +133,8 @@ static enum processLine_return processLine(const char* line, uint8_t* ret){
             *ret = CMPNOT;
         }else if(mnRETINT(toPrePross[0])){
             *ret = RETINT;
+        }else if(mnTBM(toPrePross[0])){
+            *ret = TBM;
         }else if(mnSETINT(toPrePross[0])){
             int int_num = atoi(toPrePross[1]); //might something better at erroch checking than atoi...
             if(!(0 <= int_num && int_num <= 3)){

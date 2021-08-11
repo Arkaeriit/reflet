@@ -47,7 +47,7 @@ void mini_assembleFile(const char* fileIn, const char* fileOut, bool set_prefix)
 #define DEBUG  0x0F
 #define CMPNOT 0x01
 #define RETINT 0X02
-//0x03
+#define TBM    0x03
 #define SETINT_MASK 0x04
 
 //mnemonics
@@ -79,6 +79,7 @@ void mini_assembleFile(const char* fileIn, const char* fileOut, bool set_prefix)
 #define mnCMPNOT(mn) !(strcmp(mn, "CMPNOT") && strcmp(mn, "cmpnot"))
 #define mnRETINT(mn) !(strcmp(mn, "RETINT") && strcmp(mn, "retint"))
 #define mnSETINT(mn) !(strcmp(mn, "SETINT") && strcmp(mn, "setint"))
+#define mnTBM(mn) !(strcmp(mn, "TBM") && strcmp(mn, "tbm"))
 #define macroRAWBYTE(mn) !(strcmp(mn, "RAWBYTE") && strcmp(mn, "rawbyte"))
 
 #endif
