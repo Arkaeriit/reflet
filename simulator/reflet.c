@@ -6,11 +6,13 @@
 #include "reflet.h"
 static void run_inst(reflet* vm);
 static int byteExchanged(const reflet* vm, bool stack_b);
-static word_t loadWordRAM(const reflet* vm, word_t addr, bool stack_b);
+static void check_alignement_ok(reflet* vm, word_t addr, bool stack_b);
+static word_t loadWordRAM(reflet* vm, word_t addr, bool stack_b);
 static void putRAMWord(reflet* vm, word_t addr, word_t content, bool stack_b);
 static void io(reflet* vm);
 static word_t new_int(reflet* vm, int interupt);
 static void check_int(reflet* vm);
+static void triger_int(reflet* vm, uint8_t int_number);
 static void ret_int(reflet* vm);
 static bool enabled_int(reflet* vm, int interupt);
 #define min(x, y) (x < y ? x : y)
@@ -268,6 +270,29 @@ static int byteExchanged(const reflet* vm, bool stack_b){
 }
 
 /*
+ * Check for invalid alignment in memory accesses. If the invalid alignment
+ * trap is on, the interrupt is run. Otherwise, a message is printed.
+ *  Arguments:
+ *      vm : the reflet struct
+ *      addr : the address of the memory to access
+ *      stack_b : are we ignoring the behavior bits
+ */
+static void check_alignement_ok(reflet* vm, word_t addr, bool stack_b){
+    uint8_t size = byteExchanged(vm, stack_b);
+    word_t addr_invalid_mask = (1 << (size-1)) - 1;
+    bool access_ok = !(addr & addr_invalid_mask);
+    if(access_ok) return;
+    bool trap_enabled = !(!(SR(vm) & 0x88)); //Check that both the trap and the interupt 0 are enabled
+    if(trap_enabled){
+        if(vm->int_level) //Roll back the PC so that after the interrupt, the program jumps back the the instruction that caused a problem
+            PC(vm)--;
+        triger_int(vm, 0);
+    }else{
+        printf("Missaligned access at addr 0x%" WORD_PX ". Triying to acces %i bytes from address 0x%" WORD_PX ".\n", PC(vm)-1, 1<<(size-1), addr);
+    }
+}
+
+/*
  * Fetches a full word from ram
  *  Arguments:
  *      vm : the reflet struct
@@ -276,7 +301,8 @@ static int byteExchanged(const reflet* vm, bool stack_b){
  *  return:
  *      The word in RAM (the byte at the address and the following bytes)
  */
-static word_t loadWordRAM(const reflet* vm, word_t addr, bool stack_b){
+static word_t loadWordRAM(reflet* vm, word_t addr, bool stack_b){
+    check_alignement_ok(vm, addr, stack_b);
     uint8_t* target = vm->ram + addr;
     int exchanged = byteExchanged(vm, stack_b);
     word_t ret = 0;
@@ -291,11 +317,12 @@ static word_t loadWordRAM(const reflet* vm, word_t addr, bool stack_b){
  * Put a whole word in RAM
  *  Arguments:
  *      vm : the reflet struct
- *      addr : the startin address of where we must put the word
+ *      addr : the starting address of where we must put the word
  *      content : the word to be put in RAM
  *      stack_b : are we ignoring the behavior bits
  */
 static void putRAMWord(reflet* vm, word_t addr, word_t content, bool stack_b){
+    check_alignement_ok(vm, addr, stack_b);
     uint8_t* target = vm->ram + addr;
     for(size_t offset=0; offset<byteExchanged(vm, stack_b); offset++){
         uint8_t byteToSend = (uint8_t) (content >> (offset * 8)) & 0xFF;
@@ -351,11 +378,18 @@ static void check_int(reflet* vm){
     for(int i=0; i<4; i++){
         if(vm->config->ints[i]->enable && vm->ints[i]->count_up >= vm->config->ints[i]->freq){ //Checking if an enabled interrupt reached its count_up
             vm->ints[i]->count_up = 0;
-            if(i < vm->int_level->level && enabled_int(vm, i)){ //The interrupt is taken into account if its priority is higher than the current level and it is enabled in the status register
-                word_t routine = new_int(vm, i);
-                PC(vm) = routine;
-            }
+            triger_int(vm, i);
         }
+    }
+}
+
+/*
+ * Tries to trigger the desired interupt.
+ */
+static void triger_int(reflet* vm, uint8_t int_number){
+    if(int_number < vm->int_level->level && enabled_int(vm, int_number)){ //The interrupt is taken into account if its priority is higher than the current level and it is enabled in the status register
+        word_t routine = new_int(vm, int_number);
+        PC(vm) = routine;
     }
 }
 
