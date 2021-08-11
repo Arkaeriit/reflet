@@ -35,6 +35,7 @@
 #define CMPNOT 0x01
 #define RETINT 0x02
 #define SETINT 0x04
+#define TBM    0x03
 
 #define SETINT_MASK 0xFC
 #define isSETINT(inst) ((inst & SETINT_MASK) == SETINT)

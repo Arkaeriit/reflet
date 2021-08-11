@@ -55,6 +55,7 @@ typedef struct reflet_struct {
     struct reflet_int* ints[4];
     struct reflet_int_level* int_level;
     bool active;
+    bool byte_mode;
 } reflet;
 
 #include "debug.h"

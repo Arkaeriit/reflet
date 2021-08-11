@@ -25,6 +25,7 @@ reflet* reflet_init(){
     ret->reg = calloc(NUMBER_OF_REGISTERS, sizeof(word_t));
     ret->ram = NULL; //Left blank, should be written a value depending of its configuration
     ret->active = true;
+    ret->byte_mode = false;
     //default config
     struct reflet_config* conf = malloc(sizeof(struct reflet_config));
     conf->word_size = WORD_SIZE;
@@ -109,13 +110,13 @@ static void run_inst(reflet* vm){
     uint8_t instruction = (uint8_t) vm->ram[PC(vm)];
     uint8_t opperand = (instruction & 0xF0) >> 4;
     uint8_t reg = instruction & 0x0F;
+#if 0 //Toogle for easy debuging
     word_t debug_helper[16];
-    // /*
-    for(int i=0; i<16; i++) //Comment out this line and the following when not doing tests with a debuger
+    for(int i=0; i<16; i++)
         debug_helper[i] = vm->reg[i];
     uint8_t* stack = vm->ram + PC(vm);
-    // */
-        PC(vm)++;
+#endif
+    PC(vm)++;
     switch(opperand){
         case 0:
             switch(instruction){
@@ -156,6 +157,9 @@ static void run_inst(reflet* vm){
                         SR(vm) = (SR(vm) >> 1) << 1; //We want to turn the LSB into a 0
                     else
                         SR(vm) |= 1;
+                    break;
+                case TBM:
+                    vm->byte_mode = !vm->byte_mode;
                     break;
                 default:
                     if(isSETINT(instruction)){
@@ -246,6 +250,8 @@ static void run_inst(reflet* vm){
 static int byteExchanged(const reflet* vm, bool stack_b){
     if(stack_b)
         return vm->config->word_size_byte;
+    if(vm->byte_mode)
+        return 1;
     switch((SR(vm) & 0x6) >> 1){
         case 0:
             return vm->config->word_size_byte;
