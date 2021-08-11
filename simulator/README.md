@@ -16,15 +16,15 @@ The configuration file should contain information about the processor such as th
 |--------------|-----|--|
 |word\_size     |The size of the processor registers in bits.| 8 |
 |ram\_size      |The size of the RAM in bytes.| 255 |
-|log            |A file where debug log will we stored.| disabled |
+|log            |A file where debug log will be stored.| disabled |
 |tx\_cmd         |Address to print data | 0 |
 |tx\_data        |Address to select what data to print | 1 |
 |rx\_cmd         |Address used to ask for input | 2 |
 |rx\_data        |Address where the input is stored | 3 |
-|int\_0\_freq    |The number of instruction betwen each raising of the interrupt 0 | 0 (disabled) |   
-|int\_1\_freq    |The number of instruction betwen each raising of the interrupt 1 | 0 (disabled) |   
-|int\_2\_freq    |The number of instruction betwen each raising of the interrupt 2 | 0 (disabled) |   
-|int\_3\_freq    |The number of instruction betwen each raising of the interrupt 3 | 0 (disabled) |   
+|int\_0\_freq    |The number of instructions between each raising of the interrupt 0 | 0 (disabled) |   
+|int\_1\_freq    |The number of instructions between each raising of the interrupt 1 | 0 (disabled) |   
+|int\_2\_freq    |The number of instructions between each raising of the interrupt 2 | 0 (disabled) |   
+|int\_3\_freq    |The number of instructions between each raising of the interrupt 3 | 0 (disabled) |   
 
 You can add comments in the config file by prefixing them with a `;`.
 For example, the following configuration file will help simulate an 8-bit processor with 100 bytes of RAM.
@@ -34,5 +34,4 @@ word_size 8
 ;100 bytes of ram
 ram_size 100
 ```
-
 

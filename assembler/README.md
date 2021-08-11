@@ -29,11 +29,11 @@ reflet-masm <input files> <options> -o <output file>
 reflet-masm -help
 ```
 The possible options are the following:
-* -no-prefix : does not put the 'ASRM' prefix at the beginning of the output file.
-* -no-stack-init : does not initialize the stack pointer. When not used, the stack pointer is by default initialized to just after the program.
-* -set-stack-to xxx : set the stack pointer to the address given just after the flag. Incompatible with -no-stack-init.
-* -start-addr xxx : tell the linker that the code should start at the given address. 
-* -ignore-start : if set, the program will not start at the "start" label but at the beginning of the first input file.
+* -no-prefix: does not put the 'ASRM' prefix at the beginning of the output file.
+* -no-stack-init: does not initialize the stack pointer. When not used, the stack pointer is by default initialized to just after the program.
+* -set-stack-to xxx: set the stack pointer to the address given just after the flag. Incompatible with -no-stack-init.
+* -start-addr xxx: tell the linker that the code should start at the given address. 
+* -ignore-start: if set, the program will not start at the "start" label but at the beginning of the first input file.
 * -wordsize xxx : set the wordsize to xxx (a number in bits). This overrides any information about wordsize written in the assembly file.
 
 ### Macro instructions

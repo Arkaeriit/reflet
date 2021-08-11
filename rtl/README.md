@@ -5,7 +5,7 @@ In this folder is a Verilog implementation of a Reflet soft-processor. It is not
 This processor behaves as described in the main README so if some code work with the simulator, it will work with the processor.
 
 ### Pipeline
-As of now, there is no pipeline in the processor. This leads to instruction taking between 3 and 5 clock cycles to complete.
+As of now, there is no pipeline in the processor. This leads to instruction taking between 3 and 6 clock cycles to complete.
 
 ## Top-level module
 The top-level module is `reflet_cpu`.  Its only parameter is `wordsize` which defines the wordsize in bits.
