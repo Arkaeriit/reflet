@@ -19,6 +19,7 @@ module reflet_addr #(
     input [wordsize-1:0] otherRegister,
     input [1:0] reduced_behaviour_bits,
     output reg [7:0] instruction,
+    output alignement_error,
     //ram connection
     output [wordsize-1:0] addr,
     output [wordsize-1:0] data_out,
@@ -86,7 +87,7 @@ module reflet_addr #(
                 .clk(clk),
                 .size_used(size_used[$clog2(wordsize/8):0]),
                 .ready(alignement_fixer_ready),
-                .alignement_error(), //TODO
+                .alignement_error(alignement_error),
                 //Bus to the CPU
                 .cpu_addr(cpu_addr),
                 .cpu_data_out(data_out_cpu),
