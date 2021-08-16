@@ -12,6 +12,10 @@ label (print)
     pushr R4 ;end loop pointer
     pushr R5 ;contain the constant 1
     pushr R6 ;pointer to printc
+    pushr R7 ;copy of the status register
+    mov R7 SR ;byte mode
+    set 6
+    cpy SR
     setlab (print)-loop
     cpy R3
     setlab (print)-endloop
@@ -41,7 +45,9 @@ label (print)
         read R3 ;going back on top of the loop
         jmp
     label (print)-endloop
-    popr R6 ;restauring registers
+    mov SR R7
+    popr R7 ;restauring registers
+    popr R6
     popr R5
     popr R4
     popr R3
@@ -76,6 +82,10 @@ label num2dec
     pushr R5 ;R5 will hold 48 to convert numbers to ASCII
     pushr R6 ;loop pointer
     pushr R7 ;pointer to intDiv
+    pushr R8 ;copy of the status register
+    mov R8 SR ;byte mode
+    set 6
+    cpy SR
     mov R3 R2 ;init registers
     setlab num2decLoop
     cpy R6
@@ -100,7 +110,9 @@ label num2dec
         jif
     set 0  ;Null-terminating the string
     str R3
-    popr R7 ;restoring registers
+    mov SR R8
+    popr R8 ;restauring registers
+    popr R7
     popr R6
     popr R5
     popr R4

@@ -8,6 +8,12 @@ data "Reflet is a neat ISA!"
 rawbytes 10 0
 
 label start
+    set 1
+    or SP
+    cpy SP
+    set 1
+    add SP
+    cpy SP
     callf testingPrinting
     callf testingMath
     quit

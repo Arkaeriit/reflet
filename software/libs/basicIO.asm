@@ -16,7 +16,7 @@ label printc
     str R12
     set 0   ;command
     str R11
-    read R5 ;restoring SR
+    read R2 ;restoring SR
     cpy SR
     popr R2
     ret
