@@ -1,8 +1,12 @@
-/*--------------------------\
-|This rom test the effect of|
-|the activation of the      |
-|reduced behavior bits.     |
-\--------------------------*/
+/*---------------------------\
+|This rom test the effect of |
+|the activation of the       |
+|reduced behavior bits.      |
+|As the reduced behavior bits|
+|no longuer affect stack     |
+|operations, this is not     |
+|usefull anymore.            |
+\---------------------------*/
 
 module rom4_byte_access(input clk, input enable_out,input [6:0] addr, output [7:0] dataOut);
 reg [7:0] ret; assign dataOut = (enable_out ? ret : 7'h0);

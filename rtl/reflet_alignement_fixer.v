@@ -5,7 +5,7 @@
 |systems. The granularity of the operations in a    |
 |byte. The input size_used tells the size of the    |
 |data to transfer. For example, when size_used is   |
-|equal to 1, the data is a byte wide and should be  |
+|equal to 0, the data is a byte wide and should be  |
 |aligned to a byte. When size_used is 1, the data is|
 |two bytes wide and should be aligned to 16 bits.   |
 \--------------------------------------------------*/

@@ -95,17 +95,6 @@ module reflet_cpu #(
         .cpu_update(!ram_not_ready),
         .interrupt(interrupt));
 
-    //computing how much the stack pointer should evolve when using it
-    integer default_increase = wordsize/8; //Progression when handling addressis or with no reduced behavious
-    integer increase11 = 1; //A separate value for each conbinaison of reduced behaviour
-    wire [7:0] increase01 = ( wordsize > 32 ? 7'h4 : default_increase );
-    wire [7:0] increase10 = ( wordsize > 16 ? 7'h2 : default_increase );
-    wire [1:0] reduced_behavior = registers[`sr_id][2:1];
-    wire [7:0] increase_data = ( reduced_behavior == 2'b11 || byte_mode ? increase11 :
-                                    ( reduced_behavior == 2'b01 ? increase01 :
-                                        ( reduced_behavior == 2'b10 ? increase10 :
-                                            default_increase)));
-
     //debug signal
     assign debug = instruction == `inst_debug && !ram_not_ready;
     
@@ -135,18 +124,18 @@ module reflet_cpu #(
                         `inst_quit : quit <= 1'b1;
                         `inst_pop :
                         begin
-                            registers[`sp_id] <= registers[`sp_id] - increase_data;
+                            registers[`sp_id] <= registers[`sp_id] - wordsize/8;
                             registers[index] <= content;
                         end
                         `inst_ret :
                         begin
-                            registers[`sp_id] <= registers[`sp_id] - default_increase;
+                            registers[`sp_id] <= registers[`sp_id] - wordsize/8;
                             registers[index] <= content;
                         end
-                        `inst_push : registers[`sp_id] <= registers[`sp_id] + increase_data;
+                        `inst_push : registers[`sp_id] <= registers[`sp_id] + wordsize/8;
                         `inst_call : 
                         begin
-                            registers[`sp_id] <= registers[`sp_id] + default_increase;
+                            registers[`sp_id] <= registers[`sp_id] + wordsize/8;
                             registers[index] <= content;
                         end
                         default : registers[index] <= content;

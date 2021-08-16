@@ -43,8 +43,7 @@ module reflet_addr #(
 
 
     //addr selection
-    wire [5:0] pop_offset;
-    wire [wordsize-1:0] addr_pop = ( instruction == `inst_pop || instruction == `inst_ret ? stackPointer - pop_offset : 0 ); //We need the -1 because the CPU updated the stack pointer
+    wire [wordsize-1:0] addr_pop = ( instruction == `inst_pop || instruction == `inst_ret ? stackPointer - wordsize/8 : 0 ); //We need the -wordsize/8 because the CPU updated the stack pointer
     wire [wordsize-1:0] addr_push = ( instruction == `inst_push || instruction == `inst_call ? stackPointer : 0 );
     wire [wordsize-1:0] addr_reg = ( opperand == `opp_str || opperand == `opp_load ? otherRegister : 0 );
     wire [wordsize-1:0] cpu_addr = ( !fetching_instruction ? addr_reg | addr_pop | addr_push : programCounter); //The defaut behaviour is to seek the address of the next piece of code
@@ -76,7 +75,6 @@ module reflet_addr #(
             assign addr = cpu_addr;
             assign write_en = cpu_write_en;
             assign alignement_fixer_ready = 1;
-            assign pop_offset = 1;
             assign byte_mode = 0;
         end
         else
@@ -92,10 +90,13 @@ module reflet_addr #(
             assign byte_mode = byte_mode_r;
 
             //Controling the width of data to get
-            wire [15:0] size_used = ( fetching_instruction | byte_mode ? 0 :
-                                      ( reduced_behaviour_bits == 2'b00 ? (wordsize/8 - 1) :
-                                        ( reduced_behaviour_bits == 2'b01 ? 2 : //TODO, make the value 2 depends on the wordsize as it is currentely broken in 32 bit CPU
-                                          ( reduced_behaviour_bits == 2'b10 ? 1 : 0 ))));
+            wire force_alligned_use = instruction == `inst_pop || instruction == `inst_ret || instruction == `inst_push || instruction == `inst_call;
+            wire [15:0] size_used = ( fetching_instruction ? 0 :
+                                      ( force_alligned_use ? (wordsize/8 - 1) :
+                                        ( byte_mode ? 1 :
+                                          ( reduced_behaviour_bits == 2'b00 ? (wordsize/8 - 1) :
+                                            ( reduced_behaviour_bits == 2'b01 ? 2 : //TODO, make the value 2 depends on the wordsize as it is currentely broken in 32 bit CPU
+                                              ( reduced_behaviour_bits == 2'b10 ? 1 : 0 ))))));
             reflet_alignement_fixer #(.word_size(wordsize), .addr_size(wordsize)) alignement_fixer (
                 .clk(clk),
                 .size_used(size_used[$clog2(wordsize/8):0]),
@@ -112,12 +113,6 @@ module reflet_addr #(
                 .ram_data_in(data_in),
                 .ram_write_en(write_en));
             wire reduced_behaviour = ((reduced_behaviour_bits != 2'b00) && ( (reduced_behaviour_bits == 2'b01 && wordsize > 32) || (reduced_behaviour_bits == 2'b10 && wordsize > 16) || (reduced_behaviour_bits == 2'b11 && wordsize > 8) )) || byte_mode;
-            assign pop_offset = ( reduced_behaviour && instruction != `inst_ret && instruction != `inst_call ? 
-                            ( reduced_behaviour_bits == 2'b11 || byte_mode ? 1 :
-                                (reduced_behaviour_bits == 2'b10 ? 2 :
-                                    4))
-                        : wordsize/8 );
-
         end
     endgenerate
 

@@ -132,12 +132,12 @@ static void run_inst(reflet* vm){
                         PC(vm) = WR(vm);
                     break;
                 case POP:
-                    SP(vm) = (SP(vm) - byteExchanged(vm, false)) & reg_mask;
-                    WR(vm) = loadWordRAM(vm, SP(vm), false);
+                    SP(vm) = (SP(vm) - byteExchanged(vm, true)) & reg_mask;
+                    WR(vm) = loadWordRAM(vm, SP(vm), true);
                     break;
                 case PUSH:
-                    putRAMWord(vm, SP(vm), WR(vm), false);
-                    SP(vm) = (SP(vm) + byteExchanged(vm, false)) & reg_mask;
+                    putRAMWord(vm, SP(vm), WR(vm), true);
+                    SP(vm) = (SP(vm) + byteExchanged(vm, true)) & reg_mask;
                     break;
                 case CALL:
                     putRAMWord(vm, SP(vm), PC(vm), true);
