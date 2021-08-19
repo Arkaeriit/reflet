@@ -79,6 +79,7 @@ module reflet_addr #(
         end
         else
         begin
+            assign addr = cpu_addr;
             //Handleling the toggle of byte mode
             reg byte_mode_r;
             always @ (posedge clk)
@@ -108,7 +109,7 @@ module reflet_addr #(
                 .cpu_data_in(data_in_cpu),
                 .cpu_write_en(cpu_write_en),
                 //Bus to the RAM
-                .ram_addr(addr),
+                .ram_addr(), //Not used as we want to output the raw address
                 .ram_data_out(data_out),
                 .ram_data_in(data_in),
                 .ram_write_en(write_en));
