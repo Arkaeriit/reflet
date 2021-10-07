@@ -19,8 +19,8 @@ local args_choice = @enum {
 }
 
 --This is the list of all possible instructions
---and their arguments
-local instruction = @record {mnemonic: string, arguments: args_choice, opcode: byte}
+--and their argument
+local instruction = @record {mnemonic: string, argument: args_choice, opcode: byte}
 local instruction_list: []instruction <const> = {
     -- Instruction using registers
     {"SET",   args_choice.four_bit_num, 0x1},
@@ -107,7 +107,7 @@ end
 
 --From a string describing a valid register,
 --returns the number of the register
-local function reg_to_num(reg: string): boolean
+local function reg_to_num(reg: string): uint8
     local reg_UP = reg:upper()
     if reg_UP == "WR" then
         return 0
@@ -121,7 +121,7 @@ local function reg_to_num(reg: string): boolean
     if reg_UP == "SP" then
         return 15
     end
-    return tointeger(reg:sub(2:#reg))
+    return tointeger(reg:sub(2,#reg))
 end
 
 --Check that a pure line_corespond to a proper instruction
@@ -134,31 +134,44 @@ local function is_line_valid(line: pure_line): boolean
     end
     local inst = get_inst(line[0])
     --check size
-    if inst.arguments == args_choice.void and #line == 2 then
+    if inst.argument == args_choice.void and #line == 2 then
         return false
     end
     --check content
-    if inst.arguments == args_choice.reg then
+    if inst.argument == args_choice.reg then
         if not is_reg_valid(line[1]) then
             return false
         end
     end
-    if inst.arguments[i] == args_choice.two_bit_num then
+    if inst.argument == args_choice.two_bit_num then
         local arg_num = tointeger(line[1])
         if 0 > arg_num or arg_num > 3 then
             return false
         end
     end
-    if inst.arguments[i] == args_choice.four_bit_num then
+    if inst.argument == args_choice.four_bit_num then
         local arg_num = tointeger(line[1])
         if 0 > arg_num or arg_num > 15 then
             return false
         end
+    end
     return true
 end
 
 --This function takes a valid line of assembler and assemble it
-local function asm_line(line: pure_line): uint8_t
+local function asm_line(line: pure_line): uint8
+    local ret: uint8
+    local inst = get_inst(line[0])
+    if inst.argument == args_choice.void then
+        ret = inst.opcode
+    elseif inst.argument == args_choice.reg then
+        ret = (inst.opcode << 4) | reg_to_num(line[1])
+    elseif inst.argument == args_choice.two_bit_num then
+        ret = (inst.opcode << 2) | tointeger(line[1])
+    elseif inst.argument == args_choice.four_bit_num then
+        ret = (inst.opcode << 4) | tointeger(line[1])
+    end
+    return ret
 end
 
 ----------------------------------- Public API ---------------------------------
@@ -167,15 +180,11 @@ end
 --The first return value is the raw machine code. The second is an error code
 --(0 if OK, 1 in case of an error in the assembler). The third is a pretty
 --version of the assemble result for debugging purpose.
-global function assemble_line(line: pure_line): (uint16, integer, string)
+global function assemble_line(line: pure_line): (uint8, integer, string)
     local OK = is_line_valid(line)
     if not OK then
         return 0, 1, "Error!"
     end
-    local extended = pre_assemble(line)
-    check_extended(extended)
-    local machine_code = post_assemble(extended)
-    --print(extended)
-    return machine_code, 0, tostring(extended)
+    return asm_line(line), 0, tostring(line)
 end
 
