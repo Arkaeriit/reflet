@@ -1,0 +1,674 @@
+--[[--------------------------------------------
+|This file contains the main loop of the       |
+|assembling, reading a file, checking each     |
+|line and either assemble them and process     |
+|them like macro or other assembler directives.|
+----------------------------------------------]]
+
+--[[
+During assembly, the output is represented as a list of assembling blocs.
+An assembling block can either be:
+    - A pure_file of assembly language associated with name and a start line. The name and start line are used to display error messages that tell the line and the file where the error come from.
+    - A label being set or a reference to that label that needs to be computed.
+    - A special assembler directive such as an alignment constrain.
+    - An assembled instruction in machine code.
+    - A raw binary constant
+
+The first two steps of the compilation is to decode all pure_files in the list. The pure_files are processed line by line.
+
+In the first step, the @import directives are extended into new pure_files, the rest of the assembly code is packed into other pure_files. This steps is repeated until there is no longer any @import directives.
+
+The second step is to process other directives
+- @define ... @end directives are registered as macro.
+- Macro are expended into pure_files.
+- @label and @labref are registered
+- @align are registered
+- @constant and @rawbytes are registered as such
+This step is repeated until there is no longer any pure_files in the list of blocs
+
+The third step is to replace blocks of variable size such as pure_file and rawbytes into blocks of known size such as machine_code and rawbyte blocks.
+
+The fourth step is to replace all the blocs whose size are not known yet (alignment directives) with blocks of padding whose size is known. Furthermore, machine code blocks are replaced with two rawbyte blocks.
+
+As the fifth step, when the address of everything can be known, a linking can be done by replacing @labref with raw constants. Furthermore, @label can be checked to ensure that there is no duplicates.
+
+Lastly, the fifth step is to write the output binary file.
+
+For multiples steps the size of addresses is used. It is measured in bytes.
+
+]]
+
+require 'io'
+require 'macro'
+require 'vector'
+require 'string'
+require 'parser'
+require 'hashmap'
+require 'filestream'
+require 'assemble_line'
+require 'stringbuilder'
+
+----------------------------------- Data types ---------------------------------
+
+global error_t = @enum {
+    WIP = -1,
+    OK = 0,
+    file_read = 1,
+    file_write = 2,
+    arguments = 3,
+    instruction = 4,
+    type = 5,
+    label = 6,
+    macro = 7,
+}
+
+local block_types = @enum {
+    pure_file = 1,
+    machine_code,
+    alignment_directive,
+    rawbyte,
+    rawbytes,
+    label,
+}
+
+local pure_file_block = @record {
+    content: pure_file,
+    name: string,
+    place: integer,
+    is_macro: boolean,
+    dir: string
+}
+
+local machine_code_block = @record {
+    code: uint16,
+    comment: string
+}
+
+local alignment_directive_block = @record {
+    byte_alignment: integer
+}
+
+local rawbyte_block = @record {
+    content: byte
+}
+
+local rawbytes_block = @record {
+    content: vector(byte)
+}
+
+local label_block = @record {
+    id: string,
+    set: boolean
+}
+
+local block_union = @union {
+    pure_file: pure_file_block,
+    machine_code: machine_code_block,
+    alignment_directive: alignment_directive_block,
+    rawbyte: rawbyte_block,
+    rawbytes: rawbytes_block,
+    label: label_block
+}
+
+local block = @record {
+    type: block_types,
+    content: block_union
+}
+
+function block:__tostring()
+    local builder: stringbuilder
+    if self.type == block_types.pure_file then
+        builder:write("Type = Pure File\nFilename = ")
+        builder:write(self.content.pure_file.name)
+        builder:write(" ; place = ")
+        builder:write(self.content.pure_file.place)
+        builder:write(" ; content = [")
+        builder:write(self.content.pure_file.content)
+        builder:write("]\n")
+    elseif self.type == block_types.label then
+        builder:write("Type = Label; ID = ")
+        builder:write(self.content.label.id)
+        builder:write(" ; set ? ")
+        builder:write(self.content.label.set)
+        builder:write("\n")
+    elseif self.type == block_types.machine_code then
+        builder:write("Type = Machine Code; code = ")
+        builder:write(self.content.machine_code.code)
+        builder:write(" ; detail: ")
+        builder:write(self.content.machine_code.comment)
+        builder:write("\n")
+    elseif self.type == block_types.alignment_directive then
+        builder:write("Type = Alignment Directive; align to ")
+        builder:write(self.content.alignment_directive.byte_alignment)
+        builder:write("bytes\n")
+    elseif self.type == block_types.rawbyte then
+        builder:write("Type = Raw Byte; value = ")
+        builder:write(string.format("0x%02X", self.content.rawbyte.content))
+        builder:write("\n")
+    else
+        builder:write("Unsupported type: ")
+        builder:write(self.type)
+        builder:write("\n")
+    end
+    return builder:promote()
+end
+
+-- Used to pretty print vectors of blocks
+local function stringify_blocks(in_block: vector(block)): string
+    local builder: stringbuilder
+    for i=0,<#in_block do
+        builder:write("Element ")
+        builder:write(string.format("%06i", i))
+        builder:write(" ;")
+        builder:write(in_block[i])
+    end
+    return builder:promote()
+end
+
+-- From a pure file block, do the work to make a proper block
+local function make_pure_file_block(in_block: pure_file_block): block
+    local ret: block
+    ret.type = block_types.pure_file
+    ret.content.pure_file = in_block
+    return ret
+end
+
+-- Delete the i-th block in a vector
+local function delete_block(in_block: vector(block), i: integer)
+    if i < 0 or i >= #in_block then
+        error("In delete_block, invalid range.\n")
+    end
+    local ret: vector(block)
+    for j=0,<#in_block do
+        if j ~= i then
+            ret:push(in_block[j])
+        end
+    end
+    return ret
+end
+
+-- Add the new block at index i in the vector
+local function insert_block(in_block: vector(block), i: integer, new: block)
+    if i < 0 or i > #in_block then
+        error("In insert_block, invalid range.\n")
+    end
+    local ret: vector(block)
+    for j=0,<#in_block do
+        if j == i then
+            ret:push(new)
+        end
+        ret:push(in_block[j])
+    end
+    if i == #in_block then --Needed if i is too be to be included in the loop
+        ret:push(new)
+    end
+    return ret
+end
+
+-- Replace the block at index i in the vector with the new block
+local function swap_block(in_block: vector(block), i: integer, new: block)
+    if i < 0 or i >= #in_block then
+        error("In swap_block, invalid range.\n")
+    end
+    local ret: vector(block)
+    for j=0,<#in_block do
+        if j == i then
+            ret:push(new)
+        else
+            ret:push(in_block[j])
+        end
+    end
+    return ret
+end
+
+-- Removes the lines between line_start and line_stop (included) of the i-th
+-- block of the vector. Do proper checking with the error function.
+local function slice_pure_file_block(in_block: vector(block), i: integer, line_start: integer, line_stop: integer): vector(block)
+    if i < 0 then
+        error("In slice_pure_file_block, i is too small.\n")
+    end
+    if i >= #in_block then
+        error("In slice_pure_file_block, i is too big.\n")
+    end
+    if in_block[i].type ~= block_types.pure_file then
+        error("In slice_pure_file_block, invalid type.\n")
+    end
+    local file = in_block[i].content.pure_file
+    if line_start > line_stop or line_start < 0 or line_stop >= #file.content then
+        error("In slice_pure_file_block, invalid range.\n")
+    end
+    local start_file = in_block[i].content.pure_file.content:sub(0,line_start-1)
+    local end_file = in_block[i].content.pure_file.content:sub(line_stop+1,#in_block[i].content.pure_file.content - 1)
+    local start_block: pure_file_block = {start_file, in_block[i].content.pure_file.name, in_block[i].content.pure_file.place, in_block[i].content.pure_file.is_macro, in_block[i].content.pure_file.dir}
+    local end_block: pure_file_block = {end_file, in_block[i].content.pure_file.name, in_block[i].content.pure_file.place+line_stop+1, in_block[i].content.pure_file.is_macro, in_block[i].content.pure_file.dir}
+    local ret = swap_block(in_block, i, make_pure_file_block(start_block))
+    ret = insert_block(ret, i+1, make_pure_file_block(end_block))
+    return ret
+end
+
+-- Replace a line in a file with a whole block
+-- Useful to replace a directive with its effects
+local function insert_block_in_file(in_block: vector(block), file_index: integer, line: integer, new_block: block): vector(block)
+    local ret = slice_pure_file_block(in_block, file_index, line, line)
+    ret = insert_block(ret, file_index+1, new_block)
+    return ret
+end
+
+-- Report an error at the i-th line of the given file block
+local function error_in_file(in_block: pure_file_block, i: integer)
+    local builder: stringbuilder
+    if in_block.is_macro then
+        builder:write("Error in macro `")
+    else
+        builder:write("Error in file `")
+    end
+    builder:write(in_block.name)
+    builder:write("`, line ")
+    builder:write(in_block.place+i)
+    builder:write(".\n")
+    io.stderr:write(builder:promote())
+end
+
+----------------------------------- First step ---------------------------------
+
+-- From the path to a file, returns the directory where is file is
+local function dir(filename: string): string
+    for i=#filename,1,-1 do
+        if filename:sub(i,i) == "/" then
+            return filename:sub(1,i)
+        end
+    end
+    return ""
+end
+
+--Open a file as a pure_file_block
+local function open_file_block(filename: string): (pure_file_block, error_t)
+    local ret: pure_file_block
+    local f, msg, err = io.open(filename, "r")
+    if err ~= 0 then
+        return ret, error_t.file_read
+    end
+    ret.content = purify_file(f)
+    ret.name = filename
+    ret.place = 1
+    ret.is_macro= false
+    ret.dir = dir(filename)
+    return ret, error_t.OK
+end
+
+--Do the substitution in each pure_files
+local function first_step(in_block: vector(block)) : (vector(block), error_t)
+    local ret = in_block:copy()
+    for i=0,<#in_block do
+        if in_block[i].type == block_types.pure_file then
+            local file = in_block[i].content.pure_file.content
+            for j=0,<#file do
+                local line = file[j]
+                if #line == 0 then
+                    continue
+                end
+                if line[0] == "@import" then
+                    if #line ~= 2 then
+                        error_in_file(in_block[i].content.pure_file, j)
+                        io.stderr:write("Invalid number of arguments for an import directive.\n")
+                        return ret, error_t.arguments
+                    end
+                    local imported_file, err = open_file_block(in_block[i].content.pure_file.dir .. line[1])
+                    if err ~= error_t.OK then
+                        error_in_file(in_block[i].content.pure_file, j)
+                        io.stderr:write("Unable to open ", line[1], ".\n")
+                        return ret, err
+                    end
+                    ret = insert_block_in_file(ret, i, j, make_pure_file_block(imported_file))
+                    return ret, error_t.WIP
+                end
+            end
+        end
+    end
+    return ret, error_t.OK
+end
+
+----------------------------------- Second step --------------------------------
+
+-- Remove directives in pure files
+-- TODO: maybe clean up code with meta-programming
+local function second_step(in_block: vector(block)) : (vector(block), error_t)
+    local ret = in_block:copy()
+    for i=0,<#ret do
+        if ret[i].type == block_types.pure_file then
+            local file = ret[i].content.pure_file.content
+            for j=0,<#file do
+                local line = file[j]
+                if #line == 0 then
+                    continue
+                end
+                if line[0] == "@define" then
+                    if #line ~= 3 then
+                        error_in_file(in_block[i].content.pure_file, j)
+                        io.stderr:write("Invalid number of arguments for a label directive.\n")
+                        return ret, error_t.arguments
+                    end
+                    local end_label = j
+                    while true do
+                        if end_label >= #file then
+                            error_in_file(in_block[i].content.pure_file, j)
+                            io.stderr:write("Macro ", line[1], " should finish with @end.\n")
+                            return ret, error_t.macro
+                        end
+                        local line = file[end_label]
+                        if line[0] == "@end" then
+                            break
+                        end
+                        end_label = end_label + 1
+                    end
+                    local macro = file:sub(j+1, end_label-1)
+                    local macro_ok = register_macro(line[1], tointeger(line[2]), macro)
+                    if not macro_ok then
+                        error_in_file(in_block[i].content.pure_file, j)
+                        io.stderr:write("Macro ", line[1], " could not be registered.\n")
+                        return ret, error_t.macro
+                    end
+                    ret = slice_pure_file_block(ret, i, j, end_label)
+                    return ret, error_t.WIP
+                elseif is_macro(line[0]) then
+                    local macro, err = expend_macro(line)
+                    if err == EXP_MACRO_ERR_INVALID_ARG then --Note: the error related to macro not found is not possible as we check it with is_macro
+                        error_in_file(in_block[i].content.pure_file, j)
+                        io.stderr:write("Invalid number of arguments for macro", line[0], ".\n")
+                        return ret, error_t.macro
+                    end
+                    local macro_block: pure_file_block = {macro, line[0], 1, true, ""}
+                    ret = insert_block_in_file(ret, i, j, make_pure_file_block(macro_block))
+                    return ret, error_t.WIP
+                elseif line[0] == "@label" then
+                    if #line ~= 2 then
+                        error_in_file(in_block[i].content.pure_file, j)
+                        io.stderr:write("Invalid number of arguments for a label directive.\n")
+                        return ret, error_t.arguments
+                    end
+                    local lab_blk: label_block = {line[1], true}
+                    local new_block: block
+                    new_block.type = block_types.label
+                    new_block.content.label = lab_blk
+                    ret = insert_block_in_file(ret, i, j, new_block)
+                    return ret, error_t.WIP
+                elseif line[0] == "@labref" then
+                    if #line ~= 2 then
+                        error_in_file(in_block[i].content.pure_file, j)
+                        io.stderr:write("Invalid number of arguments for a labref directive.\n")
+                        return ret, error_t.arguments
+                    end
+                    local lab_blk: label_block = {line[1], false}
+                    local new_block: block
+                    new_block.type = block_types.label
+                    new_block.content.label = lab_blk
+                    ret = insert_block_in_file(ret, i, j, new_block)
+                    return ret, error_t.WIP
+                elseif line[0] == "@align" then
+                    if #line ~= 2 then
+                        error_in_file(in_block[i].content.pure_file, j)
+                        io.stderr:write("Invalid number of arguments for a align directive.\n")
+                        return ret, error_t.arguments
+                    end
+                    local lab_blk: alignment_directive_block  = {tointeger(line[1])}
+                    local new_block: block
+                    new_block.type = block_types.alignment_directive
+                    new_block.content.alignment_directive = lab_blk
+                    ret = insert_block_in_file(ret, i, j, new_block)
+                    return ret, error_t.WIP
+                elseif line[0] == "@constant" then --TODO: find way to manipulate floats
+                elseif line[0] == "@rawbytes" then
+                    if #line < 2 then
+                        error_in_file(in_block[i].content.pure_file, j)
+                        io.stderr:write("Invalid number of arguments for a rawbytes directive.\n")
+                        return ret, error_t.arguments
+                    end
+                    local raws: vector(byte)
+                    for i=1,<#line do
+                        raws:push(tointeger(line[i], 16))
+                    end
+                    local lab_blk: rawbytes_block  = {raws}
+                    local new_block: block
+                    new_block.type = block_types.rawbytes
+                    new_block.content.rawbytes = lab_blk
+                    ret = insert_block_in_file(ret, i, j, new_block)
+                    return ret, error_t.WIP
+                end
+            end
+        end
+    end
+    return ret, error_t.OK
+end
+
+----------------------------------- Third step ---------------------------------
+
+-- Replace fancy blocks with their simpler version
+local function third_step(in_block: vector(block)) : (vector(block), error_t)
+    local ret = in_block:copy()
+    for i=0,<#in_block do
+        if ret[i].type == block_types.pure_file then
+            local file = ret[i].content.pure_file.content
+            if #file == 0 then
+                ret = delete_block(ret, i)
+                return ret, error_t.WIP
+            else
+                local code: vector(block)
+                for j=0,<#file do
+                    local line = file[j]
+                    if #line == 0 then
+                        continue
+                    end
+                    local mc, err, pretty = assemble_line(line)
+                    if err ~= 0 then
+                        error_in_file(in_block[i].content.pure_file, j)
+                        io.stderr:write("Invalid instruction. ", line:__tostring(), "\n")
+                        return ret, error_t.instruction
+                    end
+                    local new_block: block
+                    new_block.type = block_types.machine_code
+                    new_block.content.machine_code = {mc, pretty}
+                    code:push(new_block)
+                end
+                ret = delete_block(ret, i)
+                for j=0,<#code do
+                    ret = insert_block(ret, i+j, code[j])
+                end
+                return ret, error_t.WIP
+            end
+        elseif ret[i].type == block_types.rawbytes then
+            local content = ret[i].content.rawbytes.content
+            ret = delete_block(ret, i)
+            for j=0,<#content do
+                local new_block: block
+                new_block.type = block_types.rawbyte
+                new_block.content.rawbyte = {content[j]}
+                ret = insert_block(ret, i+j, new_block)
+            end
+            return ret, error_t.WIP
+        end
+    end
+    return ret, error_t.OK
+end
+
+----------------------------------- Fourth step --------------------------------
+
+local function fourth_step(in_block: vector(block), addr_size: integer) : (vector(block), error_t)
+    local ret: vector(block)
+    local curr_addr: uint64 = 0
+    for i=0,<#in_block do
+        if in_block[i].type == block_types.label then
+            ret:push(in_block[i])
+            if not in_block[i].content.label.set then
+                curr_addr = curr_addr + addr_size
+            end
+        elseif in_block[i].type == block_types.rawbyte then
+            ret:push(in_block[i])
+            curr_addr = curr_addr + 1
+        elseif in_block[i].type == block_types.machine_code then
+            local new_block: block
+            new_block.type = block_types.rawbyte
+            new_block.content.rawbyte = {in_block[i].content.machine_code.code & 0xFF} --Note: little endian
+            ret:push(new_block)
+            new_block.content.rawbyte = {(in_block[i].content.machine_code.code >> 8) & 0xFF}
+            ret:push(new_block)
+            curr_addr = curr_addr + 2
+        elseif in_block[i].type == block_types.alignment_directive then
+            local new_block: block
+            new_block.type = block_types.rawbyte
+            new_block.content.rawbyte = {0}
+            while curr_addr % in_block[i].content.alignment_directive.byte_alignment ~= 0 do
+                ret:push(new_block)
+                curr_addr = curr_addr + 1
+            end
+        else
+            io.stderr:write("Error, unexpected type (", in_block[i].type, ") in fourth step.\n")
+            return ret, error_t.type
+        end
+    end
+    return ret, error_t.OK
+end
+
+----------------------------------- Fifth step ---------------------------------
+
+-- Generate a hash map indexed with the keys of labels and containing the
+-- address of those labels.
+local function gen_label_map(in_block: vector(block), addr_size: integer): (hashmap(string, uint64), error_t)
+    local ret: hashmap(string, uint64)
+    local curr_addr: uint64 = 0
+    for i=0,<#in_block do
+        if in_block[i].type == block_types.label then
+            local label = in_block[i].content.label
+            if label.set then
+                local addr_pnt = ret:peek(label.id)
+                if addr_pnt == nilptr then
+                    ret[label.id] = curr_addr
+                else
+                    io.stderr:write("Error, label ", label.id, " is set multiple times.\n")
+                    return ret, error_t.label
+                end
+            else
+                curr_addr = curr_addr + addr_size
+            end
+        elseif in_block[i].type == block_types.rawbyte then
+            curr_addr = curr_addr + 1
+        else
+            io.stderr:write("Error, unexpected type (", in_block[i].type, ") in fifth step.\n")
+            return ret, error_t.type
+        end
+    end
+    return ret, error_t.OK
+end
+
+-- Replaces all labels with raw bytes
+-- Returns a vector of bytes
+local function fifth_step(in_block: vector(block), addr_size: integer): (vector(byte), error_t)
+    local ret: vector(byte)
+    local map, err = gen_label_map(in_block, addr_size)
+    for i=0,<#in_block do
+        if in_block[i].type == block_types.label then
+            local label = in_block[i].content.label
+            if not label.set then
+                local addr_pnt = map:peek(label.id)
+                if addr_pnt == nilptr then
+                    io.stderr:write("Error, label ", label.id, " is used but never set.\n")
+                    return ret, error_t.label
+                end
+                local addr = $addr_pnt
+                for i=0,<addr_size do
+                    ret:push((addr >> (i*8)) & 0xFF)
+                end
+            end
+        elseif in_block[i].type == block_types.rawbyte then
+            ret:push(in_block[i].content.rawbyte.content)
+        else
+            -- Note: no need to check the type of the block as this check have
+            -- been made in gen_label_map.
+        end
+    end
+    return ret, error_t.OK
+end
+
+---------------------------------- Full assembly -------------------------------
+
+-- This function runs a step of the assembly until it returns a definitive value
+local function run_step(in_block: vector(block), step: function(a: vector(block)): (vector(block), error_t)): (vector(block), error_t)
+    local ret, err = step(in_block)
+    while err == error_t.WIP do
+        ret, err = step(ret)
+    end
+    return ret, err
+end
+
+-- This function generates a vector of executable Reflet FPU machine code
+global function assemble(input_file: string, runtime_start: string, runtime_end: string, addr_size: integer): (vector(byte), error_t)
+    local ret_err: vector(byte)
+    local in_file_block, err = open_file_block(input_file)
+    if err ~= error_t.OK then
+        io.stderr:write("Error, unable to open ", input_file, ".\n")
+        return ret_err, err
+    end
+    local run_start_block: pure_file_block = {purify_string(runtime_start), "runtime_start", 1, true, ""}
+    local run_end_block: pure_file_block = {purify_string(runtime_end), "runtime_end", 1, true, ""}
+    local initial_vector: vector(block)
+    initial_vector:push(make_pure_file_block(run_start_block))
+    initial_vector:push(make_pure_file_block(in_file_block))
+    initial_vector:push(make_pure_file_block(run_end_block))
+    local step1_vector, err1 = run_step(initial_vector, first_step)
+    if err1 ~= error_t.OK then
+        return ret_err, err1
+    end
+    local step2_vector, err2 = run_step(step1_vector, second_step)
+    if err2 ~= error_t.OK then
+        return ret_err, err2
+    end
+    local step3_vector, err3 = run_step(step2_vector, third_step)
+    if err3 ~= error_t.OK then
+        return ret_err, err3
+    end
+    local step4_vector, err4 = fourth_step(step3_vector, addr_size)
+    if err4 ~= error_t.OK then
+        return ret_err, err4
+    end
+    local step5_vector, err5 = fifth_step(step4_vector, addr_size)
+    if err5 ~= error_t.OK then
+        return ret_err, err5
+    end
+    return step5_vector, error_t.OK
+end
+
+-------------------------------------- Test ------------------------------------
+
+-- To delete in final product
+local function strigify_bytes(arr: vector(byte))
+    local builder: stringbuilder
+    for i=0,<#arr do
+        builder:write(string.format("0x%04X: %02X \n",i,arr[i]))
+    end
+    return builder:promote()
+end
+
+-- To delete in final product
+global function asm_test()
+    local addr_size = 2
+    local including_file, err = open_file_block("./directives.asm")
+    print(err)
+    local mini_vector : vector(block)
+    mini_vector:push(make_pure_file_block(including_file))
+    print(stringify_blocks(mini_vector))
+    local step1_vector = run_step(mini_vector, first_step)
+    print(stringify_blocks(step1_vector))
+    local step2_vector = run_step(step1_vector, second_step)
+    print(stringify_blocks(step2_vector))
+    local step3_vector = run_step(step2_vector, third_step)
+    print(stringify_blocks(step3_vector))
+    local step4_vector = fourth_step(step3_vector, addr_size)
+    print(stringify_blocks(step4_vector))
+    local step5_vector = fifth_step(step4_vector, addr_size)
+    print(strigify_bytes(step5_vector))
+    purge_macros()
+    print("<----------->")
+    local comp, err_cmp = assemble("./directives.asm", (""), (""), addr_size)
+    print(strigify_bytes(comp))
+    print(err_cmp)
+end
+

@@ -1,0 +1,41 @@
+require 'filestream'
+require 'io'
+require 'assemble_line'
+require 'parser'
+require 'macro'
+require 'assembler'
+
+--Testing assembly
+local f = io.open("./raw_instructions.asm", "r")
+local pure = purify_file(f)
+print(pure)
+for i=0,<#pure do
+    local mc, err, pretty = assemble_line(pure[i])
+    io.stdout:write(string.format("%04X", mc))
+    io.stdout:write(" ")
+    io.stdout:write(err)
+    io.stdout:write(" ")
+    io.stdout:write(pretty)
+    io.stdout:write("\n")
+end
+
+--Testing macros
+local macro_str = [[
+This is a macro with $1 and $2 as args.
+Note: $2 $1
+]]
+
+local pure_macro = purify_string(macro_str)
+local reg_OK = register_macro("test_macro", 2, pure_macro)
+print(reg_OK)
+local call_str = "test_macro arg1 arg2"
+local call_pure = purify_string(call_str)
+print(call_pure)
+local call_line = call_pure[0]
+local call_exp, err_code = expend_macro(call_line)
+print(err_code)
+print(call_exp)
+
+--testing includes
+asm_test()
+

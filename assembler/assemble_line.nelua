@@ -1,0 +1,258 @@
+--[[---------------------------------
+|This file contains the code used to|
+|assemble a line of assembly code.  |
+-----------------------------------]]
+
+require 'string'
+require 'math'
+require 'stringbuilder'
+require 'io'
+require 'parser'
+
+------------------------------ Constants definitions ---------------------------
+
+local args_choice = @enum {
+    void = 0,
+    reg,
+	two_bit_num,
+	four_bit_num,
+}
+
+--This is the list of all possible instructions
+--and their arguments
+local instruction = @record {mnemonic: string, arguments: args_choice, opcode: byte}
+local instruction_list: []instruction <const> = {
+	-- Instruction using registers
+	{"SET",   args_choice.four_bit_num, 0x1},
+	{"READ",   args_choice.reg,         0x2},
+	{"CPY",    args_choice.reg,         0x3},
+	{"ADD",    args_choice.reg,         0x4},
+	{"SUB",    args_choice.reg,         0x5},
+	{"AND",    args_choice.reg,         0x6},
+	{"OR",     args_choice.reg,         0x7},
+	{"XOR",    args_choice.reg,         0x8},
+	{"NOT",    args_choice.reg,         0x9},
+	{"LSL",    args_choice.reg,         0xA},
+	{"LSR",    args_choice.reg,         0xB},
+	{"EQ",     args_choice.reg,         0xC},
+	{"LES",    args_choice.reg,         0xD},
+	{"STR",    args_choice.reg,         0xE},
+	{"LOAD",   args_choice.reg,         0xF},
+	-- Other instructions
+	{"SLP",    args_choice.void,        0x00},
+	{"CMPNOT", args_choice.void,        0x01},
+	{"RETINT", args_choice.void,        0x02},
+	{"TBM",    args_choice.void,        0x03},
+	{"CC2",    args_choice.void,        0x08},
+	{"JIF",    args_choice.void,        0x09},
+	{"POP",    args_choice.void,        0x0A},
+	{"PUSH",   args_choice.void,        0x0B},
+	{"CALL",   args_choice.void,        0x0C},
+	{"RET",    args_choice.void,        0x0D},
+	{"QUIT",   args_choice.void,        0x0E},
+	{"DEBUG",  args_choice.void,        0x0F},
+	{"SETINT", args_choice.two_bit_num, 0x00},
+}
+
+--------------------------------- Private symbols ------------------------------
+
+--Tells if a mnemonic correspond to a valid instruction
+local function is_mnemonic_valid(mnemonic: string): boolean 
+    local mnemonic_UP = mnemonic:upper()
+    for i=0,<#instruction_list do
+        if mnemonic_UP == instruction_list[i].mnemonic then
+            return true
+        end
+    end
+    return false
+end
+
+--Return the instruction for a valid mnemonic
+local function get_inst(mnemonic: string): instruction
+    local mnemonic_UP = mnemonic:upper()
+    for i=0,<#instruction_list do
+        if mnemonic_UP == instruction_list[i].mnemonic then
+            return instruction_list[i]
+        end
+    end
+    return get_inst("SLP") --Should not happen if the mnemonic is valid
+end
+
+--Tells if a flag correspond to a valid flag
+local function is_flag_valid(flag: string): boolean
+    local flag_UP = flag:upper()
+    for i=0,<#flag_value do
+        if flag_UP == flag_value[i].name then
+            return true
+        end
+    end
+    return false
+end
+
+--Returns the value of a correct flag
+local function get_flag(flag: string): byte
+    local flag_UP = flag:upper()
+    for i=0,<#flag_value do
+        if flag_UP == flag_value[i].name then
+            return flag_value[i].value
+        end
+    end
+    return 0 --Should not happen if the flag is valid
+end
+
+--Check if a register is correct.
+--Register should be to the form RX
+--where X is an number between 0 and 7
+local function is_reg_valid(reg: string): boolean
+    if #reg ~= 2 then
+        return false
+    end
+    if reg:sub(1,1):upper() ~= "R" then
+        return false
+    end
+    local number = reg:sub(2,2)
+    --local num_type = math.type(number) --TODO: wait for a better compiler
+    --if num_type ~= "integer" then
+        --return false
+    --end
+    local true_num = tointeger(number)
+    if true_num < 0 or true_num > 7 then
+        return false
+    end
+    return true
+end
+
+--Check that a pure line_corespond to a proper instruction
+local function is_line_valid(line: pure_line): boolean
+    if #line > 4 then
+        return false
+    end
+    if not is_mnemonic_valid(line[0]) then
+        return false
+    end
+    local inst = get_inst(line[0])
+    for i=0,<3 do
+        --check size
+        if (inst.arguments[i] == args_choice.void and (#line - 1) > i) or
+            (inst.arguments[i] ~= args_choice.void and (#line - 1) < i) then 
+            return false
+        end
+        --check content
+        if inst.arguments[i] == args_choice.reg then
+            if not is_reg_valid(line[i+1]) then
+                return false
+            end
+        end
+        if inst.arguments[i] == args_choice.flag then
+            if not is_flag_valid(line[i+1]) then
+                return false
+            end
+        end
+    end
+    return true
+end
+
+--temporary representation of machine code instruction
+local extended_instruction = @record{
+    arithmetic: boolean,
+    opcode: byte,
+    arg: [3]byte,
+}
+
+function extended_instruction:__tostring()
+    local builder: stringbuilder
+    builder:write("{ arithmetic: ")
+    builder:write(self.arithmetic)
+    builder:write(", opcode: 0x")
+    builder:write(string.format("%02X", self.opcode))
+    builder:write(", arg0: ")
+    builder:write(self.arg[0])
+    builder:write(", arg1: ")
+    builder:write(self.arg[1])
+    builder:write(", arg2: ")
+    builder:write(self.arg[2])
+    builder:write(" }")
+    return builder:promote()
+end
+
+--convert a valid line into an extended instruction
+local function pre_assemble(line: pure_line): extended_instruction
+    local inst = get_inst(line[0])
+    local ret = extended_instruction{inst.arithmetic, inst.opcode, {0, 0, 0}}
+    --Registering register arguments
+    for i=0,<3 do
+        if inst.arguments[i] == args_choice.reg then
+            ret.arg[i] = tointeger(line[i+1]:sub(2,2))
+        end
+    end
+    --Taking care of flags. Note: The flags have to be in the second argument of the machine code instruction because of the way the FPU is wired; but the NOTIF and JMP instruction have a flag as only orgument. Thus, we process flags in a second time to ensure they are set to the second argument.
+    for i=0,<3 do
+        if inst.arguments[i] == args_choice.flag then
+            ret.arg[2] = tointeger(get_flag(line[i+1]))
+        end
+    end
+    return ret
+end
+
+--Check that all the values in an extented_instruction are in the
+--correct range. As this should not happen it only prints a message
+--if needed.
+local function check_extended(inst: extended_instruction)
+    local builder: stringbuilder
+    builder:write("Error in instruction ")
+    builder:write(inst)
+    builder:write("\n")
+    local check_OK = true
+    for i=0,<3 do
+        if inst.arg[i] < 0 or inst.arg[i] > 7 then
+            check_OK = false
+            builder:write("Argument ")
+            builder:write(i)
+            builder:write(" is ")
+            builder:write(inst.arg[i])
+            builder:write(".\n")
+        end
+    end
+    if inst.opcode < 0 or inst.opcode > 63 then
+        check_OK = false
+        builder:write("Opcode is ")
+        builder:write(inst.opcode)
+        builder:write(".\n")
+    end
+    local msg = builder:promote()
+    if not check_OK then
+        io.stderr:write(msg)
+    end
+end
+
+--convert an extended instruction into a 16 bit machine code number
+local function post_assemble(inst: extended_instruction): uint16
+    local ret: uint16 = 0
+    ret = ret | (tointeger(inst.arg[2]) << 0)
+    ret = ret | (tointeger(inst.arg[1]) << 3)
+    ret = ret | (tointeger(inst.arg[0]) << 6)
+    ret = ret | (tointeger(inst.opcode) << 9)
+    if not inst.arithmetic then
+        ret = ret | (1 << 15)
+    end
+    return ret
+end
+
+----------------------------------- Public API ---------------------------------
+
+--This function takes a pure_line of assembler as argument and assemble it
+--The first return value is the raw machine code. The second is an error code
+--(0 if OK, 1 in case of an error in the assembler). The third is a pretty
+--version of the assemble result for debugiong purpose.
+global function assemble_line(line: pure_line): (uint16, integer, string)
+    local OK = is_line_valid(line)
+    if not OK then
+        return 0, 1, "Error!"
+    end
+    local extended = pre_assemble(line)
+    check_extended(extended)
+    local machine_code = post_assemble(extended)
+    --print(extended)
+    return machine_code, 0, tostring(extended)
+end
+

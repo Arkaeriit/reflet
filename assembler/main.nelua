@@ -1,0 +1,147 @@
+--[[-------------------------------------------
+|This file handle the command line arguments, |
+|the generation of a basic runtime and initial|
+|file IO.                                     |
+---------------------------------------------]]
+
+require 'io'
+require 'os'
+require 'arg'
+require 'string'
+require 'vector'
+require 'assembler'
+require 'stringbuilder'
+
+-------------------------------- Parsing arguments -----------------------------
+
+local help_msg <comptime> = [[reflet-fpu-asm, an assembler for the Reflet FPU architecture.
+
+Usage:
+    reflet-fpu-asm <input-file> <options> -o <output-file>
+    reflet-fpu-asm -help
+
+Options:
+* -float-size 16/32/64: indicate the size of floating points numbers used.
+]]
+
+local arg_flags = @record{
+    error:      boolean,
+    help:       boolean,
+    input:      string,
+    output:     string,
+    float_size: integer,
+}
+
+-- Reads the arg variable and generate a list of flags
+local function parse_args(): arg_flags
+    local flags: arg_flags = {false, false, "", "", 0}
+    local i = 1
+    if #arg == 0 then
+        flags.help = true
+    end
+    while i <= #arg do
+        if arg[i] == "-h" or arg[i] == "-help" or arg[i] == "--help" or arg[i] == "help" then
+            flags.help = true
+        elseif arg[i] == "-float-size" then
+            if i == #arg then
+                flags.error = true
+            else
+                flags.float_size = tointeger(arg[i+1])
+                i = i + 1
+            end
+        elseif arg[i] == "-o" then
+            if i == #arg then
+                flags.error = true
+            else
+                flags.output = arg[i+1]
+                i = i + 1
+            end
+        else
+            flags.input = arg[i]
+        end
+        i = i + 1
+    end
+    return flags
+end
+
+-- Check a list of flags for errors. Exit the program if an error if found.
+local function check_flags_ok(flags: arg_flags)
+    if flags.error then
+        io.stderr:write("Error, invalid arguments.\n", help_msg)
+        os.exit(-1)
+    end
+    if flags.help then
+        io.stdout:write(help_msg)
+        os.exit(0)
+    end
+    if flags.input == "" or flags.output == "" then
+        io.stderr:write("Error, input or output file not specified.\n")
+        os.exit(-1)
+    end
+    if not (flags.float_size == 16 or flags.float_size == 32 or flags.float_size == 64) then
+        io.stderr:write("Error, float-size is unspecified or invalid.\nValid values are &6, 32, and 64.\n")
+        os.exit(-1)
+    end
+end
+
+--------------------------- Runtime and default macros -------------------------
+
+local start_runtime <comptime> = [[
+@align_word
+jmp always
+@labref start
+]]
+
+local default_macros <comptime> = [[
+;TODO
+]]
+
+local end_runtime <comptime> = [[
+;Nothing yet
+]]
+
+-- This function combine start_runtime, default_macros and the definition
+-- of the @align_word macro
+local function make_start_runtime(float_size: integer): string
+    local builder: stringbuilder
+    builder:write("@define @align_word 0\n")
+    if float_size == 16 then
+        builder:write("    @align 2\n")
+    elseif float_size == 32 then
+        builder:write("    @align 4\n")
+    elseif float_size == 64 then
+        builder:write("    @align 8\n")
+    else
+        error("Invalid argument for make_start_runtime.\n")
+    end
+    builder:write("@end\n")
+    builder:write(start_runtime)
+    builder:write(default_macros)
+    return builder:promote()
+end
+
+---------------------------------- Main function -------------------------------
+
+-- Main function. Returns an error exit code.
+local function reflet_fpu_asm_main(): error_t
+    local flags = parse_args()
+    check_flags_ok(flags)
+    local machine_code, asm_error = assemble(flags.input, make_start_runtime(flags.float_size), end_runtime, flags.float_size/8)
+    if asm_error ~= error_t.OK then
+        return asm_error
+    end
+    local f, msg, err = io.open(flags.output, "w")
+    if err ~= 0 then
+        io.stderr:write("Error, unable to open ", flags.output, " .\n", msg, "\n")
+        return error_t.file_write
+    end
+    for i=0,<#machine_code do
+        f:write(string.char(machine_code[i]))
+    end
+    f:close()
+    return error_t.OK
+end
+
+local exit_code = reflet_fpu_asm_main()
+os.exit(exit_code)
+
