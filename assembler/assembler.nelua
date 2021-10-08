@@ -60,12 +60,14 @@ global error_t = @enum {
     type = 5,
     label = 6,
     macro = 7,
+    constant = 8,
 }
 
 local block_types = @enum {
     pure_file = 1,
     machine_code,
     alignment_directive,
+    constant,
     rawbyte,
     rawbytes,
     label,
@@ -80,12 +82,16 @@ local pure_file_block = @record {
 }
 
 local machine_code_block = @record {
-    code: uint16,
+    code: uint8,
     comment: string
 }
 
 local alignment_directive_block = @record {
     byte_alignment: integer
+}
+
+local constant_block = @record {
+    content: int64
 }
 
 local rawbyte_block = @record {
@@ -105,6 +111,7 @@ local block_union = @union {
     pure_file: pure_file_block,
     machine_code: machine_code_block,
     alignment_directive: alignment_directive_block,
+    constant: constant_block,
     rawbyte: rawbyte_block,
     rawbytes: rawbytes_block,
     label: label_block
@@ -297,7 +304,7 @@ local function open_file_block(filename: string): (pure_file_block, error_t)
 end
 
 --Do the substitution in each pure_files
-local function first_step(in_block: vector(block)) : (vector(block), error_t)
+local function first_step(in_block: vector(block), addr_size: integer) : (vector(block), error_t)
     local ret = in_block:copy()
     for i=0,<#in_block do
         if in_block[i].type == block_types.pure_file then
@@ -332,7 +339,7 @@ end
 
 -- Remove directives in pure files
 -- TODO: maybe clean up code with meta-programming
-local function second_step(in_block: vector(block)) : (vector(block), error_t)
+local function second_step(in_block: vector(block), addr_size: integer) : (vector(block), error_t)
     local ret = in_block:copy()
     for i=0,<#ret do
         if ret[i].type == block_types.pure_file then
@@ -416,7 +423,18 @@ local function second_step(in_block: vector(block)) : (vector(block), error_t)
                     new_block.content.alignment_directive = lab_blk
                     ret = insert_block_in_file(ret, i, j, new_block)
                     return ret, error_t.WIP
-                elseif line[0] == "@constant" then --TODO: find way to manipulate floats
+                elseif line[0] == "@constant" then
+                    if #line ~= 2 then
+                        error_in_file(in_block[i].content.pure_file, j)
+                        io.stderr:write("Invalid number of arguments for a constant directive.\n")
+                        return ret, error_t.arguments
+                    end
+                    local lab_blk: constant_block  = {tointeger(line[1])}
+                    local new_block: block
+                    new_block.type = block_types.constant
+                    new_block.content.constant = lab_blk
+                    ret = insert_block_in_file(ret, i, j, new_block)
+                    return ret, error_t.WIP
                 elseif line[0] == "@rawbytes" then
                     if #line < 2 then
                         error_in_file(in_block[i].content.pure_file, j)
@@ -443,7 +461,7 @@ end
 ----------------------------------- Third step ---------------------------------
 
 -- Replace fancy blocks with their simpler version
-local function third_step(in_block: vector(block)) : (vector(block), error_t)
+local function third_step(in_block: vector(block), addr_size: integer) : (vector(block), error_t)
     local ret = in_block:copy()
     for i=0,<#in_block do
         if ret[i].type == block_types.pure_file then
@@ -485,6 +503,22 @@ local function third_step(in_block: vector(block)) : (vector(block), error_t)
                 ret = insert_block(ret, i+j, new_block)
             end
             return ret, error_t.WIP
+        elseif ret[i].type == block_types.constant then
+            local num = ret[i].content.constant.content
+            local vect: vector(byte)
+            for i=0,<addr_size do
+                vect:push(num & 0xFF)
+                num = num >> 8 --TODO: arithmetic or logical shift
+            end
+            if num ~= 0 then
+                io.stderr:write("Error, invalid constant: ", tostring(ret[i].content.constant.content), ", number is too big.\n")
+                return ret, error_t.constant
+            end
+            local new_block: block
+            new_block.type = block_types.rawbytes
+            new_block.content.rawbytes = {vect}
+            ret = swap_block(ret, i, new_block)
+            return ret, error_t.WIP
         end
     end
     return ret, error_t.OK
@@ -507,11 +541,9 @@ local function fourth_step(in_block: vector(block), addr_size: integer) : (vecto
         elseif in_block[i].type == block_types.machine_code then
             local new_block: block
             new_block.type = block_types.rawbyte
-            new_block.content.rawbyte = {in_block[i].content.machine_code.code & 0xFF} --Note: little endian
+            new_block.content.rawbyte = {in_block[i].content.machine_code.code}
             ret:push(new_block)
-            new_block.content.rawbyte = {(in_block[i].content.machine_code.code >> 8) & 0xFF}
-            ret:push(new_block)
-            curr_addr = curr_addr + 2
+            curr_addr = curr_addr + 1
         elseif in_block[i].type == block_types.alignment_directive then
             local new_block: block
             new_block.type = block_types.rawbyte
@@ -591,10 +623,10 @@ end
 ---------------------------------- Full assembly -------------------------------
 
 -- This function runs a step of the assembly until it returns a definitive value
-local function run_step(in_block: vector(block), step: function(a: vector(block)): (vector(block), error_t)): (vector(block), error_t)
-    local ret, err = step(in_block)
+local function run_step(in_block: vector(block), step: function(a: vector(block), b: integer): (vector(block), error_t), addr_size: integer): (vector(block), error_t)
+    local ret, err = step(in_block, addr_size)
     while err == error_t.WIP do
-        ret, err = step(ret)
+        ret, err = step(ret, addr_size)
     end
     return ret, err
 end
@@ -613,15 +645,15 @@ global function assemble(input_file: string, runtime_start: string, runtime_end:
     initial_vector:push(make_pure_file_block(run_start_block))
     initial_vector:push(make_pure_file_block(in_file_block))
     initial_vector:push(make_pure_file_block(run_end_block))
-    local step1_vector, err1 = run_step(initial_vector, first_step)
+    local step1_vector, err1 = run_step(initial_vector, first_step, addr_size)
     if err1 ~= error_t.OK then
         return ret_err, err1
     end
-    local step2_vector, err2 = run_step(step1_vector, second_step)
+    local step2_vector, err2 = run_step(step1_vector, second_step, addr_size)
     if err2 ~= error_t.OK then
         return ret_err, err2
     end
-    local step3_vector, err3 = run_step(step2_vector, third_step)
+    local step3_vector, err3 = run_step(step2_vector, third_step, addr_size)
     if err3 ~= error_t.OK then
         return ret_err, err3
     end
@@ -655,11 +687,11 @@ global function asm_test()
     local mini_vector : vector(block)
     mini_vector:push(make_pure_file_block(including_file))
     print(stringify_blocks(mini_vector))
-    local step1_vector = run_step(mini_vector, first_step)
+    local step1_vector = run_step(mini_vector, first_step, addr_size)
     print(stringify_blocks(step1_vector))
-    local step2_vector = run_step(step1_vector, second_step)
+    local step2_vector = run_step(step1_vector, second_step, addr_size)
     print(stringify_blocks(step2_vector))
-    local step3_vector = run_step(step2_vector, third_step)
+    local step3_vector = run_step(step2_vector, third_step, addr_size)
     print(stringify_blocks(step3_vector))
     local step4_vector = fourth_step(step3_vector, addr_size)
     print(stringify_blocks(step4_vector))
