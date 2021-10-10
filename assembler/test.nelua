@@ -11,7 +11,7 @@ local pure = purify_file(f)
 print(pure)
 for i=0,<#pure do
     local mc, err, pretty = assemble_line(pure[i])
-    io.stdout:write(string.format("%04X", mc))
+    io.stdout:write(string.format("%02X", mc))
     io.stdout:write(" ")
     io.stdout:write(err)
     io.stdout:write(" ")
