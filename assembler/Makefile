@@ -1,7 +1,7 @@
 CFLAGS := -g
 #CFLAGS := -Os -fdata-sections -ffunction-sections -Wl,--gc-sections
 
-all: reflet-fpu-asm
+all: reflet-fpu-asm.bin
 
 INSTALL_DIR := /usr/local/bin
 
@@ -22,7 +22,7 @@ full_compilation: purge
 	$(MAKE) reflet-fpu-asm
 
 install: | reflet-fpu-asm
-	cp -f reflet-fpu-asm $(INSTALL_DIR)/reflet-fpu-asm
+	cp -f reflet-fpu-asm.bin $(INSTALL_DIR)/reflet-fpu-asm
 
 uninstall:
 	rm -f $(INSTALL_DIR)/reflet-fpu-asm

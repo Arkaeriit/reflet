@@ -564,9 +564,9 @@ end
 
 -- Generate a hash map indexed with the keys of labels and containing the
 -- address of those labels.
-local function gen_label_map(in_block: vector(block), addr_size: integer): (hashmap(string, uint64), error_t)
+local function gen_label_map(in_block: vector(block), addr_size: integer, start_addr: integer): (hashmap(string, uint64), error_t)
     local ret: hashmap(string, uint64)
-    local curr_addr: uint64 = 0
+    local curr_addr: uint64 = start_addr
     for i=0,<#in_block do
         if in_block[i].type == block_types.label then
             local label = in_block[i].content.label
@@ -593,9 +593,9 @@ end
 
 -- Replaces all labels with raw bytes
 -- Returns a vector of bytes
-local function fifth_step(in_block: vector(block), addr_size: integer): (vector(byte), error_t)
+local function fifth_step(in_block: vector(block), addr_size: integer, start_addr: integer): (vector(byte), error_t)
     local ret: vector(byte)
-    local map, err = gen_label_map(in_block, addr_size)
+    local map, err = gen_label_map(in_block, addr_size, start_addr)
     for i=0,<#in_block do
         if in_block[i].type == block_types.label then
             local label = in_block[i].content.label
@@ -632,7 +632,7 @@ local function run_step(in_block: vector(block), step: function(a: vector(block)
 end
 
 -- This function generates a vector of executable Reflet FPU machine code
-global function assemble(input_file: string, runtime_start: string, runtime_end: string, addr_size: integer): (vector(byte), error_t)
+global function assemble(input_file: string, runtime_start: string, runtime_end: string, addr_size: integer, start_addr: integer): (vector(byte), error_t)
     local ret_err: vector(byte)
     local in_file_block, err = open_file_block(input_file)
     if err ~= error_t.OK then
@@ -661,7 +661,7 @@ global function assemble(input_file: string, runtime_start: string, runtime_end:
     if err4 ~= error_t.OK then
         return ret_err, err4
     end
-    local step5_vector, err5 = fifth_step(step4_vector, addr_size)
+    local step5_vector, err5 = fifth_step(step4_vector, addr_size, start_addr)
     if err5 ~= error_t.OK then
         return ret_err, err5
     end
@@ -695,11 +695,11 @@ global function asm_test()
     print(stringify_blocks(step3_vector))
     local step4_vector = fourth_step(step3_vector, addr_size)
     print(stringify_blocks(step4_vector))
-    local step5_vector = fifth_step(step4_vector, addr_size)
+    local step5_vector = fifth_step(step4_vector, addr_size, 0)
     print(strigify_bytes(step5_vector))
     purge_macros()
     print("<----------->")
-    local comp, err_cmp = assemble("./directives.asm", (""), (""), addr_size)
+    local comp, err_cmp = assemble("./directives.asm", (""), (""), addr_size, 0)
     print(strigify_bytes(comp))
     print(err_cmp)
 end
