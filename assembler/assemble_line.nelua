@@ -3,11 +3,12 @@
 |assemble a line of assembly code.  |
 -----------------------------------]]
 
-require 'string'
-require 'math'
-require 'stringbuilder'
 require 'io'
+require 'math'
+require 'utils'
+require 'string'
 require 'parser'
+require 'stringbuilder'
 
 ------------------------------ Constants definitions ---------------------------
 
@@ -87,19 +88,15 @@ local function is_reg_valid(reg: string): boolean
     if reg_UP == "WR" or reg_UP == "SR" or reg_UP == "PC" or reg_UP == "SP" then
         return true
     end
-    if #reg ~= 2 and ~reg ~= 3 then
+    if #reg ~= 2 and #reg ~= 3 then
         return false
     end
     if reg_UP:sub(1,1) ~= "R" then
         return false
     end
     local number = reg:sub(2,#reg)
-    --local num_type = math.type(number) --TODO: wait for a better compiler
-    --if num_type ~= "integer" then
-        --return false
-    --end
-    local true_num = tointeger(number)
-    if true_num < 0 or true_num > 15 then
+    local true_num, conv_ok = check_integer(number)
+    if true_num < 0 or true_num > 15 or not conv_ok then
         return false
     end
     return true
@@ -121,7 +118,8 @@ local function reg_to_num(reg: string): uint8
     if reg_UP == "SP" then
         return 15
     end
-    return tointeger(reg:sub(2,#reg))
+    local ret = tointeger(reg:sub(2,#reg)) --Note: no need for check_integer as we verified it already
+	return ret
 end
 
 --Check that a pure line_corespond to a proper instruction
@@ -144,14 +142,14 @@ local function is_line_valid(line: pure_line): boolean
         end
     end
     if inst.argument == args_choice.two_bit_num then
-        local arg_num = tointeger(line[1])
-        if 0 > arg_num or arg_num > 3 then
+        local arg_num, conv_ok = check_integer(line[1])
+        if 0 > arg_num or arg_num > 3 or not conv_ok then
             return false
         end
     end
     if inst.argument == args_choice.four_bit_num then
-        local arg_num = tointeger(line[1])
-        if 0 > arg_num or arg_num > 15 then
+        local arg_num, conv_ok = check_integer(line[1])
+        if 0 > arg_num or arg_num > 15 or not conv_ok then
             return false
         end
     end

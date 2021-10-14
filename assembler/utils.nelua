@@ -1,0 +1,61 @@
+--[[------------------------
+|This file contains various|
+|utils functions.          |
+--------------------------]]
+
+require 'io'
+
+-- This function takes a tring as input. If the string represent a
+-- decimal integer, it returns its conversion to integer and true
+-- otherwize, it return 0 and false
+global function check_integer(str: string): (integer, boolean)
+	local decimal_digits <comptime> = "0123456789"
+	local ok_digits = 0
+	for i=1,#str do
+		local ch = str:sub(i,i)
+		for j=1,#decimal_digits do
+			local cmp = decimal_digits:sub(j,j)
+			if cmp == ch then
+				ok_digits = ok_digits + 1
+				break
+			end
+		end
+	end
+	if ok_digits == #str and #str ~= 0 then
+		local ret = tointeger(str, 10)
+		return ret, true
+	else
+		io.stderr:write("Error, unable to convert `")
+		io.stderr:write(str)
+		io.stderr:write("` to an integer from base 10.\n")
+		return 0, false
+	end
+end
+
+-- This function takes a tring as input. If the string represent an
+-- hexadecimal integer, it returns its conversion to integer and true
+-- otherwize, it return 0 and false
+global function check_hex(str: string): (integer, boolean)
+	local hex_digits <comptime> = "0123456789abcdefABCDEF"
+	local ok_digits = 0
+	for i=1,#str do
+		local ch = str:sub(i,i)
+		for j=1,#hex_digits do
+			local cmp = hex_digits:sub(j,j)
+			if cmp == ch then
+				ok_digits = ok_digits + 1
+				break
+			end
+		end
+	end
+	if ok_digits == #str and #str ~= 0 then
+		local ret = tointeger(str, 16)
+		return ret, true
+	else
+		io.stderr:write("Error, unable to convert `")
+		io.stderr:write(str)
+		io.stderr:write("` to an integer from base 16.\n")
+		return 0, false
+	end
+end
+

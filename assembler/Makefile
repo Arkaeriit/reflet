@@ -5,7 +5,7 @@ all: reflet-fpu-asm.bin
 
 INSTALL_DIR := /usr/local/bin
 
-reflet-fpu-asm: objsrc/reflet-fpu-asm.c
+reflet-fpu-asm.bin: objsrc/reflet-fpu-asm.c
 	gcc $< $(CFLAGS) -o $@
 
 objsrc/reflet-fpu-asm.c: | main.nelua
@@ -13,13 +13,13 @@ objsrc/reflet-fpu-asm.c: | main.nelua
 	nelua --generate-code -o $@ main.nelua
 
 clean:
-	rm -f reflet-fpu-asm
+	rm -f reflet-fpu-asm.bin
 
 purge: clean
 	rm -f objsrc/reflet-fpu-asm.c
 
 full_compilation: purge
-	$(MAKE) reflet-fpu-asm
+	$(MAKE) reflet-fpu-asm.bin
 
 install: | reflet-fpu-asm
 	cp -f reflet-fpu-asm.bin $(INSTALL_DIR)/reflet-fpu-asm

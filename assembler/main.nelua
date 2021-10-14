@@ -7,6 +7,7 @@
 require 'io'
 require 'os'
 require 'arg'
+require 'utils'
 require 'string'
 require 'vector'
 require 'assembler'
@@ -44,6 +45,7 @@ local arg_flags = @record{
 local function parse_args(): arg_flags
     local flags: arg_flags = {false, false, "", "", -1, true, -1, 0, false}
     local i = 1
+	local conv_ok: boolean
     if #arg == 0 then
         flags.help = true
     end
@@ -54,8 +56,11 @@ local function parse_args(): arg_flags
             if i == #arg then
                 flags.error = true
             else
-                flags.word_size = tointeger(arg[i+1])
+                flags.word_size, conv_ok = check_integer(arg[i+1])
                 i = i + 1
+				if not conv_ok then
+					flags.error = true
+				end
             end
         elseif arg[i] == "-o" then
             if i == #arg then
@@ -70,15 +75,21 @@ local function parse_args(): arg_flags
             if i == #arg then
                 flags.error = true
             else
-                flags.stack_value = tointeger(arg[i+1])
+                flags.stack_value, conv_ok = check_integer(arg[i+1])
                 i = i + 1
+				if not conv_ok then
+					flags.error = true
+				end
             end
         elseif arg[i] == "-start-addr" then
             if i == #arg then
                 flags.error = true
             else
-                flags.start_addr = tointeger(arg[i+1])
+                flags.start_addr, conv_ok = check_integer(arg[i+1])
                 i = i + 1
+				if not conv_ok then
+					flags.error = true
+				end
             end
 		elseif arg[i] == "-ignore-start" then
 			flags.ignore_start = true
@@ -181,6 +192,10 @@ local default_macros <comptime> = [[
 	read R12
 @end
 
+@define jmp 0
+	cpy PC
+@end
+
 ]]
 
 local end_runtime <comptime> = [[
@@ -194,7 +209,9 @@ local function make_start_runtime(flags: arg_flags): string
 	local word_size = flags.word_size
     local builder: stringbuilder
     builder:write("@define @align_word 0\n")
-    if word_size == 16 then --Note: no need for 8 as it would always be alligned
+	if word_size == 8 then
+		builder:write(";Note: no need for 8 as it would always be alligned.\n")
+    elseif word_size == 16 then 
         builder:write("    @align 2\n")
     elseif word_size == 32 then
         builder:write("    @align 4\n")
@@ -205,7 +222,7 @@ local function make_start_runtime(flags: arg_flags): string
     end
     builder:write("@end\n")
 	builder:write("@define @set_wordsize_byte 0\n    set ")
-	builder:write(tostring(word_size)/8)
+	builder:write(tostring(tointeger(word_size/8)))
 	builder:write("\n@end\n")
     builder:write(default_macros)
 	if flags.set_stack then

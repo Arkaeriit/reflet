@@ -39,6 +39,7 @@ For multiples steps the size of addresses is used. It is measured in bytes.
 ]]
 
 require 'io'
+require 'utils'
 require 'macro'
 require 'vector'
 require 'string'
@@ -61,6 +62,7 @@ global error_t = @enum {
     label = 6,
     macro = 7,
     constant = 8,
+	number = 9,
 }
 
 local block_types = @enum {
@@ -352,7 +354,7 @@ local function second_step(in_block: vector(block), addr_size: integer) : (vecto
                 if line[0] == "@define" then
                     if #line ~= 3 then
                         error_in_file(in_block[i].content.pure_file, j)
-                        io.stderr:write("Invalid number of arguments for a label directive.\n")
+                        io.stderr:write("Invalid number of arguments for a define directive.\n")
                         return ret, error_t.arguments
                     end
                     local end_label = j
@@ -369,7 +371,12 @@ local function second_step(in_block: vector(block), addr_size: integer) : (vecto
                         end_label = end_label + 1
                     end
                     local macro = file:sub(j+1, end_label-1)
-                    local macro_ok = register_macro(line[1], tointeger(line[2]), macro)
+					local number_of_args, conv_ok = check_integer(line[2])
+					if not conv_ok then
+                        error_in_file(in_block[i].content.pure_file, j)
+						return ret, error_t.number
+					end
+                    local macro_ok = register_macro(line[1], number_of_args, macro)
                     if not macro_ok then
                         error_in_file(in_block[i].content.pure_file, j)
                         io.stderr:write("Macro ", line[1], " could not be registered.\n")
@@ -417,7 +424,12 @@ local function second_step(in_block: vector(block), addr_size: integer) : (vecto
                         io.stderr:write("Invalid number of arguments for a align directive.\n")
                         return ret, error_t.arguments
                     end
-                    local lab_blk: alignment_directive_block  = {tointeger(line[1])}
+					local num, conv_ok = check_integer(line[1])
+					if not conv_ok then
+                        error_in_file(in_block[i].content.pure_file, j)
+						return ret, error_t.number
+					end
+                    local lab_blk: alignment_directive_block  = {num}
                     local new_block: block
                     new_block.type = block_types.alignment_directive
                     new_block.content.alignment_directive = lab_blk
@@ -429,7 +441,12 @@ local function second_step(in_block: vector(block), addr_size: integer) : (vecto
                         io.stderr:write("Invalid number of arguments for a constant directive.\n")
                         return ret, error_t.arguments
                     end
-                    local lab_blk: constant_block  = {tointeger(line[1])}
+					local num, conv_ok = check_integer(line[1])
+					if not conv_ok then
+                        error_in_file(in_block[i].content.pure_file, j)
+						return ret, error_t.number
+					end
+                    local lab_blk: constant_block  = {num}
                     local new_block: block
                     new_block.type = block_types.constant
                     new_block.content.constant = lab_blk
@@ -443,7 +460,12 @@ local function second_step(in_block: vector(block), addr_size: integer) : (vecto
                     end
                     local raws: vector(byte)
                     for i=1,<#line do
-                        raws:push(tointeger(line[i], 16))
+						local num, conv_ok = check_hex(line[i])
+						if not conv_ok then
+							error_in_file(in_block[i].content.pure_file, j)
+							return ret, error_t.number
+						end
+                        raws:push(num)
                     end
                     local lab_blk: rawbytes_block  = {raws}
                     local new_block: block

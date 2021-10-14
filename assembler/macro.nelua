@@ -47,8 +47,8 @@ local function check_arg_formed_OK(m: macro): boolean
                 if #curr_word == 1 then
                     return false
                 end
-                local arg_num = tointeger(curr_word:sub(2,#curr_word))
-                if arg_num < 1 then
+                local arg_num, conv_ok = check_integer(curr_word:sub(2,#curr_word))
+                if arg_num < 1 or not conv_ok then
                     return  false
                 end
             end
@@ -69,8 +69,8 @@ local function check_arg_use_OK(m: macro): boolean
         for j=0,<#curr_line do
             local curr_word = curr_line[j]
             if curr_word:sub(1,1) == "$" then --Note: we know for sure that curr_word is at least of length 1
-                local arg_num = tointeger(curr_word:sub(2,#curr_word))
-                if arg_num > m.number_of_args then
+                local arg_num, conv_ok = check_integer(curr_word:sub(2,#curr_word))
+                if arg_num > m.number_of_args or not conv_ok then
                     return false
                 end
                 list_used_args[arg_num-1] = true
@@ -116,6 +116,7 @@ end
 global EXP_MACRO_ERR_OK = 0
 global EXP_MACRO_ERR_NOT_FOUND = 1
 global EXP_MACRO_ERR_INVALID_ARG = 2
+global EXP_MACRO_ERR_MALFORMED_NUMBER = 3
 global function expend_macro(line: pure_line): (pure_file, integer)
     local ret: pure_file
     --Funding desired macro in list of registered macros
@@ -142,7 +143,10 @@ global function expend_macro(line: pure_line): (pure_file, integer)
         for j=0,<#curr_line do
             local curr_word = curr_line[j]
             if curr_word:sub(1,1) == "$" then --Note: we know for sure that curr_word is at least of length 1
-                local arg_num = tointeger(curr_word:sub(2,#curr_word))
+                local arg_num, conv_ok = check_integer(curr_word:sub(2,#curr_word))
+				if not arg_num then
+					return ret, EXP_MACRO_ERR_MALFORMED_NUMBER
+				end
                 ret = ret:word_swap(i, j, line[arg_num]) --Note: the fact that the flag for the first arg is $1 means that the indexing ends up well
             end
         end
