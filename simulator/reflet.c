@@ -279,7 +279,7 @@ static int byteExchanged(const reflet* vm, bool stack_b){
  */
 static void check_alignement_ok(reflet* vm, word_t addr, bool stack_b){
     uint8_t size = byteExchanged(vm, stack_b);
-    word_t addr_invalid_mask = (1 << (size-1)) - 1;
+    word_t addr_invalid_mask = size-1;
     bool access_ok = !(addr & addr_invalid_mask);
     if(access_ok) return;
     bool trap_enabled = !(!(SR(vm) & 0x88)); //Check that both the trap and the interupt 0 are enabled
@@ -288,7 +288,7 @@ static void check_alignement_ok(reflet* vm, word_t addr, bool stack_b){
             PC(vm)--;
         triger_int(vm, 0);
     }else{
-        printf("Missaligned access at addr 0x%" WORD_PX ". Triying to acces %i bytes from address 0x%" WORD_PX ".\n", PC(vm)-1, 1<<(size-1), addr);
+        printf("Missaligned access at addr 0x%" WORD_PX ". Triying to acces %i bytes from address 0x%" WORD_PX ".\n", PC(vm)-1, size, addr);
     }
 }
 
