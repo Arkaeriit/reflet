@@ -30,6 +30,8 @@ int main(int argc, char** argv){
 }
 
 static void help(){
-    puts("Help message here");
+    printf("reflet-sim, a virtual machine to run reflet ISA machine code.\n"
+           "Usage: reflet-sim <binary file to execute> <VM config file>.\n"
+          );
 }
 
