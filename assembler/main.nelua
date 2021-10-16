@@ -22,6 +22,7 @@ Usage:
     reflet-fpu-asm -help
 
 Options:
+* -no-prefix: does not put the 'ASRM' prefix at the beginning of the output file.
 * -word-size 8/16/32/64: indicate the size of registers in the target CPU.
 * -no-stack-init : does not initialize the stack pointer. When not used, the stack pointer is by default initialized to just after the program.
 * -set-stack-to xxx : set the stack pointer to the address given just after the flag. Incompatible with -no-stack-init. Defaults to 0 when not set.
@@ -39,11 +40,12 @@ local arg_flags = @record{
 	stack_value:  integer,
 	start_addr:   integer,
 	ignore_start: boolean,
+	no_prefix:    boolean,
 }
 
 -- Reads the arg variable and generate a list of flags
 local function parse_args(): arg_flags
-    local flags: arg_flags = {false, false, "", "", -1, true, -1, 0, false}
+    local flags: arg_flags = {false, false, "", "", -1, true, -1, 0, false, false}
     local i = 1
 	local conv_ok: boolean
     if #arg == 0 then
@@ -71,6 +73,8 @@ local function parse_args(): arg_flags
             end
 		elseif arg[i] == "-no-stack-init" then
 			flags.set_stack = false
+		elseif arg[i] == "-no-prefix" then
+			flags.no_prefix = false
         elseif arg[i] == "-set-stack-to" then
             if i == #arg then
                 flags.error = true
@@ -124,34 +128,33 @@ end
 --------------------------- Runtime and default macros -------------------------
 
 local default_macros <comptime> = [[
-@define set+ 1
+;This macro is used to put the result of the 2 word macro in the WR.
+;It is used to form set+ or setlab
+@define set_to_constant 2
 	@align_word
-	set 8
-	add PC
-	load PC
-	cpy R11
-	set 3
-	cpy R12
+    slp ;two slp are used to ensure that the access is alligned for word_size of 32 or 64 bits. May not work for bigger word size.
+    slp
 	@set_wordsize_byte
-	add R12
-	add PC
+    cpy R12
+    set 1
+    add R12
+    add PC
 	jmp
-	@constant $1
+	$1 $2
+    ;Jumped here
+    set 4
+    add R12 ;Contains the word size
+    cc2
+    add PC
+    load WR
+@end
+
+@define set+ 1
+    set_to_constant @constant $1
 @end
 
 @define setlab 1
-	@align_word
-	set 8
-	add PC
-	load PC
-	cpy R11
-	set 3
-	cpy R12
-	@set_wordsize_byte
-	add R12
-	add PC
-	jmp
-	@labref $1
+    set_to_constant @labref $1
 @end
 
 @define goto 1
@@ -208,6 +211,7 @@ local end_runtime <comptime> = [[
 local function make_start_runtime(flags: arg_flags): string
 	local word_size = flags.word_size
     local builder: stringbuilder
+	--Default macros
     builder:write("@define @align_word 0\n")
 	if word_size == 8 then
 		builder:write(";Note: no need for 8 as it would always be alligned.\n")
@@ -225,6 +229,10 @@ local function make_start_runtime(flags: arg_flags): string
 	builder:write(tostring(tointeger(word_size/8)))
 	builder:write("\n@end\n")
     builder:write(default_macros)
+	-- start runtime
+	if not flags.no_prefix then
+		builder:write("@rawbytes 41 53 52 4d\n")
+	end
 	if flags.set_stack then
 		if flags.stack_value < 0 then --default stack value, the end of the code
 			builder:write("setlab __code_end__\ncpy SP\n")
