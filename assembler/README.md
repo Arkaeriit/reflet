@@ -55,6 +55,7 @@ Beyond the `@define` directive to declare macros, the assembler offers other dir
 * `@align <number>` align the next instruction to the number given in bytes.
 * `@constant <number>` put the value of the number (written in decimal) in the machine code.
 * `@rawbytes <byte 1> <byte 2> ... <byte N>` write the given bytes in the machine code.
+* `@string ...` write the sting following the directive (and after a complementary space) in the machine code. Comments are not supported and will be considered as part of the string.
 
 ### Predefined macro
 

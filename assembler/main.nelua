@@ -119,7 +119,7 @@ local function check_flags_ok(flags: arg_flags)
         io.stderr:write("Error, input or output file not specified.\n")
         os.exit(-1)
     end
-    if not (flags.word_size == 16 or flags.word_size == 32 or flags.word_size == 64) then
+    if not (flags.word_size == 8 or flags.word_size == 16 or flags.word_size == 32 or flags.word_size == 64) then
         io.stderr:write("Error, word-size is unspecified or invalid.\nValid values are 8, 16, 32, and 64.\n")
         os.exit(-1)
     end

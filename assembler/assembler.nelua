@@ -473,6 +473,18 @@ local function second_step(in_block: vector(block), addr_size: integer) : (vecto
                     new_block.content.rawbytes = lab_blk
                     ret = insert_block_in_file(ret, i, j, new_block)
                     return ret, error_t.WIP
+                elseif line[0] == "@string" then
+                    local str = line.raw:sub(8, #line.raw)
+                    local raws: vector(byte)
+                    for i=1,#str do
+                        raws:push(str:sub(i,i):byte())
+                    end
+                    local lab_blk: rawbytes_block  = {raws}
+                    local new_block: block
+                    new_block.type = block_types.rawbytes
+                    new_block.content.rawbytes = lab_blk
+                    ret = insert_block_in_file(ret, i, j, new_block)
+                    return ret, error_t.WIP
                 end
             end
         end

@@ -20,7 +20,8 @@ local comment_delimiter <comptime> = ";"
 
 global pure_line = @record{
     len: integer,
-    content: [max_number_of_words]string
+    content: [max_number_of_words]string,
+    raw: string,
 }
 
 global pure_file = @record{
@@ -122,6 +123,7 @@ local function purify_line(s: string): pure_line
     local in_word = false
     local ret: pure_line
     ret.len = 0
+    ret.raw = s
     local pointer = 1 --Note, strings are 1-indexed so the pointer is set to 1
     local curr_word_start: integer
     while pointer <= #s and #ret < max_number_of_words-1 do --Note: the -1 is to ensure that we can add an other word after the lop
