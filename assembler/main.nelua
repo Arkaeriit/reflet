@@ -74,7 +74,7 @@ local function parse_args(): arg_flags
 		elseif arg[i] == "-no-stack-init" then
 			flags.set_stack = false
 		elseif arg[i] == "-no-prefix" then
-			flags.no_prefix = false
+			flags.no_prefix = true
         elseif arg[i] == "-set-stack-to" then
             if i == #arg then
                 flags.error = true
