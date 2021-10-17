@@ -168,17 +168,17 @@ local default_macros <comptime> = [[
 @end
 
 @define mov 2
-	push
+	cpy R12
 	read $2
 	cpy $1
-	pop
+	read R12
 @end
 
 @define setr 2
-	push
+	cpy R12
 	set+ $2
 	cpy $1
-	pop
+	read R12
 @end
 
 @define pushr 1
@@ -197,6 +197,10 @@ local default_macros <comptime> = [[
 
 @define jmp 0
 	cpy PC
+@end
+
+@define label 1
+    @label $1
 @end
 
 ]]

@@ -1,29 +1,29 @@
 CFLAGS := -g
 #CFLAGS := -Os -fdata-sections -ffunction-sections -Wl,--gc-sections
 
-all: reflet-fpu-asm.bin
+all: reflet-asm.bin
 
 INSTALL_DIR := /usr/local/bin
 
-reflet-fpu-asm.bin: objsrc/reflet-fpu-asm.c
+reflet-asm.bin: objsrc/reflet-asm.c
 	gcc $< $(CFLAGS) -o $@
 
-objsrc/reflet-fpu-asm.c: | main.nelua
+objsrc/reflet-asm.c: | main.nelua
 	mkdir -p objsrc
 	nelua --generate-code -o $@ main.nelua
 
 clean:
-	rm -f reflet-fpu-asm.bin
+	rm -f reflet-asm.bin
 
 purge: clean
-	rm -f objsrc/reflet-fpu-asm.c
+	rm -f objsrc/reflet-asm.c
 
 full_compilation: purge
-	$(MAKE) reflet-fpu-asm.bin
+	$(MAKE) reflet-asm.bin
 
-install: | reflet-fpu-asm
-	cp -f reflet-fpu-asm.bin $(INSTALL_DIR)/reflet-fpu-asm
+install: | reflet-asm
+	cp -f reflet-asm.bin $(INSTALL_DIR)/reflet-asm
 
 uninstall:
-	rm -f $(INSTALL_DIR)/reflet-fpu-asm
+	rm -f $(INSTALL_DIR)/reflet-asm
 
