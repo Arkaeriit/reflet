@@ -1,0 +1,188 @@
+--[[---------------------------------
+|This file contains the code used to|
+|assemble a line of assembly code.  |
+-----------------------------------]]
+
+require 'io'
+require 'math'
+require 'utils'
+require 'string'
+require 'parser'
+require 'stringbuilder'
+
+------------------------------ Constants definitions ---------------------------
+
+local args_choice = @enum {
+    void = 0,
+    reg,
+    two_bit_num,
+    four_bit_num,
+}
+
+--This is the list of all possible instructions
+--and their argument
+local instruction = @record {mnemonic: string, argument: args_choice, opcode: byte}
+local instruction_list: []instruction <const> = {
+    -- Instruction using registers
+    {"SET",   args_choice.four_bit_num, 0x1},
+    {"READ",   args_choice.reg,         0x2},
+    {"CPY",    args_choice.reg,         0x3},
+    {"ADD",    args_choice.reg,         0x4},
+    {"SUB",    args_choice.reg,         0x5},
+    {"AND",    args_choice.reg,         0x6},
+    {"OR",     args_choice.reg,         0x7},
+    {"XOR",    args_choice.reg,         0x8},
+    {"NOT",    args_choice.reg,         0x9},
+    {"LSL",    args_choice.reg,         0xA},
+    {"LSR",    args_choice.reg,         0xB},
+    {"EQ",     args_choice.reg,         0xC},
+    {"LES",    args_choice.reg,         0xD},
+    {"STR",    args_choice.reg,         0xE},
+    {"LOAD",   args_choice.reg,         0xF},
+    -- Other instructions
+    {"SLP",    args_choice.void,        0x00},
+    {"CMPNOT", args_choice.void,        0x01},
+    {"RETINT", args_choice.void,        0x02},
+    {"TBM",    args_choice.void,        0x03},
+    {"CC2",    args_choice.void,        0x08},
+    {"JIF",    args_choice.void,        0x09},
+    {"POP",    args_choice.void,        0x0A},
+    {"PUSH",   args_choice.void,        0x0B},
+    {"CALL",   args_choice.void,        0x0C},
+    {"RET",    args_choice.void,        0x0D},
+    {"QUIT",   args_choice.void,        0x0E},
+    {"DEBUG",  args_choice.void,        0x0F},
+    {"SETINT", args_choice.two_bit_num, 0x00},
+}
+
+--------------------------------- Private symbols ------------------------------
+
+--Tells if a mnemonic correspond to a valid instruction
+local function is_mnemonic_valid(mnemonic: string): boolean 
+    local mnemonic_UP = mnemonic:upper()
+    for i=0,<#instruction_list do
+        if mnemonic_UP == instruction_list[i].mnemonic then
+            return true
+        end
+    end
+    return false
+end
+
+--Return the instruction for a valid mnemonic
+local function get_inst(mnemonic: string): instruction
+    local mnemonic_UP = mnemonic:upper()
+    for i=0,<#instruction_list do
+        if mnemonic_UP == instruction_list[i].mnemonic then
+            return instruction_list[i]
+        end
+    end
+    return get_inst("SLP") --Should not happen if the mnemonic is valid
+end
+
+--Check if a register is correct.
+--Register should be to the form RX
+--where X is an number between 0 and 15.
+--Alternatively, WR, SR, PC and SP are valid.
+local function is_reg_valid(reg: string): boolean
+    local reg_UP = reg:upper()
+    if reg_UP == "WR" or reg_UP == "SR" or reg_UP == "PC" or reg_UP == "SP" then
+        return true
+    end
+    if #reg ~= 2 and #reg ~= 3 then
+        return false
+    end
+    if reg_UP:sub(1,1) ~= "R" then
+        return false
+    end
+    local number = reg:sub(2,#reg)
+    local true_num, conv_ok = check_integer(number)
+    if true_num < 0 or true_num > 15 or not conv_ok then
+        return false
+    end
+    return true
+end
+
+--From a string describing a valid register,
+--returns the number of the register
+local function reg_to_num(reg: string): uint8
+    local reg_UP = reg:upper()
+    if reg_UP == "WR" then
+        return 0
+    end
+    if reg_UP == "SR" then
+        return 13
+    end
+    if reg_UP == "PC" then
+        return 14
+    end
+    if reg_UP == "SP" then
+        return 15
+    end
+    local ret = tointeger(reg:sub(2,#reg)) --Note: no need for check_integer as we verified it already
+	return ret
+end
+
+--Check that a pure line_corespond to a proper instruction
+local function is_line_valid(line: pure_line): boolean
+    if #line > 2 then
+        return false
+    end
+    if not is_mnemonic_valid(line[0]) then
+        return false
+    end
+    local inst = get_inst(line[0])
+    --check size
+    if inst.argument == args_choice.void and #line == 2 then
+        return false
+    end
+    --check content
+    if inst.argument == args_choice.reg then
+        if not is_reg_valid(line[1]) then
+            return false
+        end
+    end
+    if inst.argument == args_choice.two_bit_num then
+        local arg_num, conv_ok = check_integer(line[1])
+        if 0 > arg_num or arg_num > 3 or not conv_ok then
+            return false
+        end
+    end
+    if inst.argument == args_choice.four_bit_num then
+        local arg_num, conv_ok = check_integer(line[1])
+        if 0 > arg_num or arg_num > 15 or not conv_ok then
+            return false
+        end
+    end
+    return true
+end
+
+--This function takes a valid line of assembler and assemble it
+local function asm_line(line: pure_line): uint8
+    local ret: uint8
+    local inst = get_inst(line[0])
+    if inst.argument == args_choice.void then
+        ret = inst.opcode
+    elseif inst.argument == args_choice.reg then
+        ret = (inst.opcode << 4) | reg_to_num(line[1])
+    elseif inst.argument == args_choice.two_bit_num then
+        ret = (inst.opcode << 2) | tointeger(line[1])
+    elseif inst.argument == args_choice.four_bit_num then
+        ret = (inst.opcode << 4) | tointeger(line[1])
+    end
+    return ret
+end
+
+----------------------------------- Public API ---------------------------------
+
+--This function takes a pure_line of assembler as argument and assemble it
+--The first return value is the raw machine code. The second is an error code
+--(0 if OK, 1 in case of an error in the assembler). The third is a pretty
+--version of the assemble result for debugging purpose.
+global function assemble_line(line: pure_line): (uint8, integer, string)
+    local OK = is_line_valid(line)
+    if not OK then
+        return 0, 1, "Error!"
+    end
+    return asm_line(line), 0, tostring(line)
+end
+

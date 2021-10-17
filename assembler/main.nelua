@@ -1,0 +1,283 @@
+--[[-------------------------------------------
+|This file handle the command line arguments, |
+|the generation of a basic runtime and initial|
+|file IO.                                     |
+---------------------------------------------]]
+
+require 'io'
+require 'os'
+require 'arg'
+require 'utils'
+require 'string'
+require 'vector'
+require 'assembler'
+require 'stringbuilder'
+
+-------------------------------- Parsing arguments -----------------------------
+
+local help_msg <comptime> = [[reflet-fpu-asm, an assembler for the Reflet FPU architecture.
+
+Usage:
+    reflet-fpu-asm <input-file> <options> -o <output-file>
+    reflet-fpu-asm -help
+
+Options:
+* -no-prefix: does not put the 'ASRM' prefix at the beginning of the output file.
+* -word-size 8/16/32/64: indicate the size of registers in the target CPU.
+* -no-stack-init : does not initialize the stack pointer. When not used, the stack pointer is by default initialized to just after the program.
+* -set-stack-to xxx : set the stack pointer to the address given just after the flag. Incompatible with -no-stack-init. Defaults to 0 when not set.
+* -start-addr xxx : tell the linker that the code should start at the given address.
+* -ignore-start : if set, the program will not start at the "start" label but at the beginning of the input file.
+]]
+
+local arg_flags = @record{
+    error:        boolean,
+    help:         boolean,
+    input:        string,
+    output:       string,
+    word_size:    integer,
+	set_stack:    boolean,
+	stack_value:  integer,
+	start_addr:   integer,
+	ignore_start: boolean,
+	no_prefix:    boolean,
+}
+
+-- Reads the arg variable and generate a list of flags
+local function parse_args(): arg_flags
+    local flags: arg_flags = {false, false, "", "", -1, true, -1, 0, false, false}
+    local i = 1
+	local conv_ok: boolean
+    if #arg == 0 then
+        flags.help = true
+    end
+    while i <= #arg do
+        if arg[i] == "-h" or arg[i] == "-help" or arg[i] == "--help" or arg[i] == "help" then
+            flags.help = true
+        elseif arg[i] == "-word-size" then
+            if i == #arg then
+                flags.error = true
+            else
+                flags.word_size, conv_ok = check_integer(arg[i+1])
+                i = i + 1
+				if not conv_ok then
+					flags.error = true
+				end
+            end
+        elseif arg[i] == "-o" then
+            if i == #arg then
+                flags.error = true
+            else
+                flags.output = arg[i+1]
+                i = i + 1
+            end
+		elseif arg[i] == "-no-stack-init" then
+			flags.set_stack = false
+		elseif arg[i] == "-no-prefix" then
+			flags.no_prefix = false
+        elseif arg[i] == "-set-stack-to" then
+            if i == #arg then
+                flags.error = true
+            else
+                flags.stack_value, conv_ok = check_integer(arg[i+1])
+                i = i + 1
+				if not conv_ok then
+					flags.error = true
+				end
+            end
+        elseif arg[i] == "-start-addr" then
+            if i == #arg then
+                flags.error = true
+            else
+                flags.start_addr, conv_ok = check_integer(arg[i+1])
+                i = i + 1
+				if not conv_ok then
+					flags.error = true
+				end
+            end
+		elseif arg[i] == "-ignore-start" then
+			flags.ignore_start = true
+        else
+            flags.input = arg[i]
+        end
+        i = i + 1
+    end
+    return flags
+end
+
+-- Check a list of flags for errors. Exit the program if an error if found.
+local function check_flags_ok(flags: arg_flags)
+    if flags.error then
+        io.stderr:write("Error, invalid arguments.\n", help_msg)
+        os.exit(-1)
+    end
+    if flags.help then
+        io.stdout:write(help_msg)
+        os.exit(0)
+    end
+    if flags.input == "" or flags.output == "" then
+        io.stderr:write("Error, input or output file not specified.\n")
+        os.exit(-1)
+    end
+    if not (flags.word_size == 8 or flags.word_size == 16 or flags.word_size == 32 or flags.word_size == 64) then
+        io.stderr:write("Error, word-size is unspecified or invalid.\nValid values are 8, 16, 32, and 64.\n")
+        os.exit(-1)
+    end
+end
+
+--------------------------- Runtime and default macros -------------------------
+
+local default_macros <comptime> = [[
+;This macro is used to put the result of the 2 word macro in the WR.
+;It is used to form set+ or setlab
+@define set_to_constant 2
+    mov R11 SR
+    set 0
+    cpy SR
+	@align_word
+    slp ;two slp are used to ensure that the access is alligned for word_size of 32 or 64 bits. May not work for bigger word size.
+    slp
+	@set_wordsize_byte
+    cpy R12
+    set 1
+    add R12
+    add PC
+	jmp
+	$1 $2
+    ;Jumped here
+    set 4
+    add R12 ;Contains the word size
+    cc2
+    add PC
+    load WR
+    mov SR R11
+@end
+
+@define set+ 1
+    set_to_constant @constant $1
+@end
+
+@define setlab 1
+    set_to_constant @labref $1
+@end
+
+@define goto 1
+	setlab $1
+	jmp
+@end
+
+@define callf 1
+	setlab $1
+	call
+@end
+
+@define mov 2
+	cpy R12
+	read $2
+	cpy $1
+	read R12
+@end
+
+@define setr 2
+	cpy R12
+	set+ $2
+	cpy $1
+	read R12
+@end
+
+@define pushr 1
+	cpy R12
+	read $1
+	push
+	read R12
+@end
+
+@define popr 1
+	cpy R12
+	pop
+	cpy $1
+	read R12
+@end
+
+@define jmp 0
+	cpy PC
+@end
+
+@define label 1
+    @label $1
+@end
+
+]]
+
+local end_runtime <comptime> = [[
+@align_word
+@label __code_end__
+]]
+
+-- This function combine start_runtime, default_macros and the definition
+-- of the @align_word macro
+local function make_start_runtime(flags: arg_flags): string
+	local word_size = flags.word_size
+    local builder: stringbuilder
+	--Default macros
+    builder:write("@define @align_word 0\n")
+	if word_size == 8 then
+		builder:write(";Note: no need for 8 as it would always be alligned.\n")
+    elseif word_size == 16 then 
+        builder:write("    @align 2\n")
+    elseif word_size == 32 then
+        builder:write("    @align 4\n")
+    elseif word_size == 64 then
+        builder:write("    @align 8\n")
+    else
+        error("Invalid argument for make_start_runtime.\n")
+    end
+    builder:write("@end\n")
+	builder:write("@define @set_wordsize_byte 0\n    set ")
+	builder:write(tostring(tointeger(word_size/8)))
+	builder:write("\n@end\n")
+    builder:write(default_macros)
+	-- start runtime
+	if not flags.no_prefix then
+		builder:write("@rawbytes 41 53 52 4d\n")
+	end
+	if flags.set_stack then
+		if flags.stack_value < 0 then --default stack value, the end of the code
+			builder:write("setlab __code_end__\ncpy SP\n")
+		else
+			builder:write("setr SP ")
+			builder:write(tostring(flags.stack_value))
+			builder:write("\n")
+		end
+	end
+	if not flags.ignore_start then
+		builder:write("goto start\n")
+	end
+    return builder:promote()
+end
+
+---------------------------------- Main function -------------------------------
+
+-- Main function. Returns an error exit code.
+local function reflet_fpu_asm_main(): error_t
+    local flags = parse_args()
+    check_flags_ok(flags)
+    local machine_code, asm_error = assemble(flags.input, make_start_runtime(flags), end_runtime, flags.word_size/8, flags.start_addr)
+    if asm_error ~= error_t.OK then
+        return asm_error
+    end
+    local f, msg, err = io.open(flags.output, "w")
+    if err ~= 0 then
+        io.stderr:write("Error, unable to open ", flags.output, " .\n", msg, "\n")
+        return error_t.file_write
+    end
+    for i=0,<#machine_code do
+        f:write(string.char(machine_code[i]))
+    end
+    f:close()
+    return error_t.OK
+end
+
+local exit_code = reflet_fpu_asm_main()
+os.exit(exit_code)
+

@@ -1,19 +1,14 @@
-wordsize 16
 ;This file contain tests for the various function of math.asm and printing.asm
 ;It should be printed as 'reflet-nasm libtesting.asm math.asm printing.asm -o out.bin'
 ;It can then be tested as following: (TODO when the simulator will have a nice cli write a tuto here)
 
+@import libs/import_all_libs.asm
+
 label testString
-data "Reflet is a neat ISA!"
-rawbytes 10 0
+@string Reflet is a neat ISA!
+@rawbytes 0A 0
 
 label start
-    set 1
-    or SP
-    cpy SP
-    set 1
-    add SP
-    cpy SP
     callf testingPrinting
     callf testingMath
     quit

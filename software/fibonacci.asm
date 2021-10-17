@@ -1,5 +1,7 @@
 ;This program prints each numbers of the fibonachi sequence
 
+@import libs/import_all_libs.asm
+
 ;------------------------
 ;Loop throught all the integers from 3 to the 
 ;bigest one and call processNum on them

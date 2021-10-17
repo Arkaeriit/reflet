@@ -15,17 +15,17 @@ primes : primes.bin
 fibonacci : fibonacci.bin
 	reflet-sim fibonacci.bin config16
 
-libtesting.bin : libtesting.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm 
-	reflet-masm libtesting.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm -o libtesting.bin
+libtesting.bin : libtesting.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm libs/import_all_libs.asm
+	reflet-asm libtesting.asm -word-size 16 -o libtesting.bin
 
 exampleIO.bin : exampleIO.asm
-	reflet-masm exampleIO.asm -o exampleIO.bin
+	reflet-asm exampleIO.asm -o exampleIO.bin -word-size 8
 
-primes.bin : primes.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm 
-	reflet-masm primes.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm -o primes.bin -wordsize 16
+primes.bin : primes.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm  libs/import_all_libs.asm
+	reflet-asm primes.asm -o primes.bin -word-size 16
 
-fibonacci.bin : fibonacci.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm 
-	reflet-masm fibonacci.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm -o fibonacci.bin -wordsize 16
+fibonacci.bin : fibonacci.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm libs/import_all_libs.asm
+	reflet-asm fibonacci.asm -o fibonacci.bin -word-size 16
 
 clean :
 	rm -f *.bin
