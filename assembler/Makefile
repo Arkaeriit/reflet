@@ -21,7 +21,7 @@ purge: clean
 full_compilation: purge
 	$(MAKE) reflet-asm.bin
 
-install: | reflet-asm
+install: | reflet-asm.bin
 	cp -f reflet-asm.bin $(INSTALL_DIR)/reflet-asm
 
 uninstall:
