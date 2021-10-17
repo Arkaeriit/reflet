@@ -9,7 +9,7 @@ The Makefile contains the commands needed to assemble each example with some nec
 * libtesting.asm : some code to test that the functions in the libraries are working.
 
 ## Libraries
-The folder `libs` contains some libraries to help in the writing of Reflet assembly. Each library contains various functions that can affect various registers. A function preserves any register that is not used to output the result of the function except R11 and R12. The various libraries must be assembled at the same time as the code that uses them with reflet-masm.
+The folder `libs` contains some libraries to help in the writing of Reflet assembly. Each library contains various functions that can affect various registers. A function preserves any register that is not used to output the result of the function except R11 and R12. The various libraries must be assembled at the same time as the code that uses them with reflet-asm.
 
 ### basicIO 
 This file contains some very basic IO functions.

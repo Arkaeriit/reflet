@@ -3,6 +3,8 @@
 ;As this is not very efficient, it is more ment to be a proof of 
 ;concept than anything else.
 
+@import libs/import_all_libs.asm
+
 ;-----------------------
 ;Put 1 in R2 if the number in R1 is prime and put 0 otherwise
 label isPrime
