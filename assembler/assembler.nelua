@@ -474,7 +474,7 @@ local function second_step(in_block: vector(block), addr_size: integer) : (vecto
                     ret = insert_block_in_file(ret, i, j, new_block)
                     return ret, error_t.WIP
                 elseif line[0] == "@string" then
-                    local str = line.raw:sub(8, #line.raw)
+                    local str = line.raw:sub(9, #line.raw)
                     local raws: vector(byte)
                     for i=1,#str do
                         raws:push(str:sub(i,i):byte())
@@ -625,11 +625,23 @@ local function gen_label_map(in_block: vector(block), addr_size: integer, start_
     return ret, error_t.OK
 end
 
+-- Display the label map in a pretty manner
+local function print_labels(map: hashmap(string, uint64))
+    local builder: stringbuilder
+    for k,v in pairs(map) do
+        builder:write(k)
+        builder:write(" : ")
+        builder:write(string.format("%x\n", v))
+    end
+    print(builder:promote())
+end
+
 -- Replaces all labels with raw bytes
 -- Returns a vector of bytes
 local function fifth_step(in_block: vector(block), addr_size: integer, start_addr: integer): (vector(byte), error_t)
     local ret: vector(byte)
     local map, err = gen_label_map(in_block, addr_size, start_addr)
+    --print_labels(map)
     for i=0,<#in_block do
         if in_block[i].type == block_types.label then
             local label = in_block[i].content.label

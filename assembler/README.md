@@ -1,6 +1,6 @@
 # Reflet assembler
 
-An assembler to generate Reflet machine code. This assembler let you use labels, can do some basic linking, let you used predefined macros and even user-defined macros. As some of those macros do some basic data processing, they will use R12 as a temporary register.
+An assembler to generate Reflet machine code. This assembler let you use labels, can do some basic linking, let you used predefined macros and even user-defined macros. As some of those macros do some basic data processing, they will use R11 and R12 as temporary registers.
 
 
 ## Usage
@@ -56,6 +56,7 @@ Beyond the `@define` directive to declare macros, the assembler offers other dir
 * `@constant <number>` put the value of the number (written in decimal) in the machine code.
 * `@rawbytes <byte 1> <byte 2> ... <byte N>` write the given bytes in the machine code.
 * `@string ...` write the sting following the directive (and after a complementary space) in the machine code. Comments are not supported and will be considered as part of the string.
+* `@import <path>` include in the assembly the content of the given file. The path is relative to the path of the file where the import directive is.
 
 ### Predefined macro
 
@@ -72,7 +73,7 @@ To ease the use of the assembler, some macros are predefines.
 * `goto <name>` jumps to the given label.
 * `jmp` jumps to the address in the working register.
 
-Most of those macro will overwrite the register R12. If you use a macro to edit the PC, it might not work and will generate unexpected behaviors.
+Most of those macro will overwrite the register R12, only setlab and set+ will overwrite R11. If you use a macro to edit the PC, it might not work and will generate unexpected behaviors.
 
 ## Compilation and installation
 

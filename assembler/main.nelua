@@ -131,6 +131,9 @@ local default_macros <comptime> = [[
 ;This macro is used to put the result of the 2 word macro in the WR.
 ;It is used to form set+ or setlab
 @define set_to_constant 2
+    mov R11 SR
+    set 0
+    cpy SR
 	@align_word
     slp ;two slp are used to ensure that the access is alligned for word_size of 32 or 64 bits. May not work for bigger word size.
     slp
@@ -147,6 +150,7 @@ local default_macros <comptime> = [[
     cc2
     add PC
     load WR
+    mov SR R11
 @end
 
 @define set+ 1
