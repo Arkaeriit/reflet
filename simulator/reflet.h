@@ -60,10 +60,15 @@ typedef struct reflet_struct {
 
 #include "debug.h"
 
-#define WR(vm) vm->reg[0]
-#define SR(vm) vm->reg[13]
-#define PC(vm) vm->reg[14]
-#define SP(vm) vm->reg[15]
+#define WR_REG 00
+#define SR_REG 13
+#define PC_REG 14
+#define SP_REG 15
+
+#define WR(vm) vm->reg[WR_REG]
+#define SR(vm) vm->reg[SR_REG]
+#define PC(vm) vm->reg[PC_REG]
+#define SP(vm) vm->reg[SP_REG]
 
 reflet* reflet_init();
 void reflet_initRAM(reflet* vm);

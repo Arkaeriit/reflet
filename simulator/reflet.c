@@ -118,7 +118,7 @@ static void run_inst(reflet* vm){
         debug_helper[i] = vm->reg[i];
     uint8_t* stack = vm->ram + PC(vm);
 #endif
-    PC(vm)++;
+	bool edited_pc = false;
     switch(opperand){
         case 0:
             switch(instruction){
@@ -128,8 +128,10 @@ static void run_inst(reflet* vm){
                     WR(vm) = ~WR(vm) + 1;
                     break;
                 case JIF:
-                    if(SR(vm) & 1)
+                    if(SR(vm) & 1) {
                         PC(vm) = WR(vm);
+						edited_pc = true;
+					}
                     break;
                 case POP:
                     SP(vm) = (SP(vm) - byteExchanged(vm, true)) & reg_mask;
@@ -140,9 +142,10 @@ static void run_inst(reflet* vm){
                     SP(vm) = (SP(vm) + byteExchanged(vm, true)) & reg_mask;
                     break;
                 case CALL:
-                    putRAMWord(vm, SP(vm), PC(vm), true);
+                    putRAMWord(vm, SP(vm), PC(vm)+1, true);
                     SP(vm) = (SP(vm) + byteExchanged(vm, true)) & reg_mask;
                     PC(vm) = WR(vm);
+					edited_pc = true;
                     break;
                 case RET:
                     SP(vm) = (SP(vm) - byteExchanged(vm, true)) & reg_mask;
@@ -152,7 +155,7 @@ static void run_inst(reflet* vm){
                     vm->active = false;
                     break;
                 case DEBUG:
-                    printf("Debug instruction reached at address %" WORD_PX ". The content of the working register is 0x%" WORD_PX "\n", PC(vm)-1, WR(vm));
+                    printf("Debug instruction reached at address %" WORD_PX ". The content of the working register is 0x%" WORD_PX "\n", PC(vm), WR(vm));
                     break;
                 case CMPNOT:
                     if(SR(vm) & 1)
@@ -170,7 +173,7 @@ static void run_inst(reflet* vm){
                     }else if(instruction == RETINT){
                         ret_int(vm);
                     }else{
-                        fprintf(stderr, "Warning, unknow instruction (%X) at address %" WORD_P ".\n",instruction, PC(vm) - 1);
+                        fprintf(stderr, "Warning, unknow instruction (%X) at address %" WORD_P ".\n",instruction, PC(vm));
                     }
             }
             break;
@@ -182,6 +185,8 @@ static void run_inst(reflet* vm){
             break;
         case CPY:
             vm->reg[reg] = WR(vm);
+			if(reg == PC_REG)
+				edited_pc = true;
             break;
         case ADD:
             WR(vm) += vm->reg[reg];
@@ -234,8 +239,10 @@ static void run_inst(reflet* vm){
             WR(vm) = loadWordRAM(vm, vm->reg[reg], false);
             break;
         default:
-            fprintf(stderr, "Error in the reading of the instruction at address %" WORD_P ".\n", PC(vm) - 1);
+            fprintf(stderr, "Error in the reading of the instruction at address %" WORD_P ".\n", PC(vm));
     }
+	if(!edited_pc)
+		PC(vm)++;
 }
 
 /*
