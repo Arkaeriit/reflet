@@ -211,6 +211,9 @@ local default_macros <comptime> = [[
     @label $1
 @end
 
+@define rawbyte 1
+    @rawbytes $1
+@end
 ]]
 
 local end_runtime <comptime> = [[

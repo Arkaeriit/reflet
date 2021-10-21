@@ -54,9 +54,10 @@ Beyond the `@define` directive to declare macros, the assembler offers other dir
 * `@labref <name>` write in the code the address of the label with the given name.
 * `@align <number>` align the next instruction to the number given in bytes.
 * `@constant <number>` put the value of the number (written in decimal) in the machine code.
-* `@rawbytes <byte 1> <byte 2> ... <byte N>` write the given bytes in the machine code.
-* `@string ...` write the sting following the directive (and after a complementary space) in the machine code. Comments are not supported and will be considered as part of the string.
+* `@rawbytes <byte 1> <byte 2> ... <byte N>` writes the given bytes in the machine code.
+* `@string ...` writes the sting following the directive (and after a complementary space) in the machine code. Comments are not supported and will be considered as part of the string.
 * `@import <path>` include in the assembly the content of the given file. The path is relative to the path of the file where the import directive is.
+* `rawbyte <byte>` writes a single byte of data in the machine code.
 
 ### Predefined macro
 
