@@ -28,6 +28,7 @@ Options:
 * -set-stack-to xxx : set the stack pointer to the address given just after the flag. Incompatible with -no-stack-init. Defaults to 0 when not set.
 * -start-addr xxx : tell the linker that the code should start at the given address.
 * -ignore-start : if set, the program will not start at the "start" label but at the beginning of the input file.
+* -label-dump: if set, a dump of all labels will be printed just before linkage.
 ]]
 
 local arg_flags = @record{
@@ -41,11 +42,12 @@ local arg_flags = @record{
 	start_addr:   integer,
 	ignore_start: boolean,
 	no_prefix:    boolean,
+    label_dump:   boolean,
 }
 
 -- Reads the arg variable and generate a list of flags
 local function parse_args(): arg_flags
-    local flags: arg_flags = {false, false, "", "", -1, true, -1, 0, false, false}
+    local flags: arg_flags = {false, false, "", "", -1, true, -1, 0, false, false, false}
     local i = 1
 	local conv_ok: boolean
     if #arg == 0 then
@@ -97,6 +99,8 @@ local function parse_args(): arg_flags
             end
 		elseif arg[i] == "-ignore-start" then
 			flags.ignore_start = true
+		elseif arg[i] == "-label-dump" then
+			flags.label_dump = true
         else
             flags.input = arg[i]
         end
@@ -262,7 +266,7 @@ end
 local function reflet_fpu_asm_main(): error_t
     local flags = parse_args()
     check_flags_ok(flags)
-    local machine_code, asm_error = assemble(flags.input, make_start_runtime(flags), end_runtime, flags.word_size/8, flags.start_addr)
+    local machine_code, asm_error = assemble(flags.input, make_start_runtime(flags), end_runtime, flags.word_size/8, flags.start_addr, flags.label_dump)
     if asm_error ~= error_t.OK then
         return asm_error
     end

@@ -16,7 +16,7 @@ The possible options are the following:
 * -start-addr xxx: tell the linker that the code should start at the given address. 
 * -ignore-start: if set, the program will not start at the "start" label but at the beginning of the first input file.
 * -wordsize xxx : set the wordsize to xxx (a number in bits).
-
+* -label-dump: if set, a dump of all labels will be printed just before linkage.
 
 ## Assembly language file
 
