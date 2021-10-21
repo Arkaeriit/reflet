@@ -52,7 +52,7 @@ local instruction_list: []instruction <const> = {
     {"RET",    args_choice.void,        0x0D},
     {"QUIT",   args_choice.void,        0x0E},
     {"DEBUG",  args_choice.void,        0x0F},
-    {"SETINT", args_choice.two_bit_num, 0x00},
+    {"SETINT", args_choice.two_bit_num, 0x01},
 }
 
 --------------------------------- Private symbols ------------------------------

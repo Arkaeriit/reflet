@@ -143,13 +143,13 @@ local default_macros <comptime> = [[
     slp
 	@set_wordsize_byte
     cpy R12
-    set 1
+    set 2
     add R12
     add PC
 	jmp
 	$1 $2
     ;Jumped here
-    set 4
+    set 3
     add R12 ;Contains the word size
     cc2
     add PC
