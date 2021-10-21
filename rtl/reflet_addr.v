@@ -49,7 +49,7 @@ module reflet_addr #(
     wire [wordsize-1:0] cpu_addr = ( !fetching_instruction ? addr_reg | addr_pop | addr_push : programCounter); //The defaut behaviour is to seek the address of the next piece of code
 
     //selecting the data to send
-    wire [wordsize-1:0] data_wr = ( instruction == `inst_push || opperand == `opp_str || instruction == `inst_tbm ? workingRegister : 0 );
+    wire [wordsize-1:0] data_wr = ( instruction == `inst_push || opperand == `opp_str ? workingRegister : 0 );
     wire [wordsize-1:0] data_pc = ( instruction == `inst_call ? programCounter : 0 );
     wire [wordsize-1:0] data_out_cpu = data_wr | data_pc;
 
@@ -57,7 +57,7 @@ module reflet_addr #(
     wire [wordsize-1:0] data_in_cpu;
     wire returning_value = instruction == `inst_pop || instruction == `inst_ret || opperand == `opp_load;
     wire [wordsize-1:0] data_out_out = ( returning_value ? (instruction == `inst_ret ? data_in_cpu + 1 : data_in_cpu) : 0 ); //When we want to use walue read from ram. Note, when returning from a function, we need to go after what we put in the stack in order not to be trapped in an infinite loop
-    wire [wordsize-1:0] wr_out = ( instruction == `inst_push || instruction == `inst_call || opperand == `opp_str ? workingRegister : 0 ); //when we don't need to update any register we will simply put the content of the working register into itself
+    wire [wordsize-1:0] wr_out = ( instruction == `inst_push || instruction == `inst_call || opperand == `opp_str || instruction == `inst_tbm ? workingRegister : 0 ); //when we don't need to update any register we will simply put the content of the working register into itself
     assign out = wr_out | data_out_out;
 
     //register to update
@@ -94,7 +94,7 @@ module reflet_addr #(
             wire force_alligned_use = instruction == `inst_pop || instruction == `inst_ret || instruction == `inst_push || instruction == `inst_call;
             wire [15:0] size_used = ( fetching_instruction ? 0 :
                                       ( force_alligned_use ? (wordsize/8 - 1) :
-                                        ( byte_mode ? 1 :
+                                        ( byte_mode ? 0 :
                                           ( reduced_behaviour_bits == 2'b00 ? (wordsize/8 - 1) :
                                             ( reduced_behaviour_bits == 2'b01 ? 2 : //TODO, make the value 2 depends on the wordsize as it is currentely broken in 32 bit CPU
                                               ( reduced_behaviour_bits == 2'b10 ? 1 : 0 ))))));
