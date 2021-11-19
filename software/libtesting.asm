@@ -4,6 +4,7 @@
 
 @import libs/import_all_libs.asm
 
+@align_word
 label testString
 @string Reflet is a neat ISA!
 @rawbytes 0A 0

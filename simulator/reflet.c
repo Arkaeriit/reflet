@@ -118,7 +118,7 @@ static void run_inst(reflet* vm){
         debug_helper[i] = vm->reg[i];
     uint8_t* stack = vm->ram + PC(vm);
 #endif
-	bool edited_pc = false;
+    bool edited_pc = false;
     switch(opperand){
         case 0:
             switch(instruction){
@@ -130,8 +130,8 @@ static void run_inst(reflet* vm){
                 case JIF:
                     if(SR(vm) & 1) {
                         PC(vm) = WR(vm);
-						edited_pc = true;
-					}
+                        edited_pc = true;
+                    }
                     break;
                 case POP:
                     SP(vm) = (SP(vm) - byteExchanged(vm, true)) & reg_mask;
@@ -145,11 +145,12 @@ static void run_inst(reflet* vm){
                     putRAMWord(vm, SP(vm), PC(vm)+1, true);
                     SP(vm) = (SP(vm) + byteExchanged(vm, true)) & reg_mask;
                     PC(vm) = WR(vm);
-					edited_pc = true;
+                    edited_pc = true;
                     break;
                 case RET:
                     SP(vm) = (SP(vm) - byteExchanged(vm, true)) & reg_mask;
                     PC(vm) = loadWordRAM(vm, SP(vm), true);
+                    edited_pc = true;
                     break;
                 case QUIT:
                     vm->active = false;
@@ -185,8 +186,8 @@ static void run_inst(reflet* vm){
             break;
         case CPY:
             vm->reg[reg] = WR(vm);
-			if(reg == PC_REG)
-				edited_pc = true;
+            if(reg == PC_REG)
+                edited_pc = true;
             break;
         case ADD:
             WR(vm) += vm->reg[reg];
@@ -241,8 +242,8 @@ static void run_inst(reflet* vm){
         default:
             fprintf(stderr, "Error in the reading of the instruction at address %" WORD_P ".\n", PC(vm));
     }
-	if(!edited_pc)
-		PC(vm)++;
+    if(!edited_pc)
+        PC(vm)++;
 }
 
 /*
