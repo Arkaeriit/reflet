@@ -20,40 +20,40 @@ module reflet_ram8 #(
     );
     integer i; //loop variable
 
-	// Declare memory 
-	reg [7:0] memory_ram [size-1:0];
+    // Declare memory 
+    reg [7:0] memory_ram [size-1:0];
     reg [7:0] data_out_array;
 
     //addr control
     wire usable = enable && addr < size && reset;
 
-	generate
-		if(|resetable)
-		begin
-			always @(posedge clk)
-				if(!reset)
-				  begin
-					for (i=0;i<size; i=i+1)
-						memory_ram[i] = 0;
-				  end
-				else
-				  begin
-						if(usable && write_en)
-							 memory_ram[addr] <= data_in;
-						data_out_array <= memory_ram[addr];
-				  end
-		end
-		else
-		begin
-			always @(posedge clk)
-			  begin
-					if(usable && write_en)
-						 memory_ram[addr] <= data_in;
-					data_out_array <= memory_ram[addr];
-			  end
-		end
-	endgenerate
-				 
+    generate
+        if(|resetable)
+        begin
+            always @(posedge clk)
+                if(!reset)
+                  begin
+                    for (i=0;i<size; i=i+1)
+                        memory_ram[i] = 0;
+                  end
+                else
+                  begin
+                        if(usable && write_en)
+                             memory_ram[addr] <= data_in;
+                        data_out_array <= memory_ram[addr];
+                  end
+        end
+        else
+        begin
+            always @(posedge clk)
+              begin
+                    if(usable && write_en)
+                         memory_ram[addr] <= data_in;
+                    data_out_array <= memory_ram[addr];
+              end
+        end
+    endgenerate
+                 
     assign data_out = ( usable ? data_out_array : 0 );
         
 endmodule

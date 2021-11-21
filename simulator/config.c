@@ -140,7 +140,7 @@ static enum processLine_return preprocessLine(const char* line, char** ret){
             case 0: //before the first word
                 if(line[i] == ';' || line[i] == '\n'){
                     return NO_LINE;
-                }else if(line[i] == ' ' || line[i] == '	'){
+                }else if(line[i] == ' ' || line[i] == '    '){
                     //do nothing, wait for a word
                 }else{
                     ret[0][0] = line[i];
@@ -150,7 +150,7 @@ static enum processLine_return preprocessLine(const char* line, char** ret){
             case 1: //fist word
                 if(line[i] == ';' || line[i] == '\n')
                     return ERROR; //there has to be two words
-                else if(line[i] == ' ' || line[i] == '	')
+                else if(line[i] == ' ' || line[i] == '    ')
                     now = 2;
                 else
                     ret[0][strlen(ret[0])] = line[i];
@@ -158,7 +158,7 @@ static enum processLine_return preprocessLine(const char* line, char** ret){
             case 2: //before the second word
                 if(line[i] == ';' || line[i] == '\n'){
                     return ERROR; //there has to be two words
-                }else if(line[i] == ' ' || line[i] == '	'){
+                }else if(line[i] == ' ' || line[i] == '    '){
                     //do nothing, wait for a word
                 }else{
                     ret[1][0] = line[i];
@@ -168,7 +168,7 @@ static enum processLine_return preprocessLine(const char* line, char** ret){
             case 3: //second word
                 if(line[i] == ';' || line[i] == '\n')
                     return OK;
-                else if(line[i] == ' ' || line[i] == '	' || line[i] == ';' || line[i] == '\n')
+                else if(line[i] == ' ' || line[i] == '    ' || line[i] == ';' || line[i] == '\n')
                     now = 4;
                 else
                     ret[1][strlen(ret[1])] = line[i];
@@ -176,7 +176,7 @@ static enum processLine_return preprocessLine(const char* line, char** ret){
             default:
                 if(line[i] == ';' || line[i] == '\n')
                     return OK;
-                else if(!(line[i] == ' ' || line[i] == '	' || line[i] == ';' || line[i] == '\n'))
+                else if(!(line[i] == ' ' || line[i] == '    ' || line[i] == ';' || line[i] == '\n'))
                     return ERROR;
         }
     }

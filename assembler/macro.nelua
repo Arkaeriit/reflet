@@ -144,9 +144,9 @@ global function expend_macro(line: pure_line): (pure_file, integer)
             local curr_word = curr_line[j]
             if curr_word:sub(1,1) == "$" then --Note: we know for sure that curr_word is at least of length 1
                 local arg_num, conv_ok = check_integer(curr_word:sub(2,#curr_word))
-				if not arg_num then
-					return ret, EXP_MACRO_ERR_MALFORMED_NUMBER
-				end
+                if not arg_num then
+                    return ret, EXP_MACRO_ERR_MALFORMED_NUMBER
+                end
                 ret = ret:word_swap(i, j, line[arg_num]) --Note: the fact that the flag for the first arg is $1 means that the indexing ends up well
             end
         end

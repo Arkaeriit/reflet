@@ -62,7 +62,7 @@ global error_t = @enum {
     label = 6,
     macro = 7,
     constant = 8,
-	number = 9,
+    number = 9,
 }
 
 local block_types = @enum {
@@ -371,11 +371,11 @@ local function second_step(in_block: vector(block), addr_size: integer) : (vecto
                         end_label = end_label + 1
                     end
                     local macro = file:sub(j+1, end_label-1)
-					local number_of_args, conv_ok = check_integer(line[2])
-					if not conv_ok then
+                    local number_of_args, conv_ok = check_integer(line[2])
+                    if not conv_ok then
                         error_in_file(in_block[i].content.pure_file, j)
-						return ret, error_t.number
-					end
+                        return ret, error_t.number
+                    end
                     local macro_ok = register_macro(line[1], number_of_args, macro)
                     if not macro_ok then
                         error_in_file(in_block[i].content.pure_file, j)
@@ -424,11 +424,11 @@ local function second_step(in_block: vector(block), addr_size: integer) : (vecto
                         io.stderr:write("Invalid number of arguments for a align directive.\n")
                         return ret, error_t.arguments
                     end
-					local num, conv_ok = check_integer(line[1])
-					if not conv_ok then
+                    local num, conv_ok = check_integer(line[1])
+                    if not conv_ok then
                         error_in_file(in_block[i].content.pure_file, j)
-						return ret, error_t.number
-					end
+                        return ret, error_t.number
+                    end
                     local lab_blk: alignment_directive_block  = {num}
                     local new_block: block
                     new_block.type = block_types.alignment_directive
@@ -441,11 +441,11 @@ local function second_step(in_block: vector(block), addr_size: integer) : (vecto
                         io.stderr:write("Invalid number of arguments for a constant directive.\n")
                         return ret, error_t.arguments
                     end
-					local num, conv_ok = check_integer(line[1])
-					if not conv_ok then
+                    local num, conv_ok = check_integer(line[1])
+                    if not conv_ok then
                         error_in_file(in_block[i].content.pure_file, j)
-						return ret, error_t.number
-					end
+                        return ret, error_t.number
+                    end
                     local lab_blk: constant_block  = {num}
                     local new_block: block
                     new_block.type = block_types.constant
@@ -460,11 +460,11 @@ local function second_step(in_block: vector(block), addr_size: integer) : (vecto
                     end
                     local raws: vector(byte)
                     for i=1,<#line do
-						local num, conv_ok = check_hex(line[i])
-						if not conv_ok then
-							error_in_file(in_block[i].content.pure_file, j)
-							return ret, error_t.number
-						end
+                        local num, conv_ok = check_hex(line[i])
+                        if not conv_ok then
+                            error_in_file(in_block[i].content.pure_file, j)
+                            return ret, error_t.number
+                        end
                         raws:push(num)
                     end
                     local lab_blk: rawbytes_block  = {raws}
