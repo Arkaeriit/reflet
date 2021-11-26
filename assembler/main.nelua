@@ -216,6 +216,10 @@ local default_macros <comptime> = [[
 @define rawbyte 1
     @rawbytes $1
 @end
+
+@define set8 1
+    @set8 $1
+@end
 ]]
 
 local end_runtime <comptime> = [[

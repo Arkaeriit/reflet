@@ -58,6 +58,7 @@ Beyond the `@define` directive to declare macros, the assembler offers other dir
 * `@string ...` writes the sting following the directive (and after a complementary space) in the machine code. Comments are not supported and will be considered as part of the string.
 * `@import <path>` include in the assembly the content of the given file. The path is relative to the path of the file where the import directive is.
 * `rawbyte <byte>` writes a single byte of data in the machine code.
+* `set8 <number>` sets the 8 bit number (in base 10) into the WR.
 
 ### Predefined macro
 

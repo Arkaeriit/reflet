@@ -24,6 +24,7 @@ The second step is to process other directives
 - @label and @labref are registered
 - @align are registered
 - @constant and @rawbytes are registered as such
+- @set8 are expended
 This step is repeated until there is no longer any pure_files in the list of blocs
 
 The third step is to replace blocks of variable size such as pure_file and rawbytes into blocks of known size such as machine_code and rawbyte blocks.
@@ -339,6 +340,29 @@ end
 
 ----------------------------------- Second step --------------------------------
 
+
+-- Geneates the code used to initialize a 8 bit number
+local function gen_set8(num: integer): (block, error_t)
+    if (num & ~0xFF) ~= 0 then
+        return make_pure_file_block({purify_string(""), "", 1, false, ""}), error_t.arguments
+    end
+    local builder: stringbuilder
+    builder:write("set 4\n")
+    builder:write("cpy R12\n")
+    builder:write("set ")
+    builder:write((num & 0xF0) >> 4)
+    builder:write("\n")
+    builder:write("lsl R12\n")
+    builder:write("cpy R12\n")
+    builder:write("set ")
+    builder:write(num & 0x0F)
+    builder:write("\n")
+    builder:write("or R12\n")
+    local code_block = purify_string(builder:promote())
+    local local_block: pure_file_block = {code_block, "set8", 1, true, "."}
+    return make_pure_file_block(local_block), error_t.OK
+end
+
 -- Remove directives in pure files
 -- TODO: maybe clean up code with meta-programming
 local function second_step(in_block: vector(block), addr_size: integer) : (vector(block), error_t)
@@ -393,6 +417,20 @@ local function second_step(in_block: vector(block), addr_size: integer) : (vecto
                     end
                     local macro_block: pure_file_block = {macro, line[0], 1, true, ""}
                     ret = insert_block_in_file(ret, i, j, make_pure_file_block(macro_block))
+                    return ret, error_t.WIP
+                elseif line[0] == "@set8" then
+                    if #line ~= 2 then
+                        error_in_file(in_block[i].content.pure_file, j)
+                        io.stderr:write("Invalid number of arguments for a set8 directive.\n")
+                        return ret, error_t.arguments
+                    end
+                    local set8, err = gen_set8(tointeger(line[1]))
+                    if err ~= error_t.OK then
+                        error_in_file(in_block[i].content.pure_file, j)
+                        io.stderr:write("Argument for set8 takes more than 8 bits.\n")
+                        return ret, error_t.arguments
+                    end
+                    ret = insert_block_in_file(ret, i, j, set8)
                     return ret, error_t.WIP
                 elseif line[0] == "@label" then
                     if #line ~= 2 then
