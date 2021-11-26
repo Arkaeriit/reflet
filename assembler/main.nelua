@@ -138,11 +138,13 @@ local default_macros <comptime> = [[
     mov R11 SR
     set 0
     cpy SR
-    @align_word
-    slp ;two slp are used to ensure that the access is alligned for word_size of 32 or 64 bits. May not work for bigger word size.
-    slp
     @set_wordsize_byte
     cpy R12
+    @align_word
+    slp ;four slp are used to ensure that the access is alligned for word_size of 32 or 64 bits. May not work for bigger word size.
+    slp
+    slp
+    slp
     set 2
     add R12
     add PC
@@ -240,9 +242,19 @@ local function make_start_runtime(flags: arg_flags): string
         error("Invalid argument for make_start_runtime.\n")
     end
     builder:write("@end\n")
-    builder:write("@define @set_wordsize_byte 0\n    set ")
-    builder:write(tostring(tointeger(word_size/8)))
-    builder:write("\n@end\n")
+    if word_size == 64 then
+        builder:write(
+        [[@define @set_wordsize_byte 0
+            set 7
+            cpy R12
+            set 1
+            add R12
+        @end\n]])
+    else
+        builder:write("@define @set_wordsize_byte 0\n    set ")
+        builder:write(tostring(tointeger(word_size/8)))
+        builder:write("\n@end\n")
+    end
     builder:write(default_macros)
     -- start runtime
     if not flags.no_prefix then
