@@ -75,6 +75,8 @@ To ease the use of the assembler, some macros are predefines.
 * `goto <name>` jumps to the given label.
 * `jmp` jumps to the address in the working register.
 * `set_wordsize_byte`: sets the number of bytes in a word in the working register.
+* `load8 <reg>`: toggles byte mode before and after calling `load <reg>`.
+* `str8 <reg>`: toggles byte mode before and after calling `str <reg>`.
 
 Most of those macro will overwrite the register R12, only setlab and set+ will overwrite R11. If you use a macro to edit the PC, it might not work and will generate unexpected behaviors.
 

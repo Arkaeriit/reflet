@@ -220,6 +220,18 @@ local default_macros <comptime> = [[
 @define set8 1
     @set8 $1
 @end
+
+@define load8 1
+    tbm
+    load $1
+    tbm
+@end
+
+@define str8 1
+    tbm
+    str $1
+    tbm
+@end
 ]]
 
 local end_runtime <comptime> = [[
