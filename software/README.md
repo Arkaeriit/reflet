@@ -8,6 +8,13 @@ The Makefile contains the commands needed to assemble each example with some nec
 * primes.asm: print each prime number that can fit in a register of the processor.
 * libtesting.asm : some code to test that the functions in the libraries are working.
 
+## ABI
+The ABI I use is very basic. The function in the libraries follow the rules:
+* Function's argument are given in the registers, starting from R1 to how man arguments are needed.
+* Return value is written in R1.
+* Except for the return value, registers' content is preserved.
+* When calling a function, you should not be in byte mode and you should not use reduced behavior bits.
+
 ## Libraries
 The folder `libs` contains some libraries to help in the writing of Reflet assembly. Each library contains various functions that can affect various registers. A function preserves any register that is not used to output the result of the function except R11 and R12. The various libraries must be assembled at the same time as the code that uses them with reflet-asm.
 
