@@ -33,10 +33,15 @@ module reflet_cpu #(
     wire [3:0] index = index_addr | index_alu | index_int;
 
     //Content of the register to change
-    wire [wordsize-1:0] content_addr;
-    wire [wordsize-1:0] content_alu;
-    wire [wordsize-1:0] content_int;
-    wire [wordsize-1:0] content = content_alu | content_addr | content_int;
+    wire [wordsize-1:0] content_addr, content_alu, content_int;
+    reg [wordsize-1:0] content_addr_r, content_alu_r, content_int_r;
+    wire [wordsize-1:0] content = content_addr_r | content_alu_r | content_int_r;
+    always @ (posedge clk)
+    begin
+        content_alu_r <= content_alu;
+        content_addr_r <= content_addr;
+        content_int_r <= content_int;
+    end
 
     //submodules
     wire ram_not_ready;
