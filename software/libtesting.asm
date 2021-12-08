@@ -56,9 +56,9 @@ label testingPrinting
     set+ 200
     add SP
     cpy R2
-    set+ 1234
+    set+ 0xABCD
     cpy R1
-    callf printNum ;expecting '1234'
+    callf printNum ;expecting '43981'
     callf CR
     set+ 34567
     cpy R1

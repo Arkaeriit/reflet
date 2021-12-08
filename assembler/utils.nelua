@@ -8,7 +8,7 @@ require 'io'
 -- This function takes a tring as input. If the string represent a
 -- decimal integer, it returns its conversion to integer and true
 -- otherwize, it return 0 and false
-global function check_integer(str: string): (integer, boolean)
+global function check_decimal(str: string): (integer, boolean)
     local decimal_digits <comptime> = "0123456789"
     local ok_digits = 0
     for i=1,#str do
@@ -57,5 +57,18 @@ global function check_hex(str: string): (integer, boolean)
         io.stderr:write("` to an integer from base 16.\n")
         return 0, false
     end
+end
+
+-- This function tries to see if the given string might represent
+-- an hexadecimal or a decimal number and uses the the prefered
+-- function to convert it
+global function check_integer(str: string): (integer, boolean)
+    if #str < 3 then
+        return check_decimal(str)
+    end
+    if str:sub(1,2) == "0x" then
+        return check_hex(str:sub(3,#str))
+    end
+    return check_decimal(str)
 end
 

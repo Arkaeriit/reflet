@@ -53,18 +53,18 @@ Beyond the `@define` directive to declare macros, the assembler offers other dir
 * `@label <name>` defines a position in the code.
 * `@labref <name>` write in the code the address of the label with the given name.
 * `@align <number>` align the next instruction to the number given in bytes.
-* `@constant <number>` put the value of the number (written in decimal) in the machine code.
-* `@rawbytes <byte 1> <byte 2> ... <byte N>` writes the given bytes in the machine code.
+* `@constant <number>` put the value of the number in the machine code.
+* `@rawbytes <byte 1> <byte 2> ... <byte N>` writes the given bytes (in hexadecimal) in the machine code.
 * `@string ...` writes the sting following the directive (and after a complementary space) in the machine code. Comments are not supported and will be considered as part of the string.
 * `@import <path>` include in the assembly the content of the given file. The path is relative to the path of the file where the import directive is.
-* `rawbyte <byte>` writes a single byte of data in the machine code.
-* `set8 <number>` sets the 8 bit number (in base 10) into the WR.
+* `rawbyte <byte>` writes a single byte (in hexadecimal) of data in the machine code.
+* `set8 <number>` sets the 8 bit number into the WR.
 
 ### Predefined macro
 
 To ease the use of the assembler, some macros are predefines.
 
-* `set+ <number>` puts the value of the number (written in decimal) in the working register.
+* `set+ <number>` puts the value of the number in the working register.
 * `mov <reg 1> <reg 2>` copies the value of `reg 2` into `reg 1`.
 * `setr <reg> <number>` sets the value of the register to the given number.
 * `pushr <reg>` pushes the value of the given register in the stack.
@@ -79,6 +79,10 @@ To ease the use of the assembler, some macros are predefines.
 * `str8 <reg>`: toggles byte mode before and after calling `str <reg>`.
 
 Most of those macro will overwrite the register R12, only setlab and set+ will overwrite R11. If you use a macro to edit the PC, it might not work and will generate unexpected behaviors.
+
+## Numbers
+
+Unless specified otherwise (like in  `@rawbytes` or `rawbyte`), number are considered to be in hexadecimal when prefixed with `0x` and in decimal otherwise.
 
 ## Compilation and installation
 
