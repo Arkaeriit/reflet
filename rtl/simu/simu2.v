@@ -43,10 +43,13 @@ module simu2();
 
     assign dIn = dataRam | dataRom;
 
+    integer i;
     initial
     begin
         $dumpfile("simu2.vcd");
         $dumpvars(0, simu2);
+        for(i = 0; i<16; i=i+1)
+            $dumpvars(0, cpu.registers[i]);
         #10;
         reset = 1;
         #200

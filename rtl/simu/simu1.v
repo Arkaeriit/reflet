@@ -25,10 +25,13 @@ module simu1();
 
     rom1 rom1(.clk(clk), .addr(addr[3:0]), .out(dIn));
 
+    integer i;
     initial
     begin
         $dumpfile("simu1.vcd");
         $dumpvars(0, simu1);
+        for(i = 0; i<16; i=i+1)
+            $dumpvars(0, cpu.registers[i]);
         #10;
         reset = 1;
         #20;
