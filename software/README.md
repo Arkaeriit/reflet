@@ -3,6 +3,7 @@ This directory contains various examples coded in Reflet assembly language and s
 
 ## Examples
 The Makefile contains the commands needed to assemble each example with some necessary libraries and run them with `reflet-sim`. The examples are:
+
 * exampleIO.asm: ask the user for a char and print it 10 times.
 * fibonacci.asm: print the beginning of the Fibonacci sequence.
 * primes.asm: print each prime number that can fit in a register of the processor.
@@ -10,6 +11,7 @@ The Makefile contains the commands needed to assemble each example with some nec
 
 ## ABI
 The ABI I use is very basic. The function in the libraries follow the rules:
+
 * Function's argument are given in the registers, starting from R1 to how man arguments are needed.
 * Return value is written in R1.
 * Except for the return value, registers' content is preserved.

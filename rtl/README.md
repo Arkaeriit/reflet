@@ -10,6 +10,7 @@ As of now, there is no pipeline in the processor. This leads to instruction taki
 ## Top-level module
 The top-level module is `reflet_cpu`.  Its only parameter is `wordsize` which defines the wordsize in bits.
 Here is a list of all its connections:
+
 |Name |Type   |Description|
 |------|------|-------|
 |clk     |input|The main clock.|

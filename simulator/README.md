@@ -12,6 +12,7 @@ The simulator can handle interrupts. By default, no interrupts will append, but 
 
 ## Configuration
 The configuration file should contain information about the processor such as the word size or the ram size.
+
 |Parameter name|Value|Default Value|
 |--------------|-----|--|
 |word\_size     |The size of the processor registers in bits.| 8 |

@@ -29,6 +29,7 @@ reflet-masm <input files> <options> -o <output file>
 reflet-masm -help
 ```
 The possible options are the following:
+
 * -no-prefix: does not put the 'ASRM' prefix at the beginning of the output file.
 * -no-stack-init: does not initialize the stack pointer. When not used, the stack pointer is by default initialized to just after the program.
 * -set-stack-to xxx: set the stack pointer to the address given just after the flag. Incompatible with -no-stack-init.
@@ -38,6 +39,7 @@ The possible options are the following:
 
 ### Macro instructions
 Macro instructions let you combine multiples instructions in one line to make your code cleaner. They are useful because the instruction size of 8 bits limits a lot what can be done with basic instructions. 
+
 |Mnemonic|Followed by|Effect|
 |--|--|--|
 | set+ | A number | Put the argument number in the working register. The number can be as big as a register can hold. |
@@ -48,6 +50,7 @@ Macro instructions let you combine multiples instructions in one line to make yo
 
 ### Labels
 Labels can be used to jump to various parts of the program without having to calculate the address of the target instructions.
+
 |Mnemonic|Followed by|Effect|
 |--|--|--|
 | label | A label | Note. the address of the following instruction as the label. |
@@ -59,6 +62,7 @@ The entry point of the program should be a point labeled `start`.
 
 ### Data-related macro
 To write raw bytes to the output file, you can use macros that compile to `rawbyte`.
+
 |Mnemonic|Followed by|Effect|
 |--|--|--|
 | rawbyte | A list of bytes in base 10 | Write in the output file the list of bytes. |

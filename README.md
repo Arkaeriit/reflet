@@ -20,6 +20,7 @@ R1 to r12 are the 12 general-purpose registers. They are meant to store values u
 
 ### Status register
 R13 or SR is the status register. 
+
 * The first bit is the comparison bit. It is set to 1 when a comparison instruction is realized and 0 otherwise. The comparison bit is used for conditional jumps.  
 * The bits 2 and 1 are the reduced behaviors bits. When they are both set to 0, the processor behaves normally. When they are set to `b01`, if the word size of the processor is above 32 bits, the processor will act as a 32-bit processor when interfacing with memory. When they are set to `b10`, if the word size of the processor is above 16 bits, the processor will act as a 16-bit processor when interfacing with memory. When they are set to `b11`, the processor will act as an 8-bit processor when interfacing with memory.
 * The bits 3 to 6 are the flags to enable interrupts. Bit 3 enables interrupt 0, the bit 4 enables interrupt 1 up to bit 6 which enables interrupt 4.
@@ -34,6 +35,7 @@ R15 or SP is the stack pointer. It is updated when doing pop or push instruction
 
 ## Instructions
 Here is a list of the instruction of Reflet processor. 
+
 |Mnemonic|Operand|Followed by|Effect|
 |--|--|--|--|
 | slp | 0x00 | Nothing | Does nothing, wait for the next instruction |
@@ -75,6 +77,7 @@ Except in the case of overflows, Reflet machine code should work with Reflet pro
 To ease the utilization of memory, the memory access should be aligned to the size of the access. For example, when trying to manipulate 8-bit values, any address is valid. But when trying to manipulate 32-bit values, access should be aligned on 32 bits.
 
 The access to data smaller than the word size, a module of the CPU handles this assuming that the memory output data from an address aligned to the word size. The address outputed by the CPU should be masked before addressing the memory. For example, in the case of a 16-bit CPU. 
+
 * The CPU wants to read 8 bytes at address 0x3.
 * The CPU output 0x3 as the address.
 * Outside the CPU, the address is masked to 0x2 to be aligned to 16 bits.
