@@ -11,6 +11,8 @@ label array_location
 @constant 36864 ; 0x9000
 label array_size
 @constant 20
+label stack_start
+@constant 32768 ; 0x8000
 
 ;---------------------------------- Utilities ---------------------------------;
 
@@ -236,6 +238,9 @@ label test-ret-call
 ;------------------------------------ Main ------------------------------------;
     
 label start
+    setlab stack_start
+    load WR
+    cpy SP
     callf init_arr
     callf true_test
     callf debug_arr
