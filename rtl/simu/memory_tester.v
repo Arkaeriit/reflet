@@ -8,8 +8,8 @@ module memory_tester #(
     parameter base_addr = 0,
     addr_size = 16,
     word_size = 16,
-    array_size = 1,
-    array_content = 16'h00
+    array_size = 2,
+    array_content = 32'hFFFFFFFF
     ) (
     input clk,
     input reset,
@@ -30,11 +30,15 @@ module memory_tester #(
     integer i;
     always @ (posedge clk)
         if (!reset) 
+        begin
             arr_ok <= 0;
+            for (i=0; i<array_size; i=i+1)
+                mem[i] <= ~((array_content >> (i * (word_size))) & ((1 << word_size) - 1));
+        end
         else
             for (i=0; i<array_size; i=i+1)
             begin
-                arr_ok[i] <= array_content[i * word_size - 1:(i-1) * word_size);
+                arr_ok[i] <= (array_content >> (i * (word_size))) & ((1 << word_size) - 1) == mem[i];
             end
     assign content_ok = &arr_ok;
 

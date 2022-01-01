@@ -30,11 +30,11 @@ module simu1();
         $dumpfile("simu1.vcd");
         $dumpvars(0, simu1);
         #10;
-        reset = 1;
+        reset <= 1;
         #20;
-        enable = 0;
+        enable <= 0;
         #30;
-        enable = 1;
+        enable <= 1;
         #100;
         $finish;
     end
