@@ -37,17 +37,17 @@ module reflet_ram16 #(
                 end
                 else
                 begin
-                    if(write_en)
+                    if(write_en && enable)
                         ram[used_addr] <= data_in;
-                    data_out <= ram[used_addr];
+                    data_out <= (enable ? ram[used_addr] : 16'h0);
                 end
         end
         else
             always @ (posedge cl)
             begin
-                if(write_en)
+                if(write_en && enable)
                     ram[used_addr] <= data_in;
-                    data_out <= ram[used_addr];
+                data_out <= (enable ? ram[used_addr] : 16'h0);
             end
         endgenerate
 

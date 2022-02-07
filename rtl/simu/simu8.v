@@ -36,11 +36,11 @@ module simu8();
 
     // A bit of RAM needed for the code to word in the address range 0x8000 to 0x8FFF
     wire [15:0] dataRam;
-    reflet_ram16 #(.addrSize(14), .size(32'h7FF)) ram(
+    reflet_ram16 #(.addrSize(12), .size(32'h7FF)) ram(
         .clk(clk), 
         .reset(reset), 
-        .enable(addr[15]), 
-        .addr(addr[14:1]), 
+        .enable(addr[15:12] == 4'h8), 
+        .addr(addr[11:0]), 
         .data_in(dOut), 
         .write_en(write_en), 
         .data_out(dataRam));
@@ -64,10 +64,14 @@ module simu8();
 
     assign dIn = dataRom | dataRam | data_memtester;
 
+    integer i;
+
     initial
     begin
         $dumpfile("simu8.vcd");
         $dumpvars(0, simu8);
+        for(i = 0; i<2; i=i+1)
+            $dumpvars(0, ram.ram[i]);
         #100;
         reset <= 1;
         #100000;
