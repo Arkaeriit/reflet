@@ -17,7 +17,7 @@ module memory_tester_tb();
 
     wire content_ok;
 
-    memory_tester mem_test (
+    memory_tester #(.array_content(48'h0000FFFFFFFF)) mem_test (
         .clk(clk),
         .reset(reset),
         .addr(addr),

@@ -23,8 +23,11 @@ module memory_tester #(
     );
 
     reg [word_size-1:0] mem [array_size-1:0];
+    reg [word_size-1:0] ref [array_size-1:0];
     reg [array_size-1:0] arr_ok;
     wire addr_ok = addr >= base_addr && (addr-base_addr < array_size);
+    wire [word_size*array_size-1:0] array_content_show = array_content;
+    wire [addr_size-1:0] offset = addr - base_addr;
 
     // Checking that the content of the array matches the expected value
     integer i;
@@ -33,12 +36,15 @@ module memory_tester #(
         begin
             arr_ok <= 0;
             for (i=0; i<array_size; i=i+1)
+            begin
                 mem[i] <= ~((array_content >> (i * (word_size))) & ((1 << word_size) - 1));
+                ref[i] <= (array_content >> (i * (word_size))) & ((1 << word_size) - 1);
+            end
         end
         else
             for (i=0; i<array_size; i=i+1)
             begin
-                arr_ok[i] <= (array_content >> (i * (word_size))) & ((1 << word_size) - 1) == mem[i];
+                arr_ok[i] <= ref[i] == mem[i];
             end
     assign content_ok = &arr_ok;
 
@@ -51,8 +57,8 @@ module memory_tester #(
         else
         begin
             if (write_en && addr_ok)
-                mem[addr-base_addr] <= data_in;
-            data_out <= (addr_ok ? mem[addr-base_addr] : 0);
+                mem[offset] <= data_in;
+            data_out <= (addr_ok ? mem[offset] : 0);
         end
 
 endmodule
