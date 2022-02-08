@@ -40,7 +40,7 @@ module simu10();
     memory_tester #(
         .base_addr(8'h80),
         .addr_size(8),
-        .array_size(2),
+        .array_size(4),
         .word_size(8),
         .array_content(32'h0806_0402)
     ) tester (

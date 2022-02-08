@@ -43,13 +43,14 @@ module reflet_addr #(
     );
 
     reg [2:0] state;
+    reg [wordsize-1:0] read_from_mem_tmp;
     wire alignement_fixer_ready;
 
     //addr selection
     wire [wordsize-1:0] addr_pop = ( instruction == `inst_pop || instruction == `inst_ret ? stackPointer - wordsize/8 : 0 ); //We need the -wordsize/8 because the CPU updated the stack pointer
     wire [wordsize-1:0] addr_push = ( instruction == `inst_push || instruction == `inst_call ? stackPointer : 0 );
     wire [wordsize-1:0] addr_reg = ( opperand == `opp_str || opperand == `opp_load ? otherRegister : 0 );
-    wire [wordsize-1:0] cpu_addr = ( (state == `STATE_ADDR_WRITE || state == `STATE_ADDR_READ_PREPARE) ? addr_reg | addr_pop | addr_push : programCounter); //The defaut behaviour is to seek the address of the next piece of code
+    wire [wordsize-1:0] cpu_addr = ( (state == `STATE_ADDR_WRITE || state == `STATE_ADDR_READ_PREPARE || state == `STATE_ADDR_READ) ? addr_reg | addr_pop | addr_push : programCounter); //The defaut behaviour is to seek the address of the next piece of code
 
     //State branch selection
     wire [7:0] next_instruction = data_in_cpu[7:0];
@@ -71,7 +72,7 @@ module reflet_addr #(
     //data to send to the cpu
     wire [wordsize-1:0] data_in_cpu;
     wire returning_value = instruction == `inst_pop || instruction == `inst_ret || opperand == `opp_load;
-    wire [wordsize-1:0] data_out_out = ( returning_value ? (instruction == `inst_ret ? data_in_cpu + 1 : data_in_cpu) : 0 ); //When we want to use walue read from ram. Note, when returning from a function, we need to go after what we put in the stack in order not to be trapped in an infinite loop
+    wire [wordsize-1:0] data_out_out = ( returning_value ? (instruction == `inst_ret ? read_from_mem_tmp + 1 : read_from_mem_tmp) : 0 ); //When we want to use walue read from ram. Note, when returning from a function, we need to go after what we put in the stack in order not to be trapped in an infinite loop
     wire [wordsize-1:0] wr_out = ( instruction == `inst_push || instruction == `inst_call || opperand == `opp_str || instruction == `inst_tbm ? workingRegister : 0 ); //when we don't need to update any register we will simply put the content of the working register into itself
     assign out = wr_out | data_out_out;
 
@@ -161,6 +162,7 @@ module reflet_addr #(
                 end
                 `STATE_ADDR_READ: begin
                     state <= `STATE_UPDATE_BUFF_REGS;
+                    read_from_mem_tmp <= data_in_cpu;
                 end
                 `STATE_UPDATE_BUFF_REGS: begin
                     state <= `STATE_UPDATE_REGS;
