@@ -1,6 +1,6 @@
 // This test bench runs a basic test of some instruction.
 
-module simu9();
+module simu09();
 
     reg clk = 1;
     always #1 clk <= !clk;
@@ -58,8 +58,8 @@ module simu9();
 
     initial
     begin
-        $dumpfile("simu9.vcd");
-        $dumpvars(0, simu9);
+        $dumpfile("simu09.vcd");
+        $dumpvars(0, simu09);
         for(i = 0; i<16; i=i+1)
         begin
             $dumpvars(0, cpu.registers[i]);
