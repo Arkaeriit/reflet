@@ -1,6 +1,6 @@
 // This test bench runs a basic test of some instruction.
 
-module simu9();
+module simu10();
 
     reg clk = 1;
     always #1 clk <= !clk;
@@ -29,7 +29,7 @@ module simu9();
 
     // The rom got the addresses between 0x0000 and 0x7FFF
     wire [7:0] dataRom;
-    rom9 rom9(
+    rom10 rom10(
         .clk(clk), 
         .enable(!addr[7]), 
         .addr(addr[6:0]), 
@@ -40,9 +40,9 @@ module simu9();
     memory_tester #(
         .base_addr(8'h80),
         .addr_size(8),
-        .array_size(3),
+        .array_size(2),
         .word_size(8),
-        .array_content(24'h64_0700)
+        .array_content(32'h0806_0402)
     ) tester (
         .clk(clk),
         .reset(reset),
@@ -58,8 +58,8 @@ module simu9();
 
     initial
     begin
-        $dumpfile("simu9.vcd");
-        $dumpvars(0, simu9);
+        $dumpfile("simu10.vcd");
+        $dumpvars(0, simu10);
         for(i = 0; i<16; i=i+1)
         begin
             $dumpvars(0, cpu.registers[i]);
