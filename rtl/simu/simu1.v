@@ -33,11 +33,11 @@ module simu1();
         for(i = 0; i<16; i=i+1)
             $dumpvars(0, cpu.registers[i]);
         #10;
-        reset = 1;
+        reset <= 1;
         #20;
-        enable = 0;
+        enable <= 0;
         #30;
-        enable = 1;
+        enable <= 1;
         #100;
         $finish;
     end
