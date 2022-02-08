@@ -1,5 +1,6 @@
+// This test bench runs an extensive test of most instructions.
 
-module simu8();
+module simu08();
 
     reg clk = 1;
     always #1 clk <= !clk;
@@ -68,8 +69,8 @@ module simu8();
 
     initial
     begin
-        $dumpfile("simu8.vcd");
-        $dumpvars(0, simu8);
+        $dumpfile("simu08.vcd");
+        $dumpvars(0, simu08);
         for(i = 0; i<16; i=i+1)
         begin
             $dumpvars(0, ram.ram[i]);

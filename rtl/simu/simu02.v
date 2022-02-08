@@ -1,5 +1,5 @@
 
-module simu2();
+module simu02();
 
     reg clk = 1;
     always #1 clk <= !clk;
@@ -46,8 +46,8 @@ module simu2();
     integer i;
     initial
     begin
-        $dumpfile("simu2.vcd");
-        $dumpvars(0, simu2);
+        $dumpfile("simu02.vcd");
+        $dumpvars(0, simu02);
         for(i = 0; i<16; i=i+1)
             $dumpvars(0, cpu.registers[i]);
         #10;

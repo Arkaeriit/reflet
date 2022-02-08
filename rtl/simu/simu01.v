@@ -1,5 +1,5 @@
 
-module simu1();
+module simu01();
 
     reg clk = 0;
     always #1 clk <= !clk;
@@ -28,8 +28,8 @@ module simu1();
     integer i;
     initial
     begin
-        $dumpfile("simu1.vcd");
-        $dumpvars(0, simu1);
+        $dumpfile("simu01.vcd");
+        $dumpvars(0, simu01);
         for(i = 0; i<16; i=i+1)
             $dumpvars(0, cpu.registers[i]);
         #10;

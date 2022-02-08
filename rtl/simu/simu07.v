@@ -1,10 +1,11 @@
 
-module simu6();
+module simu07();
 
     reg clk = 1;
     always #1 clk <= !clk;
 
     reg reset = 0;
+    reg enable = 1;
     wire [15:0] dIn;
     wire [15:0] dOut;
     wire [15:0] addr;
@@ -16,40 +17,31 @@ module simu6();
     reflet_cpu #(.wordsize(16)) cpu(
         .clk(clk), 
         .reset(reset), 
-        .debug(debug),
-        .enable(1'b1),
+        .enable(enable),
         .quit(quit), 
+        .debug(debug),
         .data_in(dIn), 
         .addr(addr), 
         .data_out(dOut), 
         .write_en(write_en),
         .ext_int(4'h0));
 
-    //The rom
-    rom6 rom6(
+    //The rom got the addresses between 0x0000 and 0xFFFF
+    rom7 rom7(
         .clk(clk), 
-        .enable_out(!addr[15]), 
-        .addr(addr[4:0]), 
-        .dataOut(dIn));
-
-    integer i;
+        .enable(1'b1), 
+        .addr(addr[15:1]), 
+        .data(dIn));
 
     initial
     begin
-        $dumpfile("simu6.vcd");
-        $dumpvars(0, simu6);
-        for(i = 0; i<16; i=i+1)
-            $dumpvars(0, cpu.registers[i]);
-        #10;
+        $dumpfile("simu07.vcd");
+        $dumpvars(0, simu07);
+        #100;
         reset <= 1;
-        #200;
+        #1000;
         $finish;
     end
-
-    always @ (posedge clk)
-        if(quit)
-            reset = 0;
-
 
 endmodule
 

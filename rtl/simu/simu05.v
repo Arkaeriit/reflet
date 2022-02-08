@@ -1,5 +1,5 @@
 
-module simu5();
+module simu05();
 
     reg clk = 1;
     always #1 clk <= !clk;
@@ -37,8 +37,8 @@ module simu5();
 
     initial
     begin
-        $dumpfile("simu5.vcd");
-        $dumpvars(0, simu5);
+        $dumpfile("simu05.vcd");
+        $dumpvars(0, simu05);
         #10;
         reset <= 1;
         #600;
