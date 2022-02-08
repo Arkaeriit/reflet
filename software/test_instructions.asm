@@ -217,11 +217,14 @@ label true_test
     cmpnot
     jif
     ; testing tbm
+    set 8
+    add SP
+    cpy R1
     set+ 65535
     tbm
-    str SR
+    str R1
     set 0
-    load SR
+    load R1
     tbm
     register_word ; 17th word should be 255 = 0x00FF
     ; 18th, 19th, and 20th bytes should stay at 0 = 0x0000
