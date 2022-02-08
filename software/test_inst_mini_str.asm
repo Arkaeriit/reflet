@@ -1,4 +1,4 @@
-; This is a smaller version of test_instruction.asm than more ore less only
+; This is a smaller version of test_instruction.asm than more or less only
 ; tests the set and the str instruction. It does not need any memory. It
 ; should run on a 8 bit processor and the debug array is assumed to be at
 ; the address 0x80.

@@ -1,3 +1,4 @@
+// This test bench runs an extensive test of most instructions.
 
 module simu8();
 
