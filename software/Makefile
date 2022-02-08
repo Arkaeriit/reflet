@@ -1,7 +1,7 @@
 # This makefile containts comands to assemble and test the
 # various files of this folder.
 
-all : clean
+all : libtesting.bin exampleIO.bin primes.bin fibonacci.bin test_jump.bin test_instructions.bin test_inst_mini_str.bin test_inst_mini_load.bin
 
 libtesting : libtesting.bin
 	reflet-sim libtesting.bin config16
@@ -24,6 +24,9 @@ test_instructions : test_instructions.bin
 test_inst_mini_str: test_inst_mini_str.bin
 	reflet-sim test_inst_mini_str.bin
 
+test_inst_mini_load: test_inst_mini_load.bin
+	reflet-sim test_inst_mini_load.bin
+
 libtesting.bin : libtesting.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm libs/import_all_libs.asm
 	reflet-asm libtesting.asm -word-size 16 -o libtesting.bin
 
@@ -44,6 +47,9 @@ test_instructions.bin : test_instructions.asm
 
 test_inst_mini_str.bin: test_inst_mini_str.asm
 	reflet-asm test_inst_mini_str.asm -o test_inst_mini_str.bin -no-stack-init -ignore-start -word-size 8
+
+test_inst_mini_load.bin: test_inst_mini_load.asm
+	reflet-asm test_inst_mini_load.asm -o test_inst_mini_load.bin -no-stack-init -ignore-start -word-size 8
 
 clean :
 	rm -f *.bin
