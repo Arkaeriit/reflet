@@ -70,8 +70,11 @@ module simu8();
     begin
         $dumpfile("simu8.vcd");
         $dumpvars(0, simu8);
-        for(i = 0; i<2; i=i+1)
+        for(i = 0; i<16; i=i+1)
+        begin
             $dumpvars(0, ram.ram[i]);
+            $dumpvars(0, cpu.registers[i]);
+        end
         #100;
         reset <= 1;
         #100000;
