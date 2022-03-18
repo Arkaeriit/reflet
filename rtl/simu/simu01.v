@@ -1,23 +1,21 @@
 
-module simu6();
+module simu01();
 
-    reg clk = 1;
+    reg clk = 0;
     always #1 clk <= !clk;
 
     reg reset = 0;
-    wire [15:0] dIn;
-    wire [15:0] dOut;
-    wire [15:0] addr;
+    reg enable = 1;
+    wire [7:0] dIn;
+    wire [7:0] dOut;
+    wire [7:0] addr;
     wire write_en;
     wire quit;
-    wire debug;
     
-    
-    reflet_cpu #(.wordsize(16)) cpu(
+    reflet_cpu #(.wordsize(8)) cpu(
         .clk(clk), 
         .reset(reset), 
-        .debug(debug),
-        .enable(1'b1),
+        .enable(enable),
         .quit(quit), 
         .data_in(dIn), 
         .addr(addr), 
@@ -25,31 +23,28 @@ module simu6();
         .write_en(write_en),
         .ext_int(4'h0));
 
-    //The rom
-    rom6 rom6(
-        .clk(clk), 
-        .enable_out(!addr[15]), 
-        .addr(addr[4:0]), 
-        .dataOut(dIn));
+    rom1 rom1(.clk(clk), .addr(addr[3:0]), .out(dIn));
 
     integer i;
-
     initial
     begin
-        $dumpfile("simu6.vcd");
-        $dumpvars(0, simu6);
+        $dumpfile("simu01.vcd");
+        $dumpvars(0, simu01);
         for(i = 0; i<16; i=i+1)
             $dumpvars(0, cpu.registers[i]);
         #10;
         reset <= 1;
-        #200;
+        #20;
+        enable <= 0;
+        #30;
+        enable <= 1;
+        #100;
         $finish;
     end
 
     always @ (posedge clk)
         if(quit)
             reset = 0;
-
 
 endmodule
 

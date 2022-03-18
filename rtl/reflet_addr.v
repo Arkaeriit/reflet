@@ -6,6 +6,15 @@
 
 `include "reflet.vh"
 
+`define STATE_UPDATE_REGS       3'd0
+`define STATE_GET_INSTRUCTION   3'd1
+`define STATE_SAVE_INSTRUCTION  3'd2
+`define STATE_COMPUTE           3'd3
+`define STATE_ADDR_READ_PREPARE 3'd4
+`define STATE_ADDR_WRITE        3'd5
+`define STATE_ADDR_READ         3'd6
+`define STATE_UPDATE_BUFF_REGS  3'd7
+
 module reflet_addr #(
     parameter wordsize = 16
     )(
@@ -29,26 +38,33 @@ module reflet_addr #(
     output byte_mode,
     output [wordsize-1:0] out,
     output [3:0] out_reg,
+    output update_pc,
     output ram_not_ready
     );
 
-    //Communication with the CPU
-    wire [3:0] opperand = instruction[7:4];
-    reg [3:0] not_ready;
-    reg hide_ready; //This is used to hide the fact that not_ready is set to 0 when we need to use the ram
-    wire using_ram = instruction == `inst_pop || instruction == `inst_push || instruction == `inst_call || instruction == `inst_ret || opperand == `opp_str || opperand == `opp_load;
-    assign ram_not_ready = |not_ready | (!hide_ready & using_ram);
-    wire fetching_instruction = (not_ready == 2 || not_ready == 1 || not_ready == 0) & !hide_ready;
+    reg [2:0] state;
+    reg [wordsize-1:0] read_from_mem_tmp;
     wire alignement_fixer_ready;
-
 
     //addr selection
     wire [wordsize-1:0] addr_pop = ( instruction == `inst_pop || instruction == `inst_ret ? stackPointer - wordsize/8 : 0 ); //We need the -wordsize/8 because the CPU updated the stack pointer
     wire [wordsize-1:0] addr_push = ( instruction == `inst_push || instruction == `inst_call ? stackPointer : 0 );
     wire [wordsize-1:0] addr_reg = ( opperand == `opp_str || opperand == `opp_load ? otherRegister : 0 );
-    wire [wordsize-1:0] cpu_addr = ( !fetching_instruction ? addr_reg | addr_pop | addr_push : programCounter); //The defaut behaviour is to seek the address of the next piece of code
+    wire [wordsize-1:0] cpu_addr = ( (state == `STATE_ADDR_WRITE || state == `STATE_ADDR_READ_PREPARE || state == `STATE_ADDR_READ) ? addr_reg | addr_pop | addr_push : programCounter); //The defaut behaviour is to seek the address of the next piece of code
+
+    //State branch selection
+    wire [7:0] next_instruction = data_in_cpu[7:0];
+    wire next_branch_read = next_instruction == `inst_pop || next_instruction == `inst_ret || next_instruction[7:4] == `opp_load;
+    wire next_branch_write = next_instruction == `inst_push || next_instruction == `inst_call || next_instruction[7:4] == `opp_str;
+    wire [3:0] next_branch_state = ( next_branch_read ? `STATE_ADDR_READ_PREPARE :
+                                     ( next_branch_write ? `STATE_ADDR_WRITE : `STATE_COMPUTE ));
+
+    //Communication with the CPU
+    assign update_pc = state == `STATE_UPDATE_BUFF_REGS;
+    assign ram_not_ready = state != `STATE_UPDATE_REGS;
 
     //selecting the data to send
+    wire [3:0] opperand = instruction[7:4];
     wire [wordsize-1:0] data_wr = ( instruction == `inst_push || opperand == `opp_str ? workingRegister : 0 );
     wire [wordsize-1:0] data_pc = ( instruction == `inst_call ? programCounter : 0 );
     wire [wordsize-1:0] data_out_cpu = data_wr | data_pc;
@@ -56,7 +72,7 @@ module reflet_addr #(
     //data to send to the cpu
     wire [wordsize-1:0] data_in_cpu;
     wire returning_value = instruction == `inst_pop || instruction == `inst_ret || opperand == `opp_load;
-    wire [wordsize-1:0] data_out_out = ( returning_value ? (instruction == `inst_ret ? data_in_cpu + 1 : data_in_cpu) : 0 ); //When we want to use walue read from ram. Note, when returning from a function, we need to go after what we put in the stack in order not to be trapped in an infinite loop
+    wire [wordsize-1:0] data_out_out = ( returning_value ? (instruction == `inst_ret ? read_from_mem_tmp + 1 : read_from_mem_tmp) : 0 ); //When we want to use walue read from ram. Note, when returning from a function, we need to go after what we put in the stack in order not to be trapped in an infinite loop
     wire [wordsize-1:0] wr_out = ( instruction == `inst_push || instruction == `inst_call || opperand == `opp_str || instruction == `inst_tbm ? workingRegister : 0 ); //when we don't need to update any register we will simply put the content of the working register into itself
     assign out = wr_out | data_out_out;
 
@@ -64,7 +80,7 @@ module reflet_addr #(
     assign out_reg = ( instruction == `inst_ret || instruction == `inst_call ? `pc_id : 0 ); 
 
     //write enable
-    wire cpu_write_en = (instruction == `inst_push || instruction == `inst_call || opperand == `opp_str) & !fetching_instruction & !(|ram_not_ready);
+    wire cpu_write_en = state == `STATE_ADDR_WRITE;
     
     //handeling reduced behavior
     generate
@@ -92,7 +108,7 @@ module reflet_addr #(
 
             //Controling the width of data to get
             wire force_alligned_use = instruction == `inst_pop || instruction == `inst_ret || instruction == `inst_push || instruction == `inst_call;
-            wire [15:0] size_used = ( fetching_instruction ? 0 :
+            wire [15:0] size_used = ( state == `STATE_UPDATE_REGS ? 0 :
                                       ( force_alligned_use ? (wordsize/8 - 1) :
                                         ( byte_mode ? 0 :
                                           ( reduced_behaviour_bits == 2'b00 ? (wordsize/8 - 1) :
@@ -117,37 +133,40 @@ module reflet_addr #(
         end
     endgenerate
 
-    //Changing the not_ready register to let the CPU<->RAM commuticatio to occur
     always @ (posedge clk)
-        if(!reset)
+        if (!reset)
         begin
-            not_ready <= 4'h2;
-            instruction <= 8'h0;
-            hide_ready <= 0;
+            state <= `STATE_GET_INSTRUCTION;
         end
         else if(enable & alignement_fixer_ready)
         begin
-            case(not_ready)
-                0 : //we are ready and thus must addapt the time of not ready to engage the communication with the ram
-                begin
-                    if(using_ram)
-                    begin
-                        if(hide_ready) //About to fetch an instruction
-                            not_ready <= 4'h2;
-                        else //Interfacing whith RAM
-                            not_ready <= 4'h2;
-                        hide_ready <= !hide_ready;
-                    end
-                    else
-                        not_ready <= 4'h2;
+            case(state)
+                `STATE_UPDATE_REGS: begin
+                    state <= `STATE_GET_INSTRUCTION;
                 end
-                1 : 
-                begin 
-                    if(!hide_ready)
-                        instruction <= data_in_cpu[7:0];
-                    not_ready <= not_ready - 4'h1;
+                `STATE_GET_INSTRUCTION: begin
+                    state <= `STATE_SAVE_INSTRUCTION;
                 end
-                default : not_ready <= not_ready - 4'h1;
+                `STATE_SAVE_INSTRUCTION: begin
+                    instruction <= next_instruction;
+                    state <= next_branch_state;
+                end
+                `STATE_COMPUTE: begin
+                    state <= `STATE_UPDATE_BUFF_REGS;
+                end
+                `STATE_ADDR_WRITE: begin
+                    state <= `STATE_UPDATE_BUFF_REGS;
+                end
+                `STATE_ADDR_READ_PREPARE: begin
+                    state <= `STATE_ADDR_READ;
+                end
+                `STATE_ADDR_READ: begin
+                    state <= `STATE_UPDATE_BUFF_REGS;
+                    read_from_mem_tmp <= data_in_cpu;
+                end
+                `STATE_UPDATE_BUFF_REGS: begin
+                    state <= `STATE_UPDATE_REGS;
+                end
             endcase
         end
 

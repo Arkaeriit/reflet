@@ -1,5 +1,5 @@
 
-module simu3();
+module simu04();
 
     reg clk = 1;
     always #1 clk <= !clk;
@@ -23,14 +23,14 @@ module simu3();
         .write_en(write_en),
         .ext_int(4'h0));
 
-    //The rom got the addresses between 0x0000 and 0x7FFF
+    //The rom got the addresses between 0x00 and 0x7F
     wire [15:0] dataRom;
-    rom3 rom3(
+    rom4 rom4(
         .clk(clk), 
         .enable_out(!addr[15]), 
-        .addr(addr[7:0]), 
+        .addr(addr[6:0]), 
         .dataOut(dataRom));
-    //The ram got the addresses between 0x8000 and 0xFFFF
+    //The ram got the addresses between 0x80 and 0xFF
     wire [15:0] dataRam;
     reflet_ram16 #(.addrSize(15)) ram(
         .clk(clk), 
@@ -43,17 +43,13 @@ module simu3();
 
     assign dIn = dataRam | dataRom;
 
-    integer i;
-
     initial
     begin
-        $dumpfile("simu3.vcd");
-        $dumpvars(0, simu3);
-        for(i = 0; i<16; i=i+1)
-            $dumpvars(0, cpu.registers[i]);
+        $dumpfile("simu04.vcd");
+        $dumpvars(0, simu04);
         #10;
         reset = 1;
-        #800;
+        #700;
         $finish;
     end
 

@@ -33,13 +33,26 @@ module reflet_cpu #(
     wire [3:0] index = index_addr | index_alu | index_int;
 
     //Content of the register to change
-    wire [wordsize-1:0] content_addr;
-    wire [wordsize-1:0] content_alu;
-    wire [wordsize-1:0] content_int;
-    wire [wordsize-1:0] content = content_alu | content_addr | content_int;
+    wire [wordsize-1:0] content_addr, content_alu, content_int;
+    reg [wordsize-1:0] content_addr_r, content_alu_r, content_int_r;
+    wire [wordsize-1:0] content = content_addr_r | content_alu_r | content_int_r;
+    always @ (posedge clk)
+        if (!reset)
+        begin
+            content_alu_r <= 0;
+            content_addr_r <= 0;
+            content_int_r <= 0;
+        end
+        else
+        begin
+            content_alu_r <= content_alu;
+            content_addr_r <= content_addr;
+            content_int_r <= content_int;
+        end
 
     //submodules
     wire ram_not_ready;
+    wire update_pc;
     wire [7:0] instruction;
     //wire [3:0] opperand = instruction[7:4];
     wire [3:0] argument_id = instruction[3:0];
@@ -78,6 +91,7 @@ module reflet_cpu #(
         .byte_mode(byte_mode),
         .out(content_addr),
         .out_reg(index_addr),
+        .update_pc(update_pc),
         .ram_not_ready(ram_not_ready));
 
     reflet_interrupt #(.wordsize(wordsize)) interrupt_ctrl (
@@ -140,9 +154,11 @@ module reflet_cpu #(
                         end
                         default : registers[index] <= content;
                     endcase
-                    if(index != `pc_id) //When changing the pc, no need to increment it
-                        registers[`pc_id] <= registers[`pc_id] + 1;
                 end
+            end
+            else if(update_pc)
+            begin
+                registers[`pc_id] <= registers[`pc_id] + 1;
             end
         end
 

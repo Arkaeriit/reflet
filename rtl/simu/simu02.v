@@ -1,18 +1,18 @@
 
-module simu4();
+module simu02();
 
     reg clk = 1;
     always #1 clk <= !clk;
 
     reg reset = 0;
-    wire [15:0] dIn;
-    wire [15:0] dOut;
-    wire [15:0] addr;
+    wire [7:0] dIn;
+    wire [7:0] dOut;
+    wire [7:0] addr;
     wire write_en;
     wire quit;
     
     
-    reflet_cpu #(.wordsize(16)) cpu(
+    reflet_cpu #(.wordsize(8)) cpu(
         .clk(clk), 
         .reset(reset), 
         .enable(1'b1),
@@ -24,32 +24,35 @@ module simu4();
         .ext_int(4'h0));
 
     //The rom got the addresses between 0x00 and 0x7F
-    wire [15:0] dataRom;
-    rom4 rom4(
+    wire [7:0] dataRom;
+    rom2 rom2(
         .clk(clk), 
-        .enable_out(!addr[15]), 
-        .addr(addr[6:0]), 
-        .dataOut(dataRom));
+        .enable_out(!addr[7]), 
+        .addr(addr[4:0]), 
+        .out(dataRom));
     //The ram got the addresses between 0x80 and 0xFF
-    wire [15:0] dataRam;
-    reflet_ram16 #(.addrSize(15)) ram(
+    wire [7:0] dataRam;
+    reflet_ram8 #(.addrSize(7)) ram(
         .clk(clk), 
         .reset(reset), 
-        .enable(addr[15]), 
-        .addr(addr[14:0]), 
+        .enable(addr[7]), 
+        .addr(addr[6:0]), 
         .data_in(dOut), 
         .write_en(write_en), 
         .data_out(dataRam));
 
     assign dIn = dataRam | dataRom;
 
+    integer i;
     initial
     begin
-        $dumpfile("simu4.vcd");
-        $dumpvars(0, simu4);
+        $dumpfile("simu02.vcd");
+        $dumpvars(0, simu02);
+        for(i = 0; i<16; i=i+1)
+            $dumpvars(0, cpu.registers[i]);
         #10;
         reset = 1;
-        #700;
+        #200
         $finish;
     end
 
