@@ -50,12 +50,18 @@ module reflet_cpu #(
             content_int_r <= content_int;
         end
 
+    //Register being used along the working register
+    wire [3:0] argument_id = instruction[3:0];
+    wire [7:0] instruction;
+    reg [7:0] instruction_r;
+    reg [wordsize-1:0] other_register;
+    always @ (posedge clk)
+        other_register <= registers[argument_id];
+
     //submodules
     wire ram_not_ready;
     wire update_pc;
-    wire [7:0] instruction;
     //wire [3:0] opperand = instruction[7:4];
-    wire [3:0] argument_id = instruction[3:0];
     wire interrupt;
     wire [wordsize-1:0] int_routine;
     wire alignement_error;
@@ -64,9 +70,9 @@ module reflet_cpu #(
 
     reflet_alu #(.wordsize(wordsize)) alu(
         .working_register(registers[`wr_id]),
-        .other_register(registers[argument_id]),
+        .other_register(other_register),
         .status_register(registers[`sr_id]),
-        .instruction(instruction),
+        .instruction(instruction_r),
         .out(content_alu),
         .out_reg(index_alu));
 
@@ -78,7 +84,7 @@ module reflet_cpu #(
         .workingRegister(registers[`wr_id]),
         .programCounter(registers[`pc_id]),
         .stackPointer(registers[`sp_id]),
-        .otherRegister(registers[argument_id]),
+        .otherRegister(other_register),
         .reduced_behaviour_bits(registers[`sr_id][2:1]),
         .instruction(instruction),
         .alignement_error(alignement_error),
@@ -99,7 +105,7 @@ module reflet_cpu #(
         .reset(reset),
         .enable(enable),
         .ext_int(used_int),
-        .instruction(instruction),
+        .instruction(instruction_r),
         .working_register(registers[`wr_id]),
         .program_counter(registers[`pc_id]),
         .int_mask(registers[`sr_id][6:3]),
@@ -126,7 +132,8 @@ module reflet_cpu #(
         end
         else if(enable & !quit)
         begin
-            if(!ram_not_ready)
+            instruction_r <= instruction;
+            if(!ram_not_ready & !quit)
             begin
                 if(interrupt)
                 begin
@@ -134,7 +141,7 @@ module reflet_cpu #(
                 end
                 else
                 begin
-                    case(instruction)
+                    case(instruction_r)
                         `inst_quit : quit <= 1'b1;
                         `inst_pop :
                         begin
