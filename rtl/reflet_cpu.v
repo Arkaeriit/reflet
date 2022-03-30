@@ -73,7 +73,7 @@ module reflet_cpu #(
     reflet_addr #(.wordsize(wordsize)) ram_interface(
         .clk(clk),
         .reset(reset),
-        .enable(enable),
+        .enable(enable & !quit),
         //instruction from the CPU
         .workingRegister(registers[`wr_id]),
         .programCounter(registers[`pc_id]),
@@ -124,9 +124,9 @@ module reflet_cpu #(
                registers[i] <= `gp_reset;
            quit = 0;
         end
-        else if(enable)
+        else if(enable & !quit)
         begin
-            if(!ram_not_ready & !quit)
+            if(!ram_not_ready)
             begin
                 if(interrupt)
                 begin
