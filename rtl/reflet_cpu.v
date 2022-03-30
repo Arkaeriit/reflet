@@ -53,10 +53,8 @@ module reflet_cpu #(
     //Register being used along the working register
     wire [3:0] argument_id = instruction[3:0];
     wire [7:0] instruction;
-    reg [7:0] instruction_r;
-    reg [wordsize-1:0] other_register;
-    always @ (posedge clk)
-        other_register <= registers[argument_id];
+    reg [7:0] instruction_alu, instruction_int, instruction_cpu;
+    wire [wordsize-1:0] other_register = registers[argument_id];
 
     //submodules
     wire ram_not_ready;
@@ -72,7 +70,7 @@ module reflet_cpu #(
         .working_register(registers[`wr_id]),
         .other_register(other_register),
         .status_register(registers[`sr_id]),
-        .instruction(instruction_r),
+        .instruction(instruction_alu),
         .out(content_alu),
         .out_reg(index_alu));
 
@@ -105,7 +103,7 @@ module reflet_cpu #(
         .reset(reset),
         .enable(enable),
         .ext_int(used_int),
-        .instruction(instruction_r),
+        .instruction(instruction_int),
         .working_register(registers[`wr_id]),
         .program_counter(registers[`pc_id]),
         .int_mask(registers[`sr_id][6:3]),
@@ -132,7 +130,9 @@ module reflet_cpu #(
         end
         else if(enable & !quit)
         begin
-            instruction_r <= instruction;
+            instruction_cpu <= instruction;
+            instruction_int <= instruction;
+            instruction_alu <= instruction;
             if(!ram_not_ready & !quit)
             begin
                 if(interrupt)
@@ -141,7 +141,7 @@ module reflet_cpu #(
                 end
                 else
                 begin
-                    case(instruction_r)
+                    case(instruction_cpu)
                         `inst_quit : quit <= 1'b1;
                         `inst_pop :
                         begin
