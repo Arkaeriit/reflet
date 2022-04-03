@@ -28,12 +28,13 @@ module reflet_addr #(
     input [wordsize-1:0] otherRegister,
     input [1:0] reduced_behaviour_bits,
     output reg [7:0] instruction,
-    output alignement_error,
+    output alignment_error,
     //ram connection
     output [wordsize-1:0] addr,
     output [wordsize-1:0] data_out,
     input [wordsize-1:0] data_in,
     output write_en,
+    input mem_ready,
     //output to the CPU
     output byte_mode,
     output [wordsize-1:0] out,
@@ -44,7 +45,7 @@ module reflet_addr #(
 
     reg [2:0] state;
     reg [wordsize-1:0] read_from_mem_tmp;
-    wire alignement_fixer_ready;
+    wire alignment_fixer_ready;
     wire [3:0] opperand = instruction[7:4];
 
     //addr selection
@@ -90,7 +91,7 @@ module reflet_addr #(
             assign data_out = data_out_cpu;
             assign addr = cpu_addr;
             assign write_en = cpu_write_en;
-            assign alignement_fixer_ready = 1;
+            assign alignment_fixer_ready = 1;
             assign byte_mode = 0;
         end
         else
@@ -114,11 +115,11 @@ module reflet_addr #(
                                           ( reduced_behaviour_bits == 2'b00 ? (wordsize/8 - 1) :
                                             ( reduced_behaviour_bits == 2'b01 ? 2 : //TODO, make the value 2 depends on the wordsize as it is currentely broken in 32 bit CPU
                                               ( reduced_behaviour_bits == 2'b10 ? 1 : 0 ))))));
-            reflet_alignement_fixer #(.word_size(wordsize), .addr_size(wordsize)) alignement_fixer (
+            reflet_alignment_fixer #(.word_size(wordsize), .addr_size(wordsize)) alignment_fixer (
                 .clk(clk),
                 .size_used(size_used[$clog2(wordsize/8):0]),
-                .ready(alignement_fixer_ready),
-                .alignement_error(alignement_error),
+                .ready(alignment_fixer_ready),
+                .alignment_error(alignment_error),
                 //Bus to the CPU
                 .cpu_addr(cpu_addr),
                 .cpu_data_out(data_out_cpu),
@@ -138,7 +139,7 @@ module reflet_addr #(
         begin
             state <= `STATE_GET_INSTRUCTION;
         end
-        else if(enable & alignement_fixer_ready)
+        else if(enable & alignment_fixer_ready)
         begin
             case(state)
                 `STATE_UPDATE_REGS: begin

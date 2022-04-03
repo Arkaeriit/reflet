@@ -1,5 +1,5 @@
 
-module alignement_fixer_tb();
+module alignment_fixer_tb();
 
     reg clk = 1;
     always #1 clk <= !clk;
@@ -19,7 +19,7 @@ module alignement_fixer_tb();
     wire ready;
     wire ram_write_en;
 
-    reflet_alignement_fixer #(.word_size(64), .addr_size(64)) fix (
+    reflet_alignment_fixer #(.word_size(64), .addr_size(64)) fix (
         .clk(clk),
         .cpu_addr(cpu_addr),
         .cpu_data_out(cpu_data_out),
@@ -48,8 +48,8 @@ module alignement_fixer_tb();
 
     initial
     begin
-        $dumpfile("alignement_fixer_tb.vcd");
-        $dumpvars(0, alignement_fixer_tb);
+        $dumpfile("alignment_fixer_tb.vcd");
+        $dumpvars(0, alignment_fixer_tb);
         //Filling the begining of the ram
         #10;
         reset <= 1;
@@ -119,7 +119,7 @@ module dummyCPU (
 
     always @ (posedge clk)
         case(cnt)
-            1: begin //Testing alignement error
+            1: begin //Testing alignment error
                 size_used <= 3;
                 addr <= 1;
             end
