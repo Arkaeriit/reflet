@@ -5,7 +5,7 @@ A RISC ISA. Reflet stands for **R**ISC **E**lementary **FLE**xible **T**hinking 
 This repository contains a simulator for a Reflet processor, an assembler to create Reflet machine code, and a Verilog implementation of a Reflet processor.
 
 # The architecture
-Reflet is a RISC ISA. Each instruction is coded on a single byte and composed of a 4 or 8-bit operand, followed by an optional 4-bit register. This ISA can be used with a processor with words of any size superior which is 8 bits times a power of two. When the processor has a word size above 8 bits, it is little-endian.
+Reflet is a RISC ISA. Each instruction is coded on a single byte and composed of a 4 or 8-bit opcode, followed by an optional 4-bit register. This ISA can be used with a processor with words of any size superior which is 8 bits times a power of two. When the processor has a word size above 8 bits, it is little-endian.
 
 Most operations are made between one of the 12 general-purpose registers and an implicit working register.
 
@@ -13,10 +13,10 @@ Most operations are made between one of the 12 general-purpose registers and an 
 A Reflet processor got 16 registers.
 
 ### The working register
-R0 or WR is the working register.  This is the most important register, most operations will either copy its value into another register modify its content. Its use is never explicitly mentioned in the instructions as it is assumed that it is used most of the time. Its reset value is 0.
+R0 or WR is the working register.  This is the most important register, most operations will either copy its value into another register modify its content. Its use is never explicitly mentioned in the instructions as it is assumed that it is used most of the time. Its reset value is 0. This is very similar to the accumulator in other ISA with the exception than any register (including the working register) can be used as operand in the same way.
 
 ### General purpose registers
-R1 to r12 are the 12 general-purpose registers. They are meant to store values used to interact with the working register. Their reset values are 0.
+R1 to R12 are the 12 general-purpose registers. They are meant to store values used to interact with the working register. Their reset values are 0.
 
 ### Status register
 R13 or SR is the status register. 
@@ -24,7 +24,7 @@ R13 or SR is the status register.
 * The first bit is the comparison bit. It is set to 1 when a comparison instruction is realized and 0 otherwise. The comparison bit is used for conditional jumps.  
 * The bits 2 and 1 are the reduced behaviors bits. When they are both set to 0, the processor behaves normally. When they are set to `b01`, if the word size of the processor is above 32 bits, the processor will act as a 32-bit processor when interfacing with memory. When they are set to `b10`, if the word size of the processor is above 16 bits, the processor will act as a 16-bit processor when interfacing with memory. When they are set to `b11`, the processor will act as an 8-bit processor when interfacing with memory.
 * The bits 3 to 6 are the flags to enable interrupts. Bit 3 enables interrupt 0, the bit 4 enables interrupt 1 up to bit 6 which enables interrupt 4.
-* When but 7 is set to 1, interrupt 0 is raised when invalid memory access is made.
+* When bit 7 is set to 1, interrupt 0 is raised when invalid memory access is made.
 Its reset value is  0x1.
 
 ### Program counter
@@ -36,7 +36,7 @@ R15 or SP is the stack pointer. It is updated when doing pop or push instruction
 ## Instructions
 Here is a list of the instruction of Reflet processor. 
 
-|Mnemonic|Operand|Followed by|Effect|
+|Mnemonic|Opcode|Operand|Effect|
 |--|--|--|--|
 | slp | 0x00 | Nothing | Does nothing, wait for the next instruction |
 | set | 0x1 | A 4 bits number | Put the number in the working register|
@@ -71,10 +71,10 @@ Here is a list of the instruction of Reflet processor.
 ### Word size
 To be able to work, a Reflet processor needs a connection to some RAM (or RAM and ROM) where values can be stored and machine code can be read. This document describes no word size for a Reflet processor.
 The Reflet processor word size should be 8 bits times a power of two. The memory should have a data bus the same size as the processor word size.
-Except in the case of overflows, Reflet machine code should work with Reflet processor of any word size.
+As the instruction size is always 8 bits regardless of the CPU's word size, Reflet machine code could work with Reflet processor of any word size.
 
 ### Alignment
-To ease the utilization of memory, the memory access should be aligned to the size of the access. For example, when trying to manipulate 8-bit values, any address is valid. But when trying to manipulate 32-bit values, access should be aligned on 32 bits.
+To ease the utilization of memory, the memory access should be aligned to the size of the word. For example, when trying to manipulate 8-bit values, any address is valid. But when trying to manipulate 32-bit values, access should be aligned on 32 bits.
 
 The access to data smaller than the word size, a module of the CPU handles this assuming that the memory output data from an address aligned to the word size. The address outputed by the CPU should be masked before addressing the memory. For example, in the case of a 16-bit CPU. 
 
@@ -82,7 +82,7 @@ The access to data smaller than the word size, a module of the CPU handles this 
 * The CPU output 0x3 as the address.
 * Outside the CPU, the address is masked to 0x2 to be aligned to 16 bits.
 * The memory output 0xABCD, the data at address 0x2.
-* The data is masked and shifted to be 0xAB, the data at address 0x3. 
+* Inside of the CPU, the data is masked and shifted to be 0xAB, the data at address 0x3. 
 
 When an invalid memory access is made (for example, trying to read 16 bits from address 0x3), it is possible to raise an interrupt signal to trap it. Be careful, when exiting this interruption, the program will jump back to the instruction that raised the interruption. You should disable traping or editing the working register in this case to prevent an infinite loop.
 
@@ -90,7 +90,7 @@ When an invalid memory access is made (for example, trying to read 16 bits from 
 Any byte is a valid Reflet instruction. To enable a minimal value of error-correcting, the 4 first bytes of a machine code file can be reserved for the "ASRM" magic word. To allow the existence of the magic word, the program starts at the 5th byte, at address 4.
 
 ## Interruptions
-A Reflet processor can react to external interruptions and do special routines. There are 4 different interruptions going from 0 (the highest priority to 3, the lowest priority).
+A Reflet processor can react to external interruptions and do special routines. There are 4 different interruptions going from 0 (the highest priority) to 3, (the lowest priority).
 
 To use interrupts, you must first tell the processor what is its interrupt routine. To do so, you must use the setint instruction with the number of the instruction as an argument while the address of the interruption routine is in the working register. Then, you must enable the interruption by setting to 1 the correct bit on the status register. The interruption is now set and enabled.
 
