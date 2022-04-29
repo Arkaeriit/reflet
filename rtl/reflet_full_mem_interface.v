@@ -78,6 +78,7 @@ module reflet_full_mem_interface #(
                                             ( reduced_behaviour_bits == 2'b10 ? 1 : 0 )))));
             reflet_alignment_fixer #(.word_size(wordsize), .addr_size(wordsize)) alignment_fixer (
                 .clk(clk),
+                .reset(reset),
                 .size_used(size_used[$clog2(wordsize/8):0]),
                 .ready(alignment_fixer_ready),
                 .alignment_error(alignment_error),

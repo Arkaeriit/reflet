@@ -51,8 +51,8 @@ module reflet_cpu #(
         end
 
     //Register being used along the working register
-    wire [3:0] argument_id = instruction[3:0];
     wire [7:0] instruction;
+    wire [3:0] argument_id = instruction[3:0];
     reg [7:0] instruction_alu, instruction_int, instruction_cpu;
     wire [wordsize-1:0] other_register = registers[argument_id];
 

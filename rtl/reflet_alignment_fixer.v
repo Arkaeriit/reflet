@@ -67,7 +67,7 @@ module reflet_alignment_fixer #(
     wire ready_condition = !missaligned_access | (!cpu_write_en & !cpu_read_en) | !new_input;
     always @ (posedge clk)
         if (!reset)
-            ready <= 0;
+            ready <= 1;
         else
             ready <= ready_condition;
 
