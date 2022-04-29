@@ -15,8 +15,9 @@ module reflet_alignment_fixer #(
     addr_size = 32
     )(
     input clk,
+    input reset,
     input [$clog2(word_size/8):0] size_used,
-    output ready,
+    output reg ready,
     output alignment_error,
     //Bus to the CPU
     input [addr_size-1:0] cpu_addr,
@@ -63,7 +64,12 @@ module reflet_alignment_fixer #(
     wire new_input = all_inputs != old_input;
     always @ (posedge clk)
         old_input <= all_inputs;
-    assign ready = !missaligned_access | (!cpu_write_en & !cpu_read_en) | !new_input;
+    wire ready_condition = !missaligned_access | (!cpu_write_en & !cpu_read_en) | !new_input;
+    always @ (posedge clk)
+        if (!reset)
+            ready <= 0;
+        else
+            ready <= ready_condition;
 
 endmodule
 
