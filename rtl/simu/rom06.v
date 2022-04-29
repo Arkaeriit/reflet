@@ -9,7 +9,7 @@ always @ (posedge clk)
 case(addr)
   5'h00 : ret = 8'h0F;  //debug; start of the interupt handler
   5'h01 : ret = 8'h18;  //set 8
-  5'h02 : ret = 8'h3D;  //cpy SR; Disabble alignement trap
+  5'h02 : ret = 8'h3D;  //cpy SR; Disabble alignment trap
   5'h03 : ret = 8'h02;  //retint
   5'h04 : ret = 8'h10;  //set 0
   5'h05 : ret = 8'h04;  //setint 0

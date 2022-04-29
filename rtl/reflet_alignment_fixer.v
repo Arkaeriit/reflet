@@ -10,29 +10,32 @@
 |two bytes wide and should be aligned to 16 bits.   |
 \--------------------------------------------------*/
 
-module reflet_alignement_fixer #(
+module reflet_alignment_fixer #(
     parameter word_size = 32,
     addr_size = 32
     )(
     input clk,
+    input reset,
     input [$clog2(word_size/8):0] size_used,
-    output ready,
-    output alignement_error,
+    output reg ready,
+    output alignment_error,
     //Bus to the CPU
     input [addr_size-1:0] cpu_addr,
     input [word_size-1:0] cpu_data_out,
     output [word_size-1:0] cpu_data_in,
     input cpu_write_en,
+    input cpu_read_en,
     //Bus to the RAM
     output [addr_size-1:0] ram_addr,
     output [word_size-1:0] ram_data_out,
     input [word_size-1:0] ram_data_in,
-    output ram_write_en
+    output ram_write_en,
+    output ram_read_en
     );
 
     //Checking alignment errors
     wire [addr_size-1:0] invalid_addr_mask = (1 << size_used) - 1;
-    assign alignement_error = |(cpu_addr & invalid_addr_mask);
+    assign alignment_error = |(cpu_addr & invalid_addr_mask);
 
     //Various masks used by the system
     wire [word_size/8-1:0] byte_shift = 1 << size_used;
@@ -53,6 +56,7 @@ module reflet_alignement_fixer #(
     wire [word_size-1:0] fixed_data_out_ram = data_copy | shifted_write; //Completa data to write to RAM
     assign ram_data_out = (missaligned_access ? fixed_data_out_ram : cpu_data_out);
     assign ram_write_en = cpu_write_en & ready;
+    assign ram_read_en = cpu_read_en & ready;
 
     //Detecting changes in inputs
     wire [word_size+addr_size-1:0] all_inputs = {cpu_addr, cpu_data_out};
@@ -60,7 +64,12 @@ module reflet_alignement_fixer #(
     wire new_input = all_inputs != old_input;
     always @ (posedge clk)
         old_input <= all_inputs;
-    assign ready = !missaligned_access | !cpu_write_en | !new_input;
+    wire ready_condition = !missaligned_access | (!cpu_write_en & !cpu_read_en) | !new_input;
+    always @ (posedge clk)
+        if (!reset)
+            ready <= 1;
+        else
+            ready <= ready_condition;
 
 endmodule
 

@@ -50,23 +50,26 @@ module reflet_cpu #(
             content_int_r <= content_int;
         end
 
+    //Register being used along the working register
+    wire [7:0] instruction;
+    wire [3:0] argument_id = instruction[3:0];
+    reg [7:0] instruction_alu, instruction_int, instruction_cpu;
+    wire [wordsize-1:0] other_register = registers[argument_id];
+
     //submodules
     wire ram_not_ready;
     wire update_pc;
-    wire [7:0] instruction;
     //wire [3:0] opperand = instruction[7:4];
-    wire [3:0] argument_id = instruction[3:0];
     wire interrupt;
     wire [wordsize-1:0] int_routine;
-    wire alignement_error;
-    wire [3:0] used_int = {ext_int[3:1], ext_int[0] | (registers[`sr_id][7] & alignement_error)}; //External interrupt or notification for alignement error
-    wire byte_mode;
+    wire alignment_error;
+    wire [3:0] used_int = {ext_int[3:1], ext_int[0] | (registers[`sr_id][7] & alignment_error)}; //External interrupt or notification for alignment error
 
     reflet_alu #(.wordsize(wordsize)) alu(
         .working_register(registers[`wr_id]),
-        .other_register(registers[argument_id]),
+        .other_register(other_register),
         .status_register(registers[`sr_id]),
-        .instruction(instruction),
+        .instruction(instruction_alu),
         .out(content_alu),
         .out_reg(index_alu));
 
@@ -78,17 +81,16 @@ module reflet_cpu #(
         .workingRegister(registers[`wr_id]),
         .programCounter(registers[`pc_id]),
         .stackPointer(registers[`sp_id]),
-        .otherRegister(registers[argument_id]),
+        .otherRegister(other_register),
         .reduced_behaviour_bits(registers[`sr_id][2:1]),
         .instruction(instruction),
-        .alignement_error(alignement_error),
+        .alignment_error(alignment_error),
         //System bus
         .addr(addr),
         .data_out(data_out),
         .data_in(data_in),
         .write_en(write_en),
         //Out to the CPU
-        .byte_mode(byte_mode),
         .out(content_addr),
         .out_reg(index_addr),
         .update_pc(update_pc),
@@ -99,7 +101,7 @@ module reflet_cpu #(
         .reset(reset),
         .enable(enable),
         .ext_int(used_int),
-        .instruction(instruction),
+        .instruction(instruction_int),
         .working_register(registers[`wr_id]),
         .program_counter(registers[`pc_id]),
         .int_mask(registers[`sr_id][6:3]),
@@ -126,7 +128,10 @@ module reflet_cpu #(
         end
         else if(enable & !quit)
         begin
-            if(!ram_not_ready)
+            instruction_cpu <= instruction;
+            instruction_int <= instruction;
+            instruction_alu <= instruction;
+            if(!ram_not_ready & !quit)
             begin
                 if(interrupt)
                 begin
@@ -134,7 +139,7 @@ module reflet_cpu #(
                 end
                 else
                 begin
-                    case(instruction)
+                    case(instruction_cpu)
                         `inst_quit : quit <= 1'b1;
                         `inst_pop :
                         begin
