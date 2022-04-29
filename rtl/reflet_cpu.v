@@ -62,9 +62,8 @@ module reflet_cpu #(
     //wire [3:0] opperand = instruction[7:4];
     wire interrupt;
     wire [wordsize-1:0] int_routine;
-    wire alignement_error;
-    wire [3:0] used_int = {ext_int[3:1], ext_int[0] | (registers[`sr_id][7] & alignement_error)}; //External interrupt or notification for alignement error
-    wire byte_mode;
+    wire alignment_error;
+    wire [3:0] used_int = {ext_int[3:1], ext_int[0] | (registers[`sr_id][7] & alignment_error)}; //External interrupt or notification for alignment error
 
     reflet_alu #(.wordsize(wordsize)) alu(
         .working_register(registers[`wr_id]),
@@ -85,14 +84,13 @@ module reflet_cpu #(
         .otherRegister(other_register),
         .reduced_behaviour_bits(registers[`sr_id][2:1]),
         .instruction(instruction),
-        .alignement_error(alignement_error),
+        .alignment_error(alignment_error),
         //System bus
         .addr(addr),
         .data_out(data_out),
         .data_in(data_in),
         .write_en(write_en),
         //Out to the CPU
-        .byte_mode(byte_mode),
         .out(content_addr),
         .out_reg(index_addr),
         .update_pc(update_pc),

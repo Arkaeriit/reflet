@@ -1,3 +1,7 @@
+/*
+ * This rom is made from the proram test_inst_mini_load.asm.
+ * It is meant to test some basic instructions.
+ */
 module rom10(input clk, input enable, input [7-1:0] addr, output [8-1:0] data);
     reg [8-1:0] data_reg;
     always @ (posedge clk)

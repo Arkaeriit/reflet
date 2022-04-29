@@ -23,11 +23,13 @@ module reflet_alignment_fixer #(
     input [word_size-1:0] cpu_data_out,
     output [word_size-1:0] cpu_data_in,
     input cpu_write_en,
+    input cpu_read_en,
     //Bus to the RAM
     output [addr_size-1:0] ram_addr,
     output [word_size-1:0] ram_data_out,
     input [word_size-1:0] ram_data_in,
-    output ram_write_en
+    output ram_write_en,
+    output ram_read_en
     );
 
     //Checking alignment errors
@@ -53,6 +55,7 @@ module reflet_alignment_fixer #(
     wire [word_size-1:0] fixed_data_out_ram = data_copy | shifted_write; //Completa data to write to RAM
     assign ram_data_out = (missaligned_access ? fixed_data_out_ram : cpu_data_out);
     assign ram_write_en = cpu_write_en & ready;
+    assign ram_read_en = cpu_read_en & ready;
 
     //Detecting changes in inputs
     wire [word_size+addr_size-1:0] all_inputs = {cpu_addr, cpu_data_out};
@@ -60,7 +63,7 @@ module reflet_alignment_fixer #(
     wire new_input = all_inputs != old_input;
     always @ (posedge clk)
         old_input <= all_inputs;
-    assign ready = !missaligned_access | !cpu_write_en | !new_input;
+    assign ready = !missaligned_access | (!cpu_write_en & !cpu_read_en) | !new_input;
 
 endmodule
 
