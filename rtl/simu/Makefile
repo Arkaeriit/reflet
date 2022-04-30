@@ -17,7 +17,7 @@ $(1).vcd: $(1).vvp
 	@echo "[VDC]      $(1).vvp"
 	@vvp $$<
 
-.PHONY: $(1).vcd
+.PHONY: $(1)
 $(1): $(1).vcd
 	@echo "[GTKWAVE]  $(1).vcd"
 	@gtkwave $$<
@@ -38,6 +38,4 @@ $(foreach tb, $(TEST_BENCHES), $(eval $(call test_bench_template, $(tb))))
 all: $(ALL_VCD)
 
 clean : $(ALL_CLEAN)
-
-all : stack_tb.vcd simu1.vcd simu2.vcd simu3.vcd simu4.vcd simu5.vcd
 
