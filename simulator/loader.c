@@ -27,7 +27,7 @@ bool load_file(const char* filename, reflet* vm){
     } 
     //reading file
     char* ram_char = (char*) vm->ram;
-    for(int i=0; i<vm->config->ram_size; i++){
+    for(word_t i=0; i<vm->config->ram_size; i++){
         char ch = fgetc(f);
         if(feof(f))
             break;

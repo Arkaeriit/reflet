@@ -1,5 +1,5 @@
 # Flags
-FLAGS := -Wall -g
+FLAGS := -Wall -g -Werror -Wextra -Wpedantic
 
 # Files lists
 C_SRC := config.c debug.c loader.c main.c reflet.c

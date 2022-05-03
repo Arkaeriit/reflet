@@ -314,7 +314,7 @@ static word_t loadWordRAM(reflet* vm, word_t addr, bool stack_b){
     uint8_t* target = vm->ram + addr;
     int exchanged = byteExchanged(vm, stack_b);
     word_t ret = 0;
-    for(size_t i=0; i<exchanged; i++){
+    for(int i=0; i<exchanged; i++){
         ret = ret << 8;
         ret += target[exchanged-i-1];
     }
@@ -332,7 +332,7 @@ static word_t loadWordRAM(reflet* vm, word_t addr, bool stack_b){
 static void putRAMWord(reflet* vm, word_t addr, word_t content, bool stack_b){
     check_alignement_ok(vm, addr, stack_b);
     uint8_t* target = vm->ram + addr;
-    for(size_t offset=0; offset<byteExchanged(vm, stack_b); offset++){
+    for(int offset=0; offset<byteExchanged(vm, stack_b); offset++){
         uint8_t byteToSend = (uint8_t) (content >> (offset * 8)) & 0xFF;
         target[offset] = byteToSend;
     }
