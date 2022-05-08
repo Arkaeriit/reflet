@@ -141,10 +141,6 @@ local default_macros <comptime> = [[
     @set_wordsize_byte
     cpy R12
     @align_word
-    slp ;four slp are used to ensure that the access is alligned for word_size of 32 or 64 bits. May not work for bigger word size.
-    slp
-    slp
-    slp
     set 2
     add R12
     add PC
