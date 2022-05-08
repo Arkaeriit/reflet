@@ -12,6 +12,7 @@ label testString
 label start
     callf testingPrinting
     callf testingMath
+    callf testLinkedJumps
     quit
 
 label testingMath
@@ -74,4 +75,17 @@ label testingPrinting
     callf printc
     callf CR
     ret
+
+; Tests the library linked_jumps.asm
+label testLinkedJumps
+    debug
+    callf_lr linkedFunction R10
+    debug
+    ret
+
+quit ; Should not be executed
+label linkedFunction
+    debug
+    ret_lr R10
+    quit ; Should not be executed
 
