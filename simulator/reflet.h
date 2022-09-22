@@ -48,7 +48,27 @@ struct reflet_debug {
 };
 
 typedef struct reflet_struct {
-    word_t* reg;
+	union {
+		word_t reg[16];
+		struct {
+			word_t WR;
+			word_t R1;
+			word_t R2;
+			word_t R3;
+			word_t R4;
+			word_t R5;
+			word_t R6;
+			word_t R7;
+			word_t R8;
+			word_t R9;
+			word_t R10;
+			word_t R11;
+			word_t R12;
+			word_t SR;
+			word_t PC;
+			word_t SP;
+		};
+	};
     ram_word_t* ram;
     struct reflet_config* config;
     struct reflet_debug* debug;
@@ -64,11 +84,6 @@ typedef struct reflet_struct {
 #define SR_REG 13
 #define PC_REG 14
 #define SP_REG 15
-
-#define WR(vm) vm->reg[WR_REG]
-#define SR(vm) vm->reg[SR_REG]
-#define PC(vm) vm->reg[PC_REG]
-#define SP(vm) vm->reg[SP_REG]
 
 reflet* reflet_init();
 void reflet_initRAM(reflet* vm);

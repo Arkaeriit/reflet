@@ -24,7 +24,6 @@ static bool enabled_int(reflet* vm, int interupt);
  */
 reflet* reflet_init(){
     reflet* ret = malloc(sizeof(reflet));
-    ret->reg = calloc(NUMBER_OF_REGISTERS, sizeof(word_t));
     ret->ram = NULL; //Left blank, should be written a value depending of its configuration
     ret->active = true;
     ret->byte_mode = false;
@@ -62,8 +61,8 @@ reflet* reflet_init(){
     level->stack_depth = 0;
     ret->int_level = level;
     //Input reset values not equal to 0
-    SR(ret) = 1;
-    PC(ret) = START_CHAR;
+    ret->SR = 1;
+    ret->PC = START_CHAR;
     return ret;
 }
 
@@ -84,7 +83,6 @@ void reflet_free(reflet* vm){
     }
     free(vm->int_level);
     free(vm->config);
-    free(vm->reg);
     free(vm->ram);
     if(vm->debug->enable)
         fclose(vm->debug->file);
@@ -96,7 +94,7 @@ void reflet_free(reflet* vm){
  * Run the program in the vm's RAM
  */
 void reflet_run(reflet* vm){
-    while((PC(vm) < vm->config->ram_size) && vm->active){
+    while((vm->PC < vm->config->ram_size) && vm->active){
         debugLog(vm);
         check_int(vm);
         run_inst(vm);
@@ -109,14 +107,14 @@ void reflet_run(reflet* vm){
  */
 static void run_inst(reflet* vm){
     word_t reg_mask = vm->config->word_mask;
-    uint8_t instruction = (uint8_t) vm->ram[PC(vm)];
+    uint8_t instruction = (uint8_t) vm->ram[vm->PC];
     uint8_t opperand = (instruction & 0xF0) >> 4;
     uint8_t reg = instruction & 0x0F;
 #if 0 //Toogle for easy debuging
     word_t debug_helper[16];
     for(int i=0; i<16; i++)
         debug_helper[i] = vm->reg[i];
-    uint8_t* stack = vm->ram + PC(vm);
+    uint8_t* stack = vm->ram + vm->PC;
 #endif
     bool edited_pc = false;
     switch(opperand){
@@ -125,44 +123,44 @@ static void run_inst(reflet* vm){
                 case SLP:
                     break;
                 case CC2:
-                    WR(vm) = ~WR(vm) + 1;
+                    vm->WR = ~vm->WR + 1;
                     break;
                 case JIF:
-                    if(SR(vm) & 1) {
-                        PC(vm) = WR(vm);
+                    if(vm->SR & 1) {
+                        vm->PC = vm->WR;
                         edited_pc = true;
                     }
                     break;
                 case POP:
-                    SP(vm) = (SP(vm) - byteExchanged(vm, true)) & reg_mask;
-                    WR(vm) = loadWordRAM(vm, SP(vm), true);
+                    vm->SP = (vm->SP - byteExchanged(vm, true)) & reg_mask;
+                    vm->WR = loadWordRAM(vm, vm->SP, true);
                     break;
                 case PUSH:
-                    putRAMWord(vm, SP(vm), WR(vm), true);
-                    SP(vm) = (SP(vm) + byteExchanged(vm, true)) & reg_mask;
+                    putRAMWord(vm, vm->SP, vm->WR, true);
+                    vm->SP = (vm->SP + byteExchanged(vm, true)) & reg_mask;
                     break;
                 case CALL:
-                    putRAMWord(vm, SP(vm), PC(vm)+1, true);
-                    SP(vm) = (SP(vm) + byteExchanged(vm, true)) & reg_mask;
-                    PC(vm) = WR(vm);
+                    putRAMWord(vm, vm->SP, vm->PC+1, true);
+                    vm->SP = (vm->SP + byteExchanged(vm, true)) & reg_mask;
+                    vm->PC = vm->WR;
                     edited_pc = true;
                     break;
                 case RET:
-                    SP(vm) = (SP(vm) - byteExchanged(vm, true)) & reg_mask;
-                    PC(vm) = loadWordRAM(vm, SP(vm), true);
+                    vm->SP = (vm->SP - byteExchanged(vm, true)) & reg_mask;
+                    vm->PC = loadWordRAM(vm, vm->SP, true);
                     edited_pc = true;
                     break;
                 case QUIT:
                     vm->active = false;
                     break;
                 case DEBUG:
-                    printf("Debug instruction reached at address %" WORD_PX ". The content of the working register is 0x%" WORD_PX "\n", PC(vm), WR(vm));
+                    printf("Debug instruction reached at address %" WORD_PX ". The content of the working register is 0x%" WORD_PX "\n", vm->PC, vm->WR);
                     break;
                 case CMPNOT:
-                    if(SR(vm) & 1)
-                        SR(vm) = (SR(vm) >> 1) << 1; //We want to turn the LSB into a 0
+                    if(vm->SR & 1)
+                        vm->SR = (vm->SR >> 1) << 1; //We want to turn the LSB into a 0
                     else
-                        SR(vm) |= 1;
+                        vm->SR |= 1;
                     break;
                 case TBM:
                     vm->byte_mode = !vm->byte_mode;
@@ -170,80 +168,80 @@ static void run_inst(reflet* vm){
                 default:
                     if(isSETINT(instruction)){
                         uint8_t int_number = instruction & 3;
-                        vm->ints[int_number]->routine = WR(vm);
+                        vm->ints[int_number]->routine = vm->WR;
                     }else if(instruction == RETINT){
                         ret_int(vm);
                     }else{
-                        fprintf(stderr, "Warning, unknow instruction (%X) at address %" WORD_P ".\n",instruction, PC(vm));
+                        fprintf(stderr, "Warning, unknow instruction (%X) at address %" WORD_P ".\n",instruction, vm->PC);
                     }
             }
             break;
         case SET:
-            WR(vm) = reg;
+            vm->WR = reg;
             break;
         case READ:
-            WR(vm) = vm->reg[reg];
+            vm->WR = vm->reg[reg];
             break;
         case CPY:
-            vm->reg[reg] = WR(vm);
+            vm->reg[reg] = vm->WR;
             if(reg == PC_REG)
                 edited_pc = true;
             break;
         case ADD:
-            WR(vm) += vm->reg[reg];
-            WR(vm) &= reg_mask;
+            vm->WR += vm->reg[reg];
+            vm->WR &= reg_mask;
             break;
         case SUB:
-            WR(vm) -= vm->reg[reg];
-            WR(vm) &= reg_mask;
+            vm->WR -= vm->reg[reg];
+            vm->WR &= reg_mask;
             break;
         case AND:
-            WR(vm) &= vm->reg[reg];
+            vm->WR &= vm->reg[reg];
             break;
         case OR:
-            WR(vm) |= vm->reg[reg];
+            vm->WR |= vm->reg[reg];
             break;
         case XOR:
-            WR(vm) ^= vm->reg[reg];
+            vm->WR ^= vm->reg[reg];
             break;
         case NOT:
-            WR(vm) = ~(vm->reg[reg]);
+            vm->WR = ~(vm->reg[reg]);
             break;
         case LSL:
-            WR(vm) = WR(vm) << vm->reg[reg];
-            WR(vm) &= reg_mask;
+            vm->WR = vm->WR << vm->reg[reg];
+            vm->WR &= reg_mask;
             break;
         case LSR:
-            WR(vm) = WR(vm) >> vm->reg[reg];
-            WR(vm) &= reg_mask;
+            vm->WR = vm->WR >> vm->reg[reg];
+            vm->WR &= reg_mask;
             break;
         case EQ:
-            if(WR(vm) == vm->reg[reg]){
-                SR(vm) |= 1;
+            if(vm->WR == vm->reg[reg]){
+                vm->SR |= 1;
             }else{
-                SR(vm) = SR(vm) >> 1;
-                SR(vm) = SR(vm) << 1;
+                vm->SR = vm->SR >> 1;
+                vm->SR = vm->SR << 1;
             }
             break;
         case LES:
-            if(WR(vm) < vm->reg[reg]){
-                SR(vm) |= 1;
+            if(vm->WR < vm->reg[reg]){
+                vm->SR |= 1;
             }else{
-                SR(vm) = SR(vm) >> 1;
-                SR(vm) = SR(vm) << 1;
+                vm->SR = vm->SR >> 1;
+                vm->SR = vm->SR << 1;
             }
             break;
         case STR:
-            putRAMWord(vm, vm->reg[reg], WR(vm), false);
+            putRAMWord(vm, vm->reg[reg], vm->WR, false);
             break;
         case LOAD:
-            WR(vm) = loadWordRAM(vm, vm->reg[reg], false);
+            vm->WR = loadWordRAM(vm, vm->reg[reg], false);
             break;
         default:
-            fprintf(stderr, "Error in the reading of the instruction at address %" WORD_P ".\n", PC(vm));
+            fprintf(stderr, "Error in the reading of the instruction at address %" WORD_P ".\n", vm->PC);
     }
     if(!edited_pc)
-        PC(vm)++;
+        vm->PC++;
 }
 
 /*
@@ -262,7 +260,7 @@ static int byteExchanged(const reflet* vm, bool stack_b){
         return vm->config->word_size_byte;
     if(vm->byte_mode)
         return 1;
-    switch((SR(vm) & 0x6) >> 1){
+    switch((vm->SR & 0x6) >> 1){
         case 0:
             return vm->config->word_size_byte;
         case 1:
@@ -290,13 +288,13 @@ static void check_alignement_ok(reflet* vm, word_t addr, bool stack_b){
     word_t addr_invalid_mask = size-1;
     bool access_ok = !(addr & addr_invalid_mask);
     if(access_ok) return;
-    bool trap_enabled = !(!(SR(vm) & 0x88)); //Check that both the trap and the interupt 0 are enabled
+    bool trap_enabled = !(!(vm->SR & 0x88)); //Check that both the trap and the interupt 0 are enabled
     if(trap_enabled){
         if(vm->int_level) //Roll back the PC so that after the interrupt, the program jumps back the the instruction that caused a problem
-            PC(vm)--;
+            vm->PC--;
         triger_int(vm, 0);
     }else{
-        printf("Missaligned access at addr 0x%" WORD_PX ". Triying to acces %i bytes from address 0x%" WORD_PX ".\n", PC(vm)-1, size, addr);
+        printf("Missaligned access at addr 0x%" WORD_PX ". Triying to acces %i bytes from address 0x%" WORD_PX ".\n", vm->PC-1, size, addr);
     }
 }
 
@@ -368,7 +366,7 @@ static void io(reflet* vm){
 static word_t new_int(reflet* vm, int interupt){
     word_t ret = vm->ints[interupt]->routine;
     vm->int_level->level_stack[vm->int_level->stack_depth] = vm->int_level->level;
-    vm->int_level->routine_stack[vm->int_level->stack_depth] = PC(vm);
+    vm->int_level->routine_stack[vm->int_level->stack_depth] = vm->PC;
     vm->int_level->level = interupt;
     vm->int_level->stack_depth++;
     return ret;
@@ -397,7 +395,7 @@ static void check_int(reflet* vm){
 static void triger_int(reflet* vm, uint8_t int_number){
     if(int_number < vm->int_level->level && enabled_int(vm, int_number)){ //The interrupt is taken into account if its priority is higher than the current level and it is enabled in the status register
         word_t routine = new_int(vm, int_number);
-        PC(vm) = routine;
+        vm->PC = routine;
     }
 }
 
@@ -410,7 +408,7 @@ static void ret_int(reflet* vm){
     if(vm->int_level->stack_depth){ //We are in an interrupt context, everything is fine
         vm->int_level->stack_depth--;
         vm->int_level->level = vm->int_level->level_stack[vm->int_level->stack_depth];
-        PC(vm) = vm->int_level->routine_stack[vm->int_level->stack_depth];
+        vm->PC = vm->int_level->routine_stack[vm->int_level->stack_depth];
     }else{
         fprintf(stderr, "Warning: using RETINT while not in an interrupt context.\n");
     }
@@ -420,7 +418,7 @@ static void ret_int(reflet* vm){
  * Check if the interrup the enabled in the status register
  */
 static bool enabled_int(reflet* vm, int interupt){
-    char flags = (SR(vm) >> 3) & 0xF;
+    char flags = (vm->SR >> 3) & 0xF;
     bool ret = (flags >> interupt) & 1;
     return ret;
 }
