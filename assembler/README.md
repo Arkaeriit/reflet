@@ -16,7 +16,7 @@ The possible options are the following:
 * -set-stack-to xxx: set the stack pointer to the address given just after the flag. Incompatible with -no-stack-init.
 * -start-addr xxx: tell the linker that the code should start at the given address. 
 * -ignore-start: if set, the program will not start at the "start" label but at the beginning of the first input file.
-* -wordsize xxx : set the wordsize to xxx (a number in bits).
+* -word-size xxx : set the wordsize to xxx (a number in bits).
 * -label-dump: if set, a dump of all labels will be printed just before linkage.
 
 ## Assembly language file
@@ -79,7 +79,7 @@ To ease the use of the assembler, some macros are predefines.
 * `load8 <reg>`: toggles byte mode before and after calling `load <reg>`.
 * `str8 <reg>`: toggles byte mode before and after calling `str <reg>`.
 
-Most of those macro will overwrite the register R12, only setlab and set+ will overwrite R11. If you use a macro to edit the PC, it might not work and will generate unexpected behaviors.
+Most of those macro will overwrite the register R12, only setlab, setr, and set+ will overwrite R11. If you use a macro to edit the PC, it might not work and will generate unexpected behaviors.
 
 ## Numbers
 
