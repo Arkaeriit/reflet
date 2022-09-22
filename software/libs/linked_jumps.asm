@@ -20,12 +20,6 @@
     add PC
     cpy $1
     read R12
-    cpy R12
-    set 4
-    add PC
-    cpy $2
-    read R12
-    cpy PC
     cpy PC
 @end
 
