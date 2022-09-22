@@ -1,0 +1,5 @@
+; This file is a very basig config file to let the simulator behave like
+; a 16-bit Reflet processor 
+word_size 32
+ram_size 32768
+
