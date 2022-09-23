@@ -165,9 +165,9 @@ local function asm_line(line: pure_line): uint8
     elseif inst.argument == args_choice.reg then
         ret = (inst.opcode << 4) | reg_to_num(line[1])
     elseif inst.argument == args_choice.two_bit_num then
-        ret = (inst.opcode << 2) | tointeger(line[1])
+        ret = (inst.opcode << 2) | check_integer(line[1])
     elseif inst.argument == args_choice.four_bit_num then
-        ret = (inst.opcode << 4) | tointeger(line[1])
+        ret = (inst.opcode << 4) | check_integer(line[1])
     end
     return ret
 end
