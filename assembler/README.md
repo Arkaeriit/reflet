@@ -85,6 +85,10 @@ Most of those macro will overwrite the register R12, only setlab, setr, and set+
 
 Unless specified otherwise (like in  `@rawbytes` or `rawbyte`), number are considered to be in hexadecimal when prefixed with `0x` and in decimal otherwise.
 
+## Registers
+
+Registers name are case insensitive. They can either be named (`SP`, `wr`) or be written with 'R' followed by their numbers in decimal or hexadecimal (`r2`, `R0`, `r11`, `RA`). Leading zeros in registers number are not supported.
+
 ## Compilation and installation
 
 Driver Helper is written in [Nelua](https://nelua.io). But as everyone might not have the Nelua compiler install, I included the generated C file in this repository.
