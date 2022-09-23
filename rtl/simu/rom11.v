@@ -1,0 +1,55 @@
+module rom11(input clk, input enable, input [30-1:0] addr, output [32-1:0] data);
+    reg [32-1:0] data_reg;
+    always @ (posedge clk)
+        case(addr)
+            30'h0 : data_reg <= 32'h4D525341;
+            30'h1 : data_reg <= 32'h3B2D3C3C;
+            30'h2 : data_reg <= 32'h143D102C;
+            30'h3 : data_reg <= 32'h0000003C;
+            30'h4 : data_reg <= 32'h3E4E4C12;
+            30'h5 : data_reg <= 32'h00001000;
+            30'h6 : data_reg <= 32'h4E084C13;
+            30'h7 : data_reg <= 32'h3D2B3CF0;
+            30'h8 : data_reg <= 32'h3C2C312C;
+            30'h9 : data_reg <= 32'h2C3B2D3C;
+            30'hA : data_reg <= 32'h3C143D10;
+            30'hB : data_reg <= 32'h3E4E4C12;
+            30'hC : data_reg <= 32'hABCDEF00;
+            30'hD : data_reg <= 32'h4E084C13;
+            30'hE : data_reg <= 32'h3D2B3CF0;
+            30'hF : data_reg <= 32'h3C2C322C;
+            30'h10 : data_reg <= 32'h2C3B2D3C;
+            30'h11 : data_reg <= 32'h3C143D10;
+            30'h12 : data_reg <= 32'h3E4E4C12;
+            30'h13 : data_reg <= 32'h01020304;
+            30'h14 : data_reg <= 32'h4E084C13;
+            30'h15 : data_reg <= 32'h3D2B3CF0;
+            30'h16 : data_reg <= 32'h222C332C;
+            30'h17 : data_reg <= 32'h314114E1;
+            30'h18 : data_reg <= 32'h4114E123;
+            30'h19 : data_reg <= 32'h223D1431;
+            30'h1A : data_reg <= 32'h314112E1;
+            30'h1B : data_reg <= 32'h4112E123;
+            30'h1C : data_reg <= 32'h1A3D1631;
+            30'h1D : data_reg <= 32'h314111E1;
+            30'h1E : data_reg <= 32'h4111E11B;
+            30'h1F : data_reg <= 32'h11E11C31;
+            30'h20 : data_reg <= 32'hE11D3141;
+            30'h21 : data_reg <= 32'h10314111;
+            30'h22 : data_reg <= 32'h2D3C3C3D;
+            30'h23 : data_reg <= 32'h3D102C3B;
+            30'h24 : data_reg <= 32'h00003C14;
+            30'h25 : data_reg <= 32'h3E4E4C12;
+            30'h26 : data_reg <= 32'h00001000;
+            30'h27 : data_reg <= 32'h4E084C13;
+            30'h28 : data_reg <= 32'h3D2B3CF0;
+            30'h29 : data_reg <= 32'hF12C312C;
+            30'h2A : data_reg <= 32'h3141140F;
+            30'h2B : data_reg <= 32'h41140FF1;
+            30'h2C : data_reg <= 32'h140FF131;
+            30'h2D : data_reg <= 32'h0FF13141;
+            30'h2E : data_reg <= 32'h0000000E;
+            default : data_reg <= 0;
+        endcase
+    assign data = ( enable ? data_reg : 0 );
+endmodule

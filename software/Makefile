@@ -59,6 +59,9 @@ test_align_fix.bin: test_align_fix.asm
 test_align_fix: test_align_fix.bin
 	reflet-sim test_align_fix.bin config32
 
+../rtl/simu/rom11.v: test_align_fix.bin
+	ROM_maker -name rom11 -input_file $< -output_file $@ -wordsize 4 -min_addr_size 30
+
 clean :
 	rm -f *.bin
 
