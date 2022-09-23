@@ -94,7 +94,12 @@ local function is_reg_valid(reg: string): boolean
     if reg_UP:sub(1,1) ~= "R" then
         return false
     end
-    local number = reg:sub(2,#reg)
+    local number
+    if #reg == 2 then
+        number = "0x"..reg:sub(2,#reg)
+    else
+        number = reg:sub(2,#reg)
+    end
     local true_num, conv_ok = check_integer(number)
     if true_num < 0 or true_num > 15 or not conv_ok then
         return false
@@ -118,7 +123,14 @@ local function reg_to_num(reg: string): uint8
     if reg_UP == "SP" then
         return 15
     end
-    local ret = tointeger(reg:sub(2,#reg)) --Note: no need for check_integer as we verified it already
+
+    local number
+    if #reg == 2 then
+        number = "0x"..reg:sub(2,#reg)
+    else
+        number = reg:sub(2,#reg)
+    end
+    local ret = check_integer(number)
 	return ret
 end
 
