@@ -6,15 +6,6 @@
 
 `include "reflet.vh"
 
-`define STATE_UPDATE_REGS       3'd0
-`define STATE_GET_INSTRUCTION   3'd1
-`define STATE_SAVE_INSTRUCTION  3'd2
-`define STATE_COMPUTE           3'd3
-`define STATE_ADDR_READ_PREPARE 3'd4
-`define STATE_ADDR_WRITE        3'd5
-`define STATE_ADDR_READ         3'd6
-`define STATE_UPDATE_BUFF_REGS  3'd7
-
 module reflet_addr #(
     parameter wordsize = 16
     )(
@@ -38,129 +29,243 @@ module reflet_addr #(
     output [wordsize-1:0] out,
     output [3:0] out_reg,
     output update_pc,
-    output ram_not_ready
+    output reg ram_not_ready
     );
 
-    reg [2:0] state;
-    reg [wordsize-1:0] read_from_mem_tmp;
-    wire alignment_fixer_ready;
-    wire [3:0] opperand = instruction[7:4];
+    reg instruction_ok;
 
-    //addr selection
+    // Address selection
+    wire [3:0] opperand = instruction[7:4];
     wire [wordsize-1:0] addr_pop = ( instruction == `inst_pop || instruction == `inst_ret ? stackPointer - wordsize/8 : 0 ); //We need the -wordsize/8 because the CPU updated the stack pointer
     wire [wordsize-1:0] addr_push = ( instruction == `inst_push || instruction == `inst_call ? stackPointer : 0 );
     wire [wordsize-1:0] addr_reg = ( opperand == `opp_str || opperand == `opp_load ? otherRegister : 0 );
-    wire [wordsize-1:0] cpu_addr = ( (state == `STATE_ADDR_WRITE || state == `STATE_ADDR_READ_PREPARE || state == `STATE_ADDR_READ) ? addr_reg | addr_pop | addr_push : programCounter); //The defaut behaviour is to seek the address of the next piece of code
+    wire [wordsize-1:0] cpu_addr = ( instruction_ok ? addr_reg | addr_pop | addr_push : programCounter ); //The default behavior is to seek the address of the next piece of code
+    assign addr = cpu_addr;
 
-    //State branch selection
-    wire [wordsize-1:0] cpu_data_in;
-    wire [7:0] next_instruction = cpu_data_in[7:0];
-    wire next_branch_read = next_instruction == `inst_pop || next_instruction == `inst_ret || next_instruction[7:4] == `opp_load;
-    wire next_branch_write = next_instruction == `inst_push || next_instruction == `inst_call || next_instruction[7:4] == `opp_str;
-    wire [3:0] next_branch_state = ( next_branch_read ? `STATE_ADDR_READ_PREPARE :
-                                     ( next_branch_write ? `STATE_ADDR_WRITE : `STATE_COMPUTE ));
+    // Taking action
+    wire inst_read = opperand == `opp_load || instruction == `inst_pop || instruction == `inst_ret; 
+    wire inst_write = opperand == `opp_str || instruction == `inst_push || instruction == `inst_call;
+    reg inst_mem;
 
-    //Communication with the CPU
-    assign update_pc = state == `STATE_UPDATE_BUFF_REGS;
-    assign ram_not_ready = state != `STATE_UPDATE_REGS;
-
-    //selecting the data to send
-    wire [wordsize-1:0] data_wr = ( instruction == `inst_push || opperand == `opp_str ? workingRegister : 0 );
-    wire [wordsize-1:0] data_pc = ( instruction == `inst_call ? programCounter : 0 );
-    wire [wordsize-1:0] cpu_data_out = data_wr | data_pc;
-
-    //data to send to the cpu
-    wire returning_value = instruction == `inst_pop || instruction == `inst_ret || opperand == `opp_load;
-    wire [wordsize-1:0] data_out_out = ( returning_value ? (instruction == `inst_ret ? read_from_mem_tmp + 1 : read_from_mem_tmp) : 0 ); //When we want to use walue read from ram. Note, when returning from a function, we need to go after what we put in the stack in order not to be trapped in an infinite loop
-    wire [wordsize-1:0] wr_out = ( instruction == `inst_push || instruction == `inst_call || opperand == `opp_str || instruction == `inst_tbm ? workingRegister : 0 ); //when we don't need to update any register we will simply put the content of the working register into itself
-    assign out = wr_out | data_out_out;
-
-    //register to update
+    // Talking back to the CPU
     assign out_reg = ( instruction == `inst_ret || instruction == `inst_call ? `pc_id : 0 ); 
+    reg instruction_ok_r;
+    always @ (posedge clk)
+        instruction_ok_r <= instruction_ok;
+    assign update_pc = instruction_ok & !instruction_ok_r;
 
-    // Control signals
-    wire cpu_write_en = state == `STATE_ADDR_WRITE;
-    wire new_cpu_read_en = state == `STATE_ADDR_READ_PREPARE || state == `STATE_GET_INSTRUCTION;
-    reg old_cpu_read_en;
-    wire cpu_read_en = new_cpu_read_en & !old_cpu_read_en;
+
     always @ (posedge clk)
         if (!reset)
-            old_cpu_read_en <= 0;
-        else
-            old_cpu_read_en <= new_cpu_read_en;
-    wire cpu_ready;
-    wire force_alligned_use = instruction == `inst_pop || instruction == `inst_ret || instruction == `inst_push || instruction == `inst_call;
+        begin
+            instruction_ok <= 0;
+            inst_mem <= 0;
+            ram_not_ready <= 1;
+        end
+        else if (enable)
+        begin
+            if (instruction_ok)
+            begin
+                if (inst_mem)
+                begin
+                    if (inst_read & read_ready)
+                    begin
+                        ram_not_ready <= 0;
+                        instruction_ok <= 0;
+                    end
+                    else if (inst_write & write_ready)
+                    begin
+                        ram_not_ready <= 0;
+                        instruction_ok <= 0;
+                    end
+                end
+                else
+                begin
+                    if (inst_read | inst_write)
+                        inst_mem <= 1;
+                    else
+                    begin
+                        ram_not_ready <= 0;
+                        instruction_ok <= 0;
+                    end
+                end
+            end
+            else
+            begin
+                ram_not_ready <= 1;
+                if (read_ready)
+                begin
+                    instruction <= data_in_cpu;
+                    instruction_ok <= 1;
+                end
+            end
+        end
 
-    // Toggle byte mode
-    wire now_toggle_byte_mode = state == `STATE_UPDATE_REGS && instruction == `inst_tbm;
-    reg old_toggle_byte_mode;
-    wire toggle_byte_mode = now_toggle_byte_mode & !old_toggle_byte_mode;
-    always @ (posedge clk)
-        old_toggle_byte_mode <= now_toggle_byte_mode;
+    wire [wordsize-1:0] data_in_cpu;
+    wire read_ready, write_ready;
+    wire [$clog2(wordsize/8):0] size_used = 0;
+    
+    wire [wordsize-1:0] data_out_cpu;
 
-
-    reflet_full_mem_interface #(.wordsize(wordsize), .use_buffer_register(1)) mem_interface (
+    reflet_mem_reader #(wordsize) reader (
         .clk(clk),
         .reset(reset),
         .enable(enable),
-        .toggle_byte_mode(toggle_byte_mode),
-        .reduced_behaviour_bits(reduced_behaviour_bits),
-        .alignment_error(alignment_error),
-        .force_alligned_use(force_alligned_use),
-        // Interface from the CPU
-        .cpu_addr(cpu_addr),
-        .cpu_data_out(cpu_data_out),
-        .cpu_data_in(cpu_data_in),
-        .cpu_write_en(cpu_write_en),
-        .cpu_read_en(cpu_read_en),
-        .cpu_ready(cpu_ready),
-        // Interface to the external memory
-        .mem_addr(addr),
-        .mem_data_out(data_out),
-        .mem_data_in(data_in),
-        .mem_write_en(write_en));
+        .size_used(size_used),
+        .addr(cpu_addr),
+        .data_in_ram(data_in),
+        .data_in_cpu(data_in_cpu),
+        .read_request(!instruction_ok || inst_read),
+        .read_ready(read_ready));
 
-    
+    reflet_mem_writer #(wordsize) writer (
+        .clk(clk),
+        .reset(reset),
+        .enable(enable),
+        .size_used(size_used),
+        .addr(cpu_addr),
+        .data_in_ram(data_in),
+        .data_out_cpu(data_out_cpu),
+        .write_request(inst_write && read_ready),
+        .write_ready(write_ready));
+
+    reflet_mem_shift_mask #(wordsize) rmsm (
+        .addr(addr),
+        .size_used(size_used),
+        .mask(),
+        .shift(),
+        .alignment_error(alignment_error));
+
+    assign write_en = write_ready;
+
+endmodule
+
+module reflet_mem_reader #(
+    parameter wordsize = 16
+    )(
+    input clk,
+    input reset,
+    input enable,
+    input [$clog2(wordsize/8):0] size_used,
+    input [wordsize-1:0] addr,
+    input [wordsize-1:0] data_in_ram,
+    output reg [wordsize-1:0] data_in_cpu,
+    input read_request,
+    output reg read_ready
+    );
+
+    wire [wordsize-1:0] mask;
+    wire [$clog2(wordsize/8):0] shift;
+    reflet_mem_shift_mask #(wordsize) rmsm (
+        .addr(addr),
+        .size_used(size_used),
+        .mask(mask),
+        .shift(shift),
+        .alignment_error());
+
+    reg read_request_r;
+    wire new_request = read_request & !read_request_r;
+    reg new_request_r;
+
     always @ (posedge clk)
         if (!reset)
         begin
-            state <= `STATE_GET_INSTRUCTION;
-            instruction <= `inst_slp;
+            read_request_r <= 0;
+            new_request_r <= 0;
+            read_ready <= 0;
         end
         else if(enable)
         begin
-            case(state)
-                `STATE_UPDATE_REGS: begin
-                    state <= `STATE_GET_INSTRUCTION;
-                end
-                `STATE_GET_INSTRUCTION: begin
-                    if (cpu_ready)
-                        state <= `STATE_SAVE_INSTRUCTION;
-                end
-                `STATE_SAVE_INSTRUCTION: begin
-                    instruction <= next_instruction;
-                    state <= next_branch_state;
-                end
-                `STATE_COMPUTE: begin
-                    state <= `STATE_UPDATE_BUFF_REGS;
-                end
-                `STATE_ADDR_WRITE: begin
-                    if (cpu_ready)
-                        state <= `STATE_UPDATE_BUFF_REGS;
-                end
-                `STATE_ADDR_READ_PREPARE: begin
-                    if (cpu_ready)
-                        state <= `STATE_ADDR_READ;
-                end
-                `STATE_ADDR_READ: begin
-                    state <= `STATE_UPDATE_BUFF_REGS;
-                    read_from_mem_tmp <= cpu_data_in;
-                end
-                `STATE_UPDATE_BUFF_REGS: begin
-                    state <= `STATE_UPDATE_REGS;
-                end
-            endcase
+            read_request_r <= read_request;
+            new_request_r <= new_request;
+            if (new_request_r)
+            begin
+                data_in_cpu <= (data_in_ram & mask) >> shift;
+                read_ready <= 1;
+            end
+            else
+                read_ready <= 0;
         end
 
 endmodule
-    
+
+
+module reflet_mem_writer #(
+    parameter wordsize = 16
+    )(
+    input clk,
+    input reset,
+    input enable,
+    input [$clog2(wordsize/8):0] size_used,
+    input [wordsize-1:0] addr,
+    input [wordsize-1:0] data_in_ram,
+    input [wordsize-1:0] data_out_cpu,
+    output reg [wordsize-1:0] data_out_ram,
+    input write_request,
+    output reg write_ready
+    );
+
+    wire [wordsize-1:0] mask;
+    wire [$clog2(wordsize/8):0] shift;
+    reflet_mem_shift_mask #(wordsize) rmsm (
+        .addr(addr),
+        .size_used(size_used),
+        .mask(mask),
+        .shift(shift),
+        .alignment_error());
+
+    wire [wordsize-1:0] data_to_write = (data_in_ram & ~mask) | ((data_out_cpu << shift) & mask);
+
+    reg write_request_r;
+    wire new_request = write_request & !write_request_r;
+
+    always @ (posedge clk)
+        if (!reset)
+        begin
+            write_request_r <= 0;
+            write_ready <= 0;
+        end
+        else if(enable)
+        begin
+            write_request_r <= write_request;
+            if (new_request)
+            begin
+                data_out_ram <= data_to_write;
+                write_ready <= 1;
+            end
+            else
+                write_ready <= 0;
+        end
+
+endmodule
+
+
+/*
+* This module computes the mask and the shift needed to be applied to the data to align it.
+*/
+module reflet_mem_shift_mask #(
+    parameter wordsize = 16
+)(
+    input [wordsize-1:0] addr,
+    input [$clog2(wordsize/8):0] size_used,
+    output [wordsize-1:0] mask,
+    output [$clog2(wordsize/8):0] shift,
+    output alignment_error
+    );
+
+    // Checking alignment errors
+    wire [wordsize-1:0] invalid_addr_mask = (1 << size_used) - 1;
+    assign alignment_error = |(addr & invalid_addr_mask);
+
+    // Getting the alignment offset
+    wire [wordsize-1:0] off_mask = (wordsize / 8) - 1;
+    wire [wordsize-1:0] off_from_align = addr & off_mask;
+    assign shift = off_from_align[$clog2(wordsize/8):0];
+
+    // Masking usable data
+    wire [wordsize-1:0] bits_used = (1 << size_used) * 8;
+    wire [wordsize-1:0] size_mask = (1 << bits_used) - 1;
+    assign mask = size_mask << shift;
+
+endmodule
+
