@@ -42,18 +42,51 @@ module reflet_addr #(
     wire [wordsize-1:0] cpu_addr = ( instruction_ok ? addr_reg | addr_pop | addr_push : programCounter ); //The default behavior is to seek the address of the next piece of code
     assign addr = cpu_addr;
 
-    // Taking action
-    wire inst_read = opperand == `opp_load || instruction == `inst_pop || instruction == `inst_ret; 
-    wire inst_write = opperand == `opp_str || instruction == `inst_push || instruction == `inst_call;
-    reg inst_mem;
-
     // Talking back to the CPU
     assign out_reg = ( instruction == `inst_ret || instruction == `inst_call ? `pc_id : 0 ); 
     reg instruction_ok_r;
     always @ (posedge clk)
-        instruction_ok_r <= instruction_ok;
+        if (enable)
+            instruction_ok_r <= instruction_ok;
     assign update_pc = instruction_ok & !instruction_ok_r;
 
+    wire [wordsize-1:0] data_in_cpu;
+    wire returning_value = instruction == `inst_pop || instruction == `inst_ret || opperand == `opp_load;
+    wire [wordsize-1:0] data_in_usable = ( returning_value ? (instruction == `inst_ret ? data_in_cpu + 1 : data_in_cpu) : 0 ); //When we want to use walue read from ram. Note, when returning from a function, we need to go after what we put in the stack in order not to be trapped in an infinite loop
+    wire [wordsize-1:0] wr_out = ( instruction == `inst_push || instruction == `inst_call || opperand == `opp_str || instruction == `inst_tbm ? workingRegister : 0 ); //when we don't need to update any register we will simply put the content of the working register into itself
+    assign out = wr_out | data_in_usable;
+
+    // Sending data to RAM
+    wire [wordsize-1:0] data_out_wr = ( instruction == `inst_push || opperand == `opp_str ? workingRegister : 0 );
+    wire [wordsize-1:0] data_out_pc = ( instruction == `inst_call ? programCounter : 0 );
+    wire [wordsize-1:0] data_out_cpu = data_out_wr | data_out_pc;
+
+
+
+    // Reduced behavior mode
+    reg byte_mode;
+    wire [$clog2(wordsize/8):0] size_used = 
+        ( byte_mode || !instruction_ok || reduced_behaviour_bits == 2'b00 || wordsize < 9 ? 0 : 
+          ( reduced_behaviour_bits == 2'b01 || wordsize < 17 ? 1 :
+            ( reduced_behaviour_bits == 2'b10 || wordsize < 33 ? 2 :
+              ( reduced_behaviour_bits == 2'b11 || wordsize < 65 ? 3 :
+                ( 4 /* TODO */ )))));
+
+    always @ (posedge clk)
+        if (!reset)
+            byte_mode <= 0;
+        else if(enable && instruction == `inst_tbm && !ram_not_ready)
+            byte_mode <= !byte_mode;
+
+    // Taking action
+    wire inst_read = opperand == `opp_load || instruction == `inst_pop || instruction == `inst_ret;
+    wire inst_write = opperand == `opp_str || instruction == `inst_push || instruction == `inst_call;
+    reg inst_mem, readying_ram, inst_mem_r;
+    wire read_ready, write_ready;
+    wire read_request = inst_mem & !inst_mem_r;
+    always @ (posedge clk)
+        if (enable)
+            inst_mem_r <= inst_mem;
 
     always @ (posedge clk)
         if (!reset)
@@ -61,6 +94,7 @@ module reflet_addr #(
             instruction_ok <= 0;
             inst_mem <= 0;
             ram_not_ready <= 1;
+            readying_ram <= 0;
         end
         else if (enable)
         begin
@@ -70,12 +104,12 @@ module reflet_addr #(
                 begin
                     if (inst_read & read_ready)
                     begin
-                        ram_not_ready <= 0;
+                        readying_ram <= 1;
                         instruction_ok <= 0;
                     end
                     else if (inst_write & write_ready)
                     begin
-                        ram_not_ready <= 0;
+                        readying_ram <= 1;
                         instruction_ok <= 0;
                     end
                 end
@@ -85,27 +119,30 @@ module reflet_addr #(
                         inst_mem <= 1;
                     else
                     begin
-                        ram_not_ready <= 0;
+                        readying_ram <= 1;
                         instruction_ok <= 0;
                     end
                 end
             end
             else
             begin
-                ram_not_ready <= 1;
-                if (read_ready)
+                inst_mem <= 0;
+                if (readying_ram)
                 begin
-                    instruction <= data_in_cpu;
-                    instruction_ok <= 1;
+                    ram_not_ready <= 0;
+                    readying_ram <= 0;
+                end
+                else
+                begin
+                    ram_not_ready <= 1;
+                    if (read_ready)
+                    begin
+                        instruction <= data_in_cpu;
+                        instruction_ok <= 1;
+                    end
                 end
             end
         end
-
-    wire [wordsize-1:0] data_in_cpu;
-    wire read_ready, write_ready;
-    wire [$clog2(wordsize/8):0] size_used = 0;
-    
-    wire [wordsize-1:0] data_out_cpu;
 
     reflet_mem_reader #(wordsize) reader (
         .clk(clk),
@@ -115,7 +152,7 @@ module reflet_addr #(
         .addr(cpu_addr),
         .data_in_ram(data_in),
         .data_in_cpu(data_in_cpu),
-        .read_request(!instruction_ok || inst_read),
+        .read_request(!instruction_ok || read_request),
         .read_ready(read_ready));
 
     reflet_mem_writer #(wordsize) writer (
@@ -126,7 +163,8 @@ module reflet_addr #(
         .addr(cpu_addr),
         .data_in_ram(data_in),
         .data_out_cpu(data_out_cpu),
-        .write_request(inst_write && read_ready),
+        .data_out_ram(data_out),
+        .write_request(inst_write && read_ready && instruction_ok),
         .write_ready(write_ready));
 
     reflet_mem_shift_mask #(wordsize) rmsm (
@@ -259,7 +297,7 @@ module reflet_mem_shift_mask #(
 
     // Getting the alignment offset
     wire [wordsize-1:0] off_mask = (wordsize / 8) - 1;
-    wire [wordsize-1:0] off_from_align = addr & off_mask;
+    wire [wordsize-1:0] off_from_align = (addr & off_mask) * 8;
     assign shift = off_from_align[$clog2(wordsize/8):0];
 
     // Masking usable data
