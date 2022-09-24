@@ -28,7 +28,7 @@ module reflet_addr #(
     //output to the CPU
     output [wordsize-1:0] out,
     output [3:0] out_reg,
-    output update_pc,
+    output reg update_pc,
     output reg ram_not_ready
     );
 
@@ -48,7 +48,6 @@ module reflet_addr #(
     always @ (posedge clk)
         if (enable)
             instruction_ok_r <= instruction_ok;
-    assign update_pc = instruction_ok & !instruction_ok_r;
 
     wire [wordsize-1:0] data_in_cpu;
     wire returning_value = instruction == `inst_pop || instruction == `inst_ret || opperand == `opp_load;
@@ -66,10 +65,10 @@ module reflet_addr #(
     // Reduced behavior mode
     reg byte_mode;
     wire [$clog2(wordsize/8):0] size_used = 
-        ( byte_mode || !instruction_ok || reduced_behaviour_bits == 2'b00 || wordsize < 9 ? 0 : 
-          ( reduced_behaviour_bits == 2'b01 || wordsize < 17 ? 1 :
-            ( reduced_behaviour_bits == 2'b10 || wordsize < 33 ? 2 :
-              ( reduced_behaviour_bits == 2'b11 || wordsize < 65 ? 3 :
+        ( byte_mode || !instruction_ok || reduced_behaviour_bits == 2'b11 || wordsize < 9 ? 0 : 
+          ( reduced_behaviour_bits == 2'b10 || wordsize < 17 ? 1 :
+            ( reduced_behaviour_bits == 2'b01 || wordsize < 33 ? 2 :
+              ( reduced_behaviour_bits == 2'b00 || wordsize < 65 ? 3 :
                 ( 4 /* TODO */ )))));
 
     always @ (posedge clk)
@@ -95,6 +94,7 @@ module reflet_addr #(
             inst_mem <= 0;
             ram_not_ready <= 1;
             readying_ram <= 0;
+            update_pc <= 0;
         end
         else if (enable)
         begin
@@ -129,8 +129,13 @@ module reflet_addr #(
                 inst_mem <= 0;
                 if (readying_ram)
                 begin
-                    ram_not_ready <= 0;
+                    update_pc <= 1;
                     readying_ram <= 0;
+                end
+                else if(update_pc)
+                begin
+                    ram_not_ready <= 0;
+                    update_pc <= 0;
                 end
                 else
                 begin
@@ -193,7 +198,7 @@ module reflet_mem_reader #(
     );
 
     wire [wordsize-1:0] mask;
-    wire [$clog2(wordsize/8):0] shift;
+    wire [$clog2(wordsize):0] shift;
     reflet_mem_shift_mask #(wordsize) rmsm (
         .addr(addr),
         .size_used(size_used),
@@ -244,7 +249,7 @@ module reflet_mem_writer #(
     );
 
     wire [wordsize-1:0] mask;
-    wire [$clog2(wordsize/8):0] shift;
+    wire [$clog2(wordsize):0] shift;
     reflet_mem_shift_mask #(wordsize) rmsm (
         .addr(addr),
         .size_used(size_used),
@@ -287,7 +292,7 @@ module reflet_mem_shift_mask #(
     input [wordsize-1:0] addr,
     input [$clog2(wordsize/8):0] size_used,
     output [wordsize-1:0] mask,
-    output [$clog2(wordsize/8):0] shift,
+    output [$clog2(wordsize):0] shift,
     output alignment_error
     );
 
@@ -297,8 +302,9 @@ module reflet_mem_shift_mask #(
 
     // Getting the alignment offset
     wire [wordsize-1:0] off_mask = (wordsize / 8) - 1;
-    wire [wordsize-1:0] off_from_align = (addr & off_mask) * 8;
-    assign shift = off_from_align[$clog2(wordsize/8):0];
+    wire [wordsize-1:0] bytes_off_from_align = addr & off_mask;
+    wire [wordsize-1:0] off_from_align = bytes_off_from_align * 8;
+    assign shift = off_from_align[$clog2(wordsize):0];
 
     // Masking usable data
     wire [wordsize-1:0] bits_used = (1 << size_used) * 8;
