@@ -28,7 +28,6 @@ module reflet_addr #(
     //output to the CPU
     output [wordsize-1:0] out,
     output [3:0] out_reg,
-    output reg update_pc,
     output reg ram_not_ready
     );
 
@@ -44,11 +43,6 @@ module reflet_addr #(
 
     // Talking back to the CPU
     assign out_reg = ( instruction == `inst_ret || instruction == `inst_call ? `pc_id : 0 ); 
-    reg instruction_ok_r;
-    always @ (posedge clk)
-        if (enable)
-            instruction_ok_r <= instruction_ok;
-
     wire [wordsize-1:0] data_in_cpu;
     wire returning_value = instruction == `inst_pop || instruction == `inst_ret || opperand == `opp_load;
     wire [wordsize-1:0] data_in_usable = ( returning_value ? (instruction == `inst_ret ? data_in_cpu + 1 : data_in_cpu) : 0 ); //When we want to use walue read from ram. Note, when returning from a function, we need to go after what we put in the stack in order not to be trapped in an infinite loop
@@ -80,26 +74,39 @@ module reflet_addr #(
     // Taking action
     wire inst_read = opperand == `opp_load || instruction == `inst_pop || instruction == `inst_ret;
     wire inst_write = opperand == `opp_str || instruction == `inst_push || instruction == `inst_call;
-    reg inst_mem, readying_ram, inst_mem_r;
+    reg inst_mem, readying_ram, inst_mem_r, read_ready_reset, read_ready_latched;
     wire read_ready, write_ready;
     wire read_request = inst_mem & !inst_mem_r;
+    reg [1:0] delay;
     always @ (posedge clk)
         if (enable)
             inst_mem_r <= inst_mem;
 
     always @ (posedge clk)
         if (!reset)
+            read_ready_latched <= 0;
+        else if (enable)
+            if (read_ready_reset)
+                read_ready_latched <= 0;
+            else if(read_ready)
+                read_ready_latched <= 1;
+
+
+    always @ (posedge clk)
+        if (!reset)
         begin
+            read_ready_reset <= 0;
             instruction_ok <= 0;
             inst_mem <= 0;
             ram_not_ready <= 1;
             readying_ram <= 0;
-            update_pc <= 0;
+            delay <= 1;
         end
         else if (enable)
         begin
             if (instruction_ok)
             begin
+                read_ready_reset <= 0;
                 if (inst_mem)
                 begin
                     if (inst_read & read_ready)
@@ -129,19 +136,23 @@ module reflet_addr #(
                 inst_mem <= 0;
                 if (readying_ram)
                 begin
-                    update_pc <= 1;
+                    ram_not_ready <= 0;
                     readying_ram <= 0;
                 end
-                else if(update_pc)
+                else if (!ram_not_ready)
                 begin
-                    ram_not_ready <= 0;
-                    update_pc <= 0;
+                    delay <= 1;
+                    ram_not_ready <= 1;
                 end
+                else if (&delay)
+                    delay <= 0;
+                else if (|delay)
+                    delay <= delay + 1;
                 else
                 begin
-                    ram_not_ready <= 1;
-                    if (read_ready)
+                    if (read_ready_latched)
                     begin
+                        read_ready_reset <= 1;
                         instruction <= data_in_cpu;
                         instruction_ok <= 1;
                     end
@@ -157,7 +168,7 @@ module reflet_addr #(
         .addr(cpu_addr),
         .data_in_ram(data_in),
         .data_in_cpu(data_in_cpu),
-        .read_request(!instruction_ok || read_request),
+        .read_request(delay == 2'b01 || read_request),
         .read_ready(read_ready));
 
     reflet_mem_writer #(wordsize) writer (

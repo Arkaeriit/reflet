@@ -58,7 +58,6 @@ module reflet_cpu #(
 
     //submodules
     wire ram_not_ready;
-    wire update_pc;
     //wire [3:0] opperand = instruction[7:4];
     wire interrupt;
     wire [wordsize-1:0] int_routine;
@@ -93,7 +92,6 @@ module reflet_cpu #(
         //Out to the CPU
         .out(content_addr),
         .out_reg(index_addr),
-        .update_pc(update_pc),
         .ram_not_ready(ram_not_ready));
 
     reflet_interrupt #(.wordsize(wordsize)) interrupt_ctrl (
@@ -159,11 +157,9 @@ module reflet_cpu #(
                         end
                         default : registers[index] <= content;
                     endcase
+                    if (index != `pc_id)
+                        registers[`pc_id] <= registers[`pc_id] + 1;
                 end
-            end
-            else if(update_pc)
-            begin
-                registers[`pc_id] <= registers[`pc_id] + 1;
             end
         end
 
