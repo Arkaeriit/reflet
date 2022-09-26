@@ -23,7 +23,7 @@ module reflet_addr #(
     output reg [7:0] instruction,
     output alignment_error,
     //ram connection
-    output [wordsize-1:0] addr,
+    output reg [wordsize-1:0] addr,
     output [wordsize-1:0] data_out,
     input [wordsize-1:0] data_in,
     output write_en,
@@ -41,7 +41,10 @@ module reflet_addr #(
     wire [wordsize-1:0] addr_push = ( instruction == `inst_push || instruction == `inst_call ? stackPointer : 0 );
     wire [wordsize-1:0] addr_reg = ( opperand == `opp_str || opperand == `opp_load ? otherRegister : 0 );
     wire [wordsize-1:0] cpu_addr = ( instruction_ok ? addr_reg | addr_pop | addr_push : programCounter ); //The default behavior is to seek the address of the next piece of code
-    assign addr = cpu_addr;
+
+    always @ (posedge clk)
+        if (enable && reset)
+            addr <= cpu_addr;
 
     // Talking back to the CPU
     assign out_reg = ( instruction == `inst_ret || instruction == `inst_call ? `pc_id : 0 ); 
@@ -172,7 +175,7 @@ module reflet_addr #(
         .addr(cpu_addr),
         .data_in_ram(data_in),
         .data_in_cpu(data_in_cpu),
-        .read_request(delay == 2'b01 || read_request),
+        .read_request(delay == 2'b10 || read_request),
         .read_ready(read_ready));
 
     reflet_mem_writer #(wordsize) writer (
