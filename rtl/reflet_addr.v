@@ -2,6 +2,8 @@
 |This module handle connection between the RAM|
 |and the rest of the CPU.                     |
 |Updating the stackPointer is done by the CPU.|
+|A big part of its purpose is to make sure    |
+|that all memory access are aligned.          |
 \--------------------------------------------*/
 
 `include "reflet.vh"
@@ -45,7 +47,7 @@ module reflet_addr #(
     assign out_reg = ( instruction == `inst_ret || instruction == `inst_call ? `pc_id : 0 ); 
     wire [wordsize-1:0] data_in_cpu;
     wire returning_value = instruction == `inst_pop || instruction == `inst_ret || opperand == `opp_load;
-    wire [wordsize-1:0] data_in_usable = ( returning_value ? (instruction == `inst_ret ? data_in_cpu + 1 : data_in_cpu) : 0 ); //When we want to use walue read from ram. Note, when returning from a function, we need to go after what we put in the stack in order not to be trapped in an infinite loop
+    wire [wordsize-1:0] data_in_usable = ( returning_value ? (instruction == `inst_ret ? data_in_cpu + 1 : data_in_cpu) : 0 ); //When we want to use value read from ram. Note, when returning from a function, we need to go after what we put in the stack in order not to be trapped in an infinite loop
     wire [wordsize-1:0] wr_out = ( instruction == `inst_push || instruction == `inst_call || opperand == `opp_str || instruction == `inst_tbm ? workingRegister : 0 ); //when we don't need to update any register we will simply put the content of the working register into itself
     assign out = wr_out | data_in_usable;
 
@@ -59,16 +61,16 @@ module reflet_addr #(
     // Reduced behavior mode
     reg byte_mode;
     wire [$clog2(wordsize/8):0] size_used = 
-        ( byte_mode || !instruction_ok || reduced_behaviour_bits == 2'b11 || wordsize < 9 ? 0 : 
-          ( reduced_behaviour_bits == 2'b10 || wordsize < 17 ? 1 :
-            ( reduced_behaviour_bits == 2'b01 || wordsize < 33 ? 2 :
-              ( reduced_behaviour_bits == 2'b00 || wordsize < 65 ? 3 :
-                ( 4 /* TODO */ )))));
+        ( byte_mode || !instruction_ok || reduced_behaviour_bits == 2'b11 || wordsize <= 8 ? 0 : 
+          ( reduced_behaviour_bits == 2'b10 || wordsize <= 16 ? 1 :
+            ( reduced_behaviour_bits == 2'b01 || wordsize <= 32 ? 2 :
+              ( reduced_behaviour_bits == 2'b00 || wordsize <= 64 ? 3 :
+                ( $clog2(wordsize/8) )))));
 
     always @ (posedge clk)
         if (!reset)
             byte_mode <= 0;
-        else if(enable && instruction == `inst_tbm && !ram_not_ready)
+        else if(enable && (instruction == `inst_tbm) && (!ram_not_ready))
             byte_mode <= !byte_mode;
 
     // Taking action
@@ -77,11 +79,13 @@ module reflet_addr #(
     reg inst_mem, readying_ram, inst_mem_r, read_ready_reset, read_ready_latched;
     wire read_ready, write_ready;
     wire read_request = inst_mem & !inst_mem_r;
-    reg [1:0] delay;
+    reg [1:0] delay; // Delay used to wait for the next instruction to be fetched
     always @ (posedge clk)
         if (enable)
             inst_mem_r <= inst_mem;
 
+    // As I don't want to assume when the read is finished, I used a latch to
+    // register it.
     always @ (posedge clk)
         if (!reset)
             read_ready_latched <= 0;
@@ -194,6 +198,13 @@ module reflet_addr #(
 
 endmodule
 
+
+/*---------------------------------\
+|This module reads from memory and |
+|re-arrange the data if the access |
+|is miss-aligned. It starts reading|
+|on rising edges of read_request.  |
+\---------------------------------*/
 module reflet_mem_reader #(
     parameter wordsize = 16
     )(
@@ -244,6 +255,14 @@ module reflet_mem_reader #(
 endmodule
 
 
+/*------------------------------------------------\
+|This module writes to RAM after having rearranged|
+|the data if the access is not aligned.           |
+|Its starts its operation is rising edges of      |
+|write_request and assumes that the data in the   |
+|target address is in data_in_ram. The output     |
+|write_ready can be used as a write_en order.     |
+\------------------------------------------------*/
 module reflet_mem_writer #(
     parameter wordsize = 16
     )(
@@ -294,9 +313,12 @@ module reflet_mem_writer #(
 endmodule
 
 
-/*
-* This module computes the mask and the shift needed to be applied to the data to align it.
-*/
+/*------------------------------------\
+|This helper module compute the       |
+|masks and shifts needed to           |
+|realign memory access. It also       |
+|tells if the realignment is possible.|
+\------------------------------------*/
 module reflet_mem_shift_mask #(
     parameter wordsize = 16
 )(
