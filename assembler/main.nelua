@@ -181,10 +181,8 @@ local default_macros <comptime> = [[
 @end
 
 @define setr 2
-    cpy R12
     set+ $2
     cpy $1
-    read R12
 @end
 
 @define pushr 1

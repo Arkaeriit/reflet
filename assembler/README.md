@@ -67,7 +67,7 @@ To ease the use of the assembler, some macros are predefines.
 
 * `set+ <number>` puts the value of the number in the working register.
 * `mov <reg 1> <reg 2>` copies the value of `reg 2` into `reg 1`.
-* `setr <reg> <number>` sets the value of the register to the given number.
+* `setr <reg> <number>` sets the value of the register to the given number. Do not preserve the working register.
 * `pushr <reg>` pushes the value of the given register in the stack.
 * `popr <reg>` pops the value on top of the stack in the given register.
 * `label <name>` is an alias to `@label <name>`.
