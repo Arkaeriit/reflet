@@ -64,12 +64,13 @@ module reflet_addr #(
 
     // Reduced behavior mode
     reg byte_mode;
+    wire [$clog2(wordsize/8):0] size_used_max = $clog2(wordsize/8);
     wire [$clog2(wordsize/8):0] size_used = 
-        ( (byte_mode & !in_interrupt_context) || !instruction_ok || reduced_behaviour_bits == 2'b11 || wordsize <= 8 ? 0 : 
-          ( reduced_behaviour_bits == 2'b10 || wordsize <= 16 ? 1 :
-            ( reduced_behaviour_bits == 2'b01 || wordsize <= 32 ? 2 :
-              ( reduced_behaviour_bits == 2'b00 || wordsize <= 64 ? 3 :
-                ( $clog2(wordsize/8) )))));
+        ( instruction_ok && (instruction == `inst_pop || instruction == `inst_push || instruction == `inst_ret || instruction == `inst_call) ? size_used_max :
+            ( (byte_mode & !in_interrupt_context) || !instruction_ok || reduced_behaviour_bits == 2'b11 || wordsize <= 8 ? 0 : 
+              ( reduced_behaviour_bits == 2'b10 || wordsize <= 16 ? 1 :
+                ( reduced_behaviour_bits == 2'b01 || wordsize <= 32 ? 2 :
+                  ( size_used_max )))));
 
     always @ (posedge clk)
         if (!reset)
