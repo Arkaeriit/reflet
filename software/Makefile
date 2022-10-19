@@ -1,7 +1,7 @@
 # This makefile containts comands to assemble and test the
 # various files of this folder.
 
-all : libtesting.bin exampleIO.bin primes.bin fibonacci.bin test_jump.bin test_instructions.bin test_inst_mini_str.bin test_inst_mini_load.bin test_align_fix.bin
+all : libtesting.bin exampleIO.bin primes.bin fibonacci.bin test_jump.bin test_instructions.bin test_inst_mini_str.bin test_inst_mini_load.bin test_align_fix.bin test_interrupt.bin
 
 .PHONY: libtesting
 libtesting : libtesting.bin
@@ -61,6 +61,12 @@ test_align_fix: test_align_fix.bin
 
 ../rtl/simu/rom11.v: test_align_fix.bin
 	ROM_maker -name rom11 -input_file $< -output_file $@ -wordsize 4 -min_addr_size 30
+
+test_interrupt.bin: test_interrupt.asm
+	reflet-asm $< -o $@ -word-size 16
+
+test_interrupt: test_interrupt.bin
+	reflet-sim $< config16
 
 clean :
 	rm -f *.bin
