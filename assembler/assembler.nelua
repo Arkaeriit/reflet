@@ -424,7 +424,13 @@ local function second_step(in_block: vector(block), addr_size: integer) : (vecto
                         io.stderr:write("Invalid number of arguments for a set8 directive.\n")
                         return ret, error_t.arguments
                     end
-                    local set8, err = gen_set8(tointeger(line[1]))
+                    local int, int_ok = check_integer(line[1])
+                    if not int_ok then
+                        error_in_file(in_block[i].content.pure_file, j)
+                        io.stderr:write("Argument for set8 shold be a number.\n")
+                        return ret, error_t.arguments
+                    end
+                    local set8, err = gen_set8(int)
                     if err ~= error_t.OK then
                         error_in_file(in_block[i].content.pure_file, j)
                         io.stderr:write("Argument for set8 takes more than 8 bits.\n")
