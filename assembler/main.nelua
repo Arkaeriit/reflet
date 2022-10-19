@@ -173,6 +173,11 @@ local default_macros <comptime> = [[
     call
 @end
 
+@define jifl 1
+    setlab $1
+    jif
+@end
+
 @define mov 2
     cpy R12
     read $2

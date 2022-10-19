@@ -63,7 +63,7 @@ Beyond the `@define` directive to declare macros, the assembler offers other dir
 
 ### Predefined macro
 
-To ease the use of the assembler, some macros are predefines.
+To ease the use of the assembler, some macros are predefined.
 
 * `set+ <number>` puts the value of the number in the working register.
 * `mov <reg 1> <reg 2>` copies the value of `reg 2` into `reg 1`.
@@ -75,11 +75,13 @@ To ease the use of the assembler, some macros are predefines.
 * `callf <name>` calls the function at the given label.
 * `goto <name>` jumps to the given label.
 * `jmp` jumps to the address in the working register.
-* `set_wordsize_byte`: sets the number of bytes in a word in the working register.
+* `jifl <name>` jump  to the given label if the comparison bit is set to 1.
+* `@set_wordsize_byte`: sets the number of bytes in a word in the working register.
+* `@align_word`: align to the size of the word.
 * `load8 <reg>`: toggles byte mode before and after calling `load <reg>`.
 * `str8 <reg>`: toggles byte mode before and after calling `str <reg>`.
 
-Most of those macro will overwrite the register R12, only setlab, setr, and set+ will overwrite R11. If you use a macro to edit the PC, it might not work and will generate unexpected behaviors.
+Most of those macro will overwrite the register R12, only `setlab`, `setr`, and `set+` will overwrite R11. If you use a macro to edit the PC, it might not work and will generate unexpected behaviors.
 
 ## Numbers
 
