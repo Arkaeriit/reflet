@@ -59,7 +59,7 @@ module reflet_cpu #(
     //submodules
     wire ram_not_ready;
     //wire [3:0] opperand = instruction[7:4];
-    wire interrupt;
+    wire interrupt, in_interrupt_context;
     wire [wordsize-1:0] int_routine;
     wire alignment_error;
     wire [3:0] used_int = {interrupt_request[3:1], interrupt_request[0] | (registers[`sr_id][7] & alignment_error)}; //External interrupt or notification for alignment error
@@ -82,6 +82,7 @@ module reflet_cpu #(
         .stackPointer(registers[`sp_id]),
         .otherRegister(other_register),
         .reduced_behaviour_bits(registers[`sr_id][2:1]),
+        .in_interrupt_context(in_interrupt_context),
         .instruction(instruction),
         .alignment_error(alignment_error),
         //System bus
@@ -107,7 +108,8 @@ module reflet_cpu #(
         .out_reg(index_int),
         .out_routine(int_routine),
         .cpu_update(!ram_not_ready),
-        .interrupt(interrupt));
+        .interrupt(interrupt),
+        .in_interrupt_context(in_interrupt_context));
 
     //debug signal
     assign debug = instruction == `inst_debug && !ram_not_ready;

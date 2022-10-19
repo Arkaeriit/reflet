@@ -22,7 +22,8 @@ module reflet_interrupt#(
     output [3:0] out_reg,
     output [wordsize-1:0] out_routine,
     input cpu_update,
-    output interrupt
+    output interrupt, // Raised to one when entering a new interrupt routine
+    output in_interrupt_context // Set to one all the time we are in interrupt context
     );
     integer i; //loop counter
 
@@ -54,6 +55,7 @@ module reflet_interrupt#(
 
     //Level of interrupts
     reg [2:0] level; //4 means normal context, otherwise, take the number of the current interrupts
+    assign in_interrupt_context = !(level == 4);
     reg [2:0] prev_level_slow; //Store the previous state
     wire [2:0] target_level = ( int_masked_latched[0] ? 0 :
                                 ( int_masked_latched[1] ? 1 : 

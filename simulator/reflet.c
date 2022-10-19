@@ -258,7 +258,7 @@ static void run_inst(reflet* vm){
 static int byteExchanged(const reflet* vm, bool stack_b){
     if(stack_b)
         return vm->config->word_size_byte;
-    if(vm->byte_mode)
+    if(vm->byte_mode && (vm->int_level->level == LEVEL_NORMAL))
         return 1;
     switch((vm->SR & 0x6) >> 1){
         case 0:
@@ -290,7 +290,7 @@ static void check_alignement_ok(reflet* vm, word_t addr, bool stack_b){
     if(access_ok) return;
     bool trap_enabled = !(!(vm->SR & 0x88)); //Check that both the trap and the interupt 0 are enabled
     if(trap_enabled){
-        if(vm->int_level) //Roll back the PC so that after the interrupt, the program jumps back the the instruction that caused a problem
+        if(vm->int_level->level != LEVEL_INT_0) //Roll back the PC so that after the interrupt, the program jumps back the the instruction that caused a problem
             vm->PC--;
         triger_int(vm, 0);
     }else{

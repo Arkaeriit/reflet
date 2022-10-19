@@ -20,6 +20,7 @@ module reflet_addr #(
     input [wordsize-1:0] stackPointer,
     input [wordsize-1:0] otherRegister,
     input [1:0] reduced_behaviour_bits,
+    input in_interrupt_context,
     output reg [7:0] instruction,
     output alignment_error,
     //ram connection
@@ -64,7 +65,7 @@ module reflet_addr #(
     // Reduced behavior mode
     reg byte_mode;
     wire [$clog2(wordsize/8):0] size_used = 
-        ( byte_mode || !instruction_ok || reduced_behaviour_bits == 2'b11 || wordsize <= 8 ? 0 : 
+        ( (byte_mode & !in_interrupt_context) || !instruction_ok || reduced_behaviour_bits == 2'b11 || wordsize <= 8 ? 0 : 
           ( reduced_behaviour_bits == 2'b10 || wordsize <= 16 ? 1 :
             ( reduced_behaviour_bits == 2'b01 || wordsize <= 32 ? 2 :
               ( reduced_behaviour_bits == 2'b00 || wordsize <= 64 ? 3 :
