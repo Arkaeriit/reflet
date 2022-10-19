@@ -41,7 +41,7 @@ module simu05();
         $dumpvars(0, simu05);
         #10;
         reset <= 1;
-        #600;
+        #1500;
         int0 <= 1;
         #10;
         int0 <= 0;
