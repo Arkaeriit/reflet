@@ -4,6 +4,8 @@
 ;---------------------
 ;Multiplies R1 by R2 and put the result in R1
 label intMult
+    pushr R2
+    callf intMult.max
     pushr R3 ;tmp result
     pushr R4 ;loop counter
     pushr R5 ;end loop pointer
@@ -36,7 +38,21 @@ label intMult
     popr R5
     popr R4
     popr R3
+    popr R2
     ret
+
+    ;-----------
+    ;Put the max of R1, R2 in R1 and the min in R2
+    label intMult.max
+        read R1
+        les R2
+        jifl intMult.max.swap
+        ret
+        label intMult.max.swap
+            pushr R1
+            mov R1 R2
+            popr R2
+            ret
 
 ;--------------------------
 ;Put the quotient of the integer division of R1 by R2 into R1 and the modulo in R2
