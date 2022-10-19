@@ -12,7 +12,7 @@ module reflet_interrupt#(
     input reset,
     input enable,
     //external interrupt signals
-    input [3:0] ext_int, //ext_int[0] is the signal for the interrupt 0
+    input [3:0] interrupt_request, //interrupt_request[0] is the signal for the interrupt 0
     //Connection with the CPU
     input [7:0] instruction,
     input [wordsize-1:0] working_register,
@@ -27,7 +27,7 @@ module reflet_interrupt#(
     integer i; //loop counter
 
     //Masking interrupts
-    wire [3:0] int_masked = ext_int & int_mask;
+    wire [3:0] int_masked = interrupt_request & int_mask;
 
     //Instructions handeling
     reg [wordsize-1:0] prev_counter_slow; //Addr for returning from interrupts

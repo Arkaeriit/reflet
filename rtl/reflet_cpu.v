@@ -20,7 +20,7 @@ module reflet_cpu #(
     //Other connections
     output reg quit, //Set to one when the quit instruction is read
     output debug,
-    input [3:0] ext_int
+    input [3:0] interrupt_request
     );
     integer i; //loop counter
 
@@ -62,7 +62,7 @@ module reflet_cpu #(
     wire interrupt;
     wire [wordsize-1:0] int_routine;
     wire alignment_error;
-    wire [3:0] used_int = {ext_int[3:1], ext_int[0] | (registers[`sr_id][7] & alignment_error)}; //External interrupt or notification for alignment error
+    wire [3:0] used_int = {interrupt_request[3:1], interrupt_request[0] | (registers[`sr_id][7] & alignment_error)}; //External interrupt or notification for alignment error
 
     reflet_alu #(.wordsize(wordsize)) alu(
         .working_register(registers[`wr_id]),
@@ -98,7 +98,7 @@ module reflet_cpu #(
         .clk(clk),
         .reset(reset),
         .enable(enable),
-        .ext_int(used_int),
+        .interrupt_request(used_int),
         .instruction(instruction_int),
         .working_register(registers[`wr_id]),
         .program_counter(registers[`pc_id]),

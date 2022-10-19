@@ -23,7 +23,7 @@ module simu06();
         .addr(addr), 
         .data_out(dOut), 
         .write_en(write_en),
-        .ext_int(4'h0));
+        .interrupt_request(4'h0));
 
     //The rom
     rom6 rom6(

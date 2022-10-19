@@ -26,7 +26,7 @@ module simu11();
         .addr(addr), 
         .data_out(dOut), 
         .write_en(write_en),
-        .ext_int(4'h0));
+        .interrupt_request(4'h0));
 
     wire [31:0] dataRom;
     rom11 rom11(

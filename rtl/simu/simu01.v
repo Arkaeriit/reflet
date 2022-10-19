@@ -21,7 +21,7 @@ module simu01();
         .addr(addr), 
         .data_out(dOut), 
         .write_en(write_en),
-        .ext_int(4'h0));
+        .interrupt_request(4'h0));
 
     rom1 rom1(.clk(clk), .addr(addr[3:0]), .out(dIn));
 

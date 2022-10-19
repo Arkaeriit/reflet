@@ -26,7 +26,7 @@ module simu05();
         .addr(addr), 
         .data_out(dOut), 
         .write_en(write_en),
-        .ext_int(int));
+        .interrupt_request(int));
 
     //The rom got the addresses between 0x00 and 0x7F
     rom5 rom5(

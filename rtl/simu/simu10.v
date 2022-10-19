@@ -25,7 +25,7 @@ module simu10();
         .addr(addr), 
         .data_out(dOut), 
         .write_en(write_en),
-        .ext_int(4'h0));
+        .interrupt_request(4'h0));
 
     // The rom got the addresses between 0x0000 and 0x7FFF
     wire [7:0] dataRom;
