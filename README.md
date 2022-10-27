@@ -99,7 +99,7 @@ If the instruction is set, when the processor will receive an interrupt signal, 
 As there are different interruptions with different levels of priority, it is possible to nest interruptions. For example, if you are in the context of interruption 2 and that interruption 1 is raised, you will shift to the context of interruption 1. When doing retint you will shift back to the context of interrupt 2. 
 On the other hand, if you are in the context of interrupt 2 and interrupt 3 is raised, you will fall into the context of interrupt 3 only when you use retint from the context of interrupt 2.
 
-The registers are not banked when entering an interrupt context. Thus some care should be given to preserve them. 
+Except for the program counter, the registers are not banked when entering an interrupt context. Thus some care should be given to preserve them. 
 
 The only noticeable impact of being in interrupt context is that the byte mode is ignored. The number of byte used during memory access is influenced by the reduced behavior bits of the status register but the setup made with the `tbm` instruction are not taken into account. Once leaving the interrupt context, the byte mode is left as it was before entering the interrupt context.
 
