@@ -58,7 +58,6 @@ Beyond the `@define` directive to declare macros, the assembler offers other dir
 * `@rawbytes <byte 1> <byte 2> ... <byte N>` writes the given bytes (in hexadecimal) in the machine code.
 * `@string ...` writes the sting following the directive (and after a complementary space) in the machine code. Comments are not supported and will be considered as part of the string.
 * `@import <path>` include in the assembly the content of the given file. The path is relative to the path of the file where the import directive is.
-* `rawbyte <byte>` writes a single byte (in hexadecimal) of data in the machine code.
 * `set8 <number>` sets the 8 bit number into the WR.
 
 ### Predefined macro
@@ -80,6 +79,7 @@ To ease the use of the assembler, some macros are predefined.
 * `@align_word`: align to the size of the word.
 * `load8 <reg>`: toggles byte mode before and after calling `load <reg>`.
 * `str8 <reg>`: toggles byte mode before and after calling `str <reg>`.
+* `rawbyte <byte>` writes a single byte (in hexadecimal) of data in the machine code.
 
 Most of those macro will overwrite the register R12, only `setlab`, `setr`, and `set+` will overwrite R11. If you use a macro to edit the PC, it might not work and will generate unexpected behaviors.
 
@@ -93,7 +93,7 @@ Registers name are case insensitive. They can either be named (`SP`, `wr`) or be
 
 ## Compilation and installation
 
-Driver Helper is written in [Nelua](https://nelua.io). But as everyone might not have the Nelua compiler install, I included the generated C file in this repository.
+The Reflet assember is written in [Nelua](https://nelua.io). But as everyone might not have the Nelua compiler install, I included the generated C file in this repository.
 
 Running `make` will compile the C file. To compile from the nelua file, run `make full_compilation`.
 
