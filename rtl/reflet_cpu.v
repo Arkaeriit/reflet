@@ -6,7 +6,8 @@
 `include "reflet.vh"
 
 module reflet_cpu #(
-    parameter wordsize = 16
+    parameter wordsize = 16,
+    debug_output = 0
     )(
     //main control signal
     input clk,
@@ -20,7 +21,8 @@ module reflet_cpu #(
     //Other connections
     output reg quit, //Set to one when the quit instruction is read
     output debug,
-    input [3:0] interrupt_request
+    input [3:0] interrupt_request,
+    output [wordsize-1:0] debug_wr
     );
     integer i; //loop counter
 
@@ -113,6 +115,12 @@ module reflet_cpu #(
 
     //debug signal
     assign debug = instruction == `inst_debug && !ram_not_ready;
+    generate
+        if (debug_output)
+            assign debug_wr = registers[`wr_id];
+        else
+            assign debug_wr = 0;
+    endgenerate
     
     //updating registers
     always @ (posedge clk)

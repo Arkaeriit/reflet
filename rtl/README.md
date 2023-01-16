@@ -23,6 +23,7 @@ Here is a list of all its connections:
 |data\_out|wordsize-bit output|Data to write to the RAM.|
 |data\_in|wordsize-bit input|Data coming from the RAM.|
 |write\_en|output|Is turned to 1 when needing to write to the RAM.|
+|debug\_wr|output|If the parameter debug\_output is set, copies the working register. Otherwize, forced to 0.|
 
 ## Content of the folder
 This folder contains the 6 modules making the Reflet processor, `reflet_addr` and `reflet_addr_reduced_behavior` handle the instruction interfacing with the RAM.`reflet_stack` and `reflet_interrupt` handle the interrupts. `reflet_alu` handle other instructions and `reflet_cpu` handle the registers and combine them.  In the folder simu, you will find what I used to test this. Each test module is associated with its ROM whose content is described.
