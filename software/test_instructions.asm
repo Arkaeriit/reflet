@@ -21,9 +21,7 @@ label stack_start
 label write_next_word_in_array
     read R1
     str R9
-    @set_wordsize_byte
-    add R9
-    cpy R9
+    inc_ws R9
     ret
 
 ;------------------------- Global array manipulations -------------------------;
@@ -44,13 +42,9 @@ label init_arr
         set 0
         str R1
         ; increment R1
-        @set_wordsize_byte
-        add R1
-        cpy R1
+        inc_ws R1
         ; increment R3
-        set 1
-        add R3
-        cpy R3
+        inc R3
         ; Jump back if not finished
         read R2
         eq R3
@@ -74,13 +68,9 @@ label debug_arr
         load R1
         debug
         ; increment R1
-        @set_wordsize_byte
-        add R1
-        cpy R1
+        inc_ws R1
         ; increment R3
-        set 1
-        add R3
-        cpy R3
+        inc R3
         ; Jump back if not finished
         read R2
         eq R3
