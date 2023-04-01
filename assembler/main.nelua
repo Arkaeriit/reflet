@@ -178,30 +178,76 @@ local default_macros <comptime> = [[
     jif
 @end
 
-@define mov 2
-    cpy R12
-    read $2
-    cpy $1
-    read R12
-@end
-
 @define setr 2
     set+ $2
     cpy $1
 @end
 
-@define pushr 1
+@define mov. 2
+    read $2
+    cpy $1
+@end
+
+@define mov 2
     cpy R12
+    mov. $1 $2
+    read R12
+@end
+
+@define pushr. 1
     read $1
     push
+@end
+
+@define pushr 1
+    cpy R12
+    pushr. $1
     read R12
+@end
+
+@define popr. 1
+    pop
+    cpy $1
 @end
 
 @define popr 1
     cpy R12
-    pop
-    cpy $1
+    popr. $1
     read R12
+@end
+
+@define addup. 1
+    add $1
+    cpy $1
+@end
+
+@define addup 1
+    cpy r12
+    addup. $1
+    read r12
+@end
+
+@define inc. 1
+    set 1
+    addup. $1
+    cpy $1
+@end
+
+@define inc 1
+    cpy r12
+    inc. $1
+    read r12
+@end
+
+@define inc_ws. 1
+    @set_wordsize_byte
+    addup. $1
+@end
+
+@define inc_ws 1
+    cpy r12
+    inc_ws. $1
+    read r12
 @end
 
 @define jmp 0
