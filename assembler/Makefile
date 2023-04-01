@@ -10,7 +10,7 @@ reflet-asm.bin: objsrc/reflet-asm.c
 
 objsrc/reflet-asm.c: | main.nelua
 	mkdir -p objsrc
-	nelua --generate-code -o $@ main.nelua
+	nelua --code -o $@ main.nelua
 
 clean:
 	rm -f reflet-asm.bin
