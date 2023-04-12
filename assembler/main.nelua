@@ -266,13 +266,71 @@ local default_macros <comptime> = [[
     @set8 $1
 @end
 
+; Takes as first argument a value to mask the SR with and as second a register to load from
+@define @loadX 2
+    ; Preserve and set SR
+    mov. R12 SR
+    set $1
+    or SR
+    cpy SR
+    ; load
+    load $2
+    cpy R11
+    ; Restore SR
+    mov. SR R12
+    read R11
+@end
+
+; Same idea as @loadX but for str
+@define @strX 2
+    cpy R11
+    ; Preserve and set SR
+    mov. R12 SR
+    read SR
+    cpy R12
+    set $1
+    or SR
+    cpy SR
+    ; store
+    read R11
+    str $2
+    cpy R11
+    ; Restore SR
+    mov. SR R12
+    read R11
+@end
+
+; load/store 8 bits
 @define load8 1
+    @loadX 6 $1
+@end
+@define str8 1
+    @strX 6 $1
+@end
+
+; Load/store 16 bits
+@define load16 1
+    @loadX 4 $1
+@end
+@define str16 1
+    @strX 4 $1
+@end
+
+; Load/store 32 bits
+@define load32 1
+    @loadX 2 $1
+@end
+@define str32 1
+    @strX 2 $1
+@end
+
+; load/store 8 bits swifters
+@define load8. 1
     tbm
     load $1
     tbm
 @end
-
-@define str8 1
+@define str8. 1
     tbm
     str $1
     tbm

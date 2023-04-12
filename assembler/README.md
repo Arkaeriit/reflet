@@ -77,16 +77,18 @@ To ease the use of the assembler, some macros are predefined.
 * `jifl <name>` jump  to the given label if the comparison bit is set to 1.
 * `@set_wordsize_byte`: sets the number of bytes in a word in the working register.
 * `@align_word` align to the size of the word.
-* `load8 <reg>` toggles byte mode before and after calling `load <reg>`.
-* `str8 <reg>` toggles byte mode before and after calling `str <reg>`.
+* `load<bit number> <reg>` calls `load <reg>` after setting the status register to only interact with the given numbers of bits.
+* `str<bit number> <reg>` calls `str <reg>` after setting the status register to only interact with the given numbers of bits.
 * `rawbyte <byte>` writes a single byte (in hexadecimal) of data in the machine code.
 * `addup <reg>` increase the target register with the value in the working register.
 * `inc <reg>` increase by one the value in the target register.
 * `inc_ws <reg>` increase by the word size in bytes the value in the target register.
 
-Most of those macro will overwrite the register R12, only `setlab`, `setr`, and `set+` will overwrite R11. If you use a macro to edit the PC, it might not work and will generate unexpected behaviors.
+Most of those macro will overwrite the register R12, only `load<X>`, `str<X>`, `setlab`, `setr`, and `set+` will overwrite R11. If you use a macro to edit the PC, it might not work and will generate unexpected behaviors.
 
 General register manipulation macros (`mov`, `pushr`, `popr`, `addup`, `inc`, and `inc_ws`) all preserve the value of the working resister by saving it to R12. If you don't want to do so for performance reason, you can use the macros suffixed with a dot (`mov.`, `pushr.`, ...). Note that `setr` never preserves the working register.
+
+`load<X>` and `str<X>` macros are available to work on 8, 16, or 32 bits (`load8`, `load16`, ...). They reset the status register after the store/load. If you want swifter operations on 8 bits, you can use `load8.` and `str8.` with use the `tbm` instruction. They are faster and don't use R11 or R12, but the use of `tbm` meas you can't use them in interrupt context.
 
 ## Numbers
 
