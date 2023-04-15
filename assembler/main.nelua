@@ -136,7 +136,7 @@ local default_macros <comptime> = [[
 ;It is used to form set+ or setlab
 @define set_to_constant 2
     mov R11 SR
-    set 0
+    @set_default_sr
     cpy SR
     @set_wordsize_byte
     cpy R12
@@ -338,12 +338,12 @@ local default_macros <comptime> = [[
 ]]
 
 local end_runtime <comptime> = [[
-@align_word
+@align 8 ; As of the, the assembler only supports up to 64 bits processors
 @label __code_end__
 ]]
 
 -- This function combine start_runtime, default_macros and the definition
--- of the @align_word macro
+-- of the @align_word macro and @set_default_sr macro
 local function make_start_runtime(flags: arg_flags): string
     local word_size = flags.word_size
     local builder: stringbuilder
@@ -359,6 +359,17 @@ local function make_start_runtime(flags: arg_flags): string
         builder:write("    @align 8\n")
     else
         error("Invalid argument for make_start_runtime.\n")
+    end
+    builder:write("@end\n")
+    builder:write("@define @set_default_sr 0\n")
+    if word_size == 8 then
+        builder:write("    set 7\n")
+    elseif word_size == 16 then 
+        builder:write("    set 5\n")
+    elseif word_size == 32 then
+        builder:write("    set 3\n")
+    else
+        builder:write("    set 1\n")
     end
     builder:write("@end\n")
     if word_size == 64 then
@@ -379,6 +390,7 @@ local function make_start_runtime(flags: arg_flags): string
     if not flags.no_prefix then
         builder:write("@rawbytes 41 53 52 4d\n")
     end
+    builder:write("@set_default_sr\ncpy SR\n")
     if flags.set_stack then
         if flags.stack_value < 0 then --default stack value, the end of the code
             builder:write("setlab __code_end__\ncpy SP\n")
