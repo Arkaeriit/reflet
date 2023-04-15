@@ -35,12 +35,12 @@ void applyConfig(reflet* vm, const char* configFile){
                     //Checking non-numeric config parameters
                     if(!strcmp(resultBuff[0], "log")){
                         if(vm->debug->enable){
-                            fprintf(stdout, "Error line %i of the config file, multiple log files.\n", lineNumber);
+                            fprintf(stderr, "Error line %i of the config file, multiple log files.\n", lineNumber);
                             exit(RET_CONFIG);
                         }
                         vm->debug->enable = true;
                         if((vm->debug->file = fopen(resultBuff[1], "w")) == NULL){
-                            fprintf(stdout, "Error line %i of the config file, unable to open log file.\n", lineNumber);
+                            fprintf(stderr, "Error line %i of the config file, unable to open log file.\n", lineNumber);
                             exit(RET_CONFIG);
                         }
                         break;
@@ -49,13 +49,13 @@ void applyConfig(reflet* vm, const char* configFile){
                     word_t configValue;
                     int numRead = sscanf(resultBuff[1], "%lu", &configValue);
                     if(numRead != 1){
-                        fprintf(stdout, "Error line %i of the config file, numeric value unreadable.\n", lineNumber);
+                        fprintf(stderr, "Error line %i of the config file, numeric value unreadable.\n", lineNumber);
                         exit(RET_CONFIG);
                     }
                     //Appliyng the config line
                     if(!strcmp(resultBuff[0], "word_size")){
                         if(configValue%8){
-                            fprintf(stdout, "Error line %i of the config file, invalid word size.\n", lineNumber);
+                            fprintf(stderr, "Error line %i of the config file, invalid word size.\n", lineNumber);
                             exit(RET_CONFIG);
                         }
                         vm->config->word_size = configValue;
@@ -90,13 +90,13 @@ void applyConfig(reflet* vm, const char* configFile){
                             vm->config->ints[3]->freq = configValue;
                         }
                     }else{
-                        fprintf(stdout, "Error line %i of the config file, unknow parameter.\n", lineNumber);
+                        fprintf(stderr, "Error line %i of the config file, unknow parameter.\n", lineNumber);
                         exit(RET_CONFIG);
                     }
                 }
                 break;
             case ERROR:
-                fprintf(stdout, "Error line %i of the config file, invalid format.\n", lineNumber);
+                fprintf(stderr, "Error line %i of the config file, invalid format.\n", lineNumber);
                 exit(RET_CONFIG);
                 break;
             case NO_LINE:
