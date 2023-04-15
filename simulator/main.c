@@ -23,7 +23,11 @@ int main(int argc, char** argv){
 
 static void help(){
     printf("reflet-sim, a virtual machine to run reflet ISA machine code.\n"
-           "Usage: reflet-sim <binary file to execute> <VM config file>.\n"
+           "Usage: reflet-sim [options] <binary file to execute>\n"
+           "Available options:\n"
+           "    -r/--ram-size <size>    : Size in bytes of the available RAM.\n"
+           "    -w/--word-size <size>   : Size in bits of the processor's words.\n"
+           "    -c/--config-file <file> : Config file used to describe the VM.\n"
           );
 }
 
@@ -69,6 +73,9 @@ static bool parse_arg(const char* arg, reflet* vm) {
             reading_word_size = true;
         } else if (!strcmp(arg, "--ram-size") || !strcmp(arg, "-r")) {
             reading_ram_size = true;
+        } else if (!strcmp(arg, "help") || !strcmp(arg, "--help") || !strcmp(arg, "-h")) {
+            help();
+            exit(0);
         } else if (!rom_loaded) {
             bool loading = load_file(arg, vm);
             if(!loading){
@@ -77,9 +84,6 @@ static bool parse_arg(const char* arg, reflet* vm) {
             }
             rom_loaded = true;
             return true;
-        } else if (!strcmp(arg, "help") || !strcmp(arg, "--help") || !strcmp(arg, "-h")) {
-            help();
-            exit(0);
         } else {
             fprintf(stderr, "Warning: '%s' argument is unused.\n", arg);
         }

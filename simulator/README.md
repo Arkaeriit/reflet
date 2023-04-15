@@ -2,7 +2,14 @@
 A simulator to test Reflet machine code. 
 
 ## Usage
-The simulator should be given two arguments to start: a configuration file and a binary file. The binary file should contain proper Reflet machine code.
+```
+reflet-sim [options] <binary file to execute>
+Available options:
+    -r/--ram-size <size>    : Size in bytes of the available RAM.
+    -w/--word-size <size>   : Size in bits of the processor's words.
+    -c/--config-file <file> : Config file used to describe the VM.
+```
+
 
 ## IO
 To test your programs, the simulator can do basic IO. To print a character, write it at address `tx_data` (default to 0x1) and then write 0 at address `tx_cmd` (default to 0x0). To get an input char, write 0 at address `rx_cmd` (default to 0x2). The input char will be written at address `rx_data` (default to 0x3).
@@ -35,4 +42,6 @@ word_size 8
 ;100 bytes of ram
 ram_size 100
 ```
+
+Some configuration items such as RAM size or word size can be given both as command line arguments. The last arguments given to when calling the simulator will prevail.
 
