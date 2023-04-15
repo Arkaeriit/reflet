@@ -5,22 +5,22 @@ all : libtesting.bin exampleIO.bin primes.bin fibonacci.bin test_jump.bin test_i
 
 .PHONY: libtesting
 libtesting : libtesting.bin
-	reflet-sim libtesting.bin config16
+	reflet-sim -c config16 libtesting.bin
 
 exampleIO : exampleIO.bin
 	reflet-sim exampleIO.bin
 
 primes : primes.bin
-	reflet-sim primes.bin config16
+	reflet-sim -c config16 primes.bin
 
 fibonacci : fibonacci.bin
-	reflet-sim fibonacci.bin config16
+	reflet-sim -c config16 fibonacci.bin
 
 test_jump : test_jump.bin
-	reflet-sim test_jump.bin config16
+	reflet-sim -c config16 test_jump.bin
 
 test_instructions : test_instructions.bin
-	reflet-sim test_instructions.bin config16
+	reflet-sim -c config16 test_instructions.bin
 
 test_inst_mini_str: test_inst_mini_str.bin
 	reflet-sim test_inst_mini_str.bin
@@ -57,7 +57,7 @@ test_align_fix.bin: test_align_fix.asm
 
 .PHONY: test_align_fix
 test_align_fix: test_align_fix.bin
-	reflet-sim test_align_fix.bin config32
+	reflet-sim -c config32 test_align_fix.bin
 
 ../rtl/simu/rom11.v: test_align_fix.bin
 	ROM_maker -name rom11 -input_file $< -output_file $@ -wordsize 4 -min_addr_size 30
@@ -66,7 +66,7 @@ test_interrupt.bin: test_interrupt.asm
 	reflet-asm $< -o $@ -word-size 16
 
 test_interrupt: test_interrupt.bin
-	reflet-sim $< config16
+	reflet-sim -c config16 $<
 
 clean :
 	rm -f *.bin
