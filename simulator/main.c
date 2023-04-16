@@ -28,7 +28,8 @@ static void help(){
            "    -r/--ram-size <size>          : Size in bytes of the available RAM.\n"
            "    -w/--word-size <size>         : Size in bits of the processor's words.\n"
            "    -c/--config-file <file>       : Config file used to describe the VM.\n"
-           "    -!/--ignore-first-line <file> : Ignore chars up to the first ne line in input binary.\n"
+           "    -!/--ignore-first-line <file> : Ignore chars up to the first new line in input binary.\n"
+           "    -x/--extended-io              : Use extended IOs instead of basic ones.\n"
           );
 }
 
@@ -77,6 +78,8 @@ static bool parse_arg(const char* arg, reflet* vm) {
             reading_word_size = true;
         } else if (!strcmp(arg, "--ram-size") || !strcmp(arg, "-r")) {
             reading_ram_size = true;
+        } else if (!strcmp(arg, "--extended-io") || !strcmp(arg, "-x")) {
+            vm->config->extended_io = true;
         } else if (!strcmp(arg, "help") || !strcmp(arg, "--help") || !strcmp(arg, "-h")) {
             help();
             exit(0);

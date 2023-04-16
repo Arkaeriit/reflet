@@ -89,6 +89,8 @@ void applyConfig(reflet* vm, const char* configFile){
                             vm->config->ints[3]->enable = true;
                             vm->config->ints[3]->freq = configValue;
                         }
+                    } else if (!strcmp(resultBuff[0], "extended_io")) {
+                        vm->config->extended_io = configValue;
                     }else{
                         fprintf(stderr, "Error line %i of the config file, unknow parameter.\n", lineNumber);
                         exit(RET_CONFIG);

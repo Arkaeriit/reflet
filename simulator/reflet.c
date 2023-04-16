@@ -10,6 +10,7 @@ static void check_alignement_ok(reflet* vm, word_t addr, bool stack_b);
 static word_t loadWordRAM(reflet* vm, word_t addr, bool stack_b);
 static void putRAMWord(reflet* vm, word_t addr, word_t content, bool stack_b);
 static void io(reflet* vm);
+static void prepare_extended_io(reflet* vm);
 static word_t new_int(reflet* vm, int interupt);
 static void check_int(reflet* vm);
 static void triger_int(reflet* vm, uint8_t int_number);
@@ -43,6 +44,7 @@ reflet* reflet_init(){
         interupt->freq = 0;
         conf->ints[i] = interupt;
     }
+    conf->extended_io = false;
     ret->config = conf;
     //default debug
     struct reflet_debug* debug = malloc(sizeof(struct reflet_debug));
@@ -94,6 +96,9 @@ void reflet_free(reflet* vm){
  * Run the program in the vm's RAM
  */
 void reflet_run(reflet* vm){
+    if (vm->config->extended_io) {
+        prepare_extended_io(vm);
+    }
     while((vm->PC < vm->config->ram_size) && vm->active){
         debugLog(vm);
         check_int(vm);
@@ -337,11 +342,12 @@ static void putRAMWord(reflet* vm, word_t addr, word_t content, bool stack_b){
 }
 
 /*
- * Check if a vm needs to do io.
- * If the address 0 in ram is 0, the content of address 1 is printed.
- * If the address 2 in ram is 0, a char is read and put in address 3.
+ * If the address tx_cmd in ram is 0, the content of address tx_data is printed
+ * If the address rx_cmd in ram is 0, a char is read and put in address rx_data
+ * For read, the rx_cmd is filled back with a status value of 1 in success and
+ * 2 in failure.
  */
-static void io(reflet* vm){
+static void basic_io(reflet* vm){
     if(!vm->ram[vm->config->tx_cmd]){
         printf("%c",vm->ram[vm->config->tx_data]);
         vm->ram[vm->config->tx_cmd] = 'A';
@@ -350,6 +356,56 @@ static void io(reflet* vm){
         int ch = getchar();
         vm->ram[vm->config->rx_data] = (char) ch;
         vm->ram[vm->config->rx_cmd] = ch == EOF ? 2 : 1;
+    }
+}
+
+enum {
+    IO_NOP = 0,
+    IO_WRITE = 1,
+    IO_READ = 2,
+} extended_io_cmds;
+
+#define IO_COUT   0
+#define IO_CIN    1
+#define IO_CMD    2
+#define IO_STATUS 3
+
+/*
+ * Perform extended IO opperations.
+ */
+static void extended_io(reflet* vm) {
+    switch (vm->ram[IO_CMD]) {
+        case IO_WRITE:
+            putchar(vm->ram[IO_COUT]);
+            break;
+        case IO_READ: {
+            int ch = getchar();
+            vm->ram[IO_CIN] = (char) ch;
+            vm->ram[IO_STATUS] = ch == EOF ? 1 : 0;}
+            break;
+        case IO_NOP:
+        default:
+            break;
+    }
+    vm->ram[IO_CMD] = IO_NOP;
+}
+
+/*
+ * Force a nop in io cmd to ensure no unfortunate IO op happen when starting
+ * the simulator.
+ */
+static void prepare_extended_io(reflet* vm) {
+    vm->ram[IO_CMD] = IO_NOP;
+}
+
+/*
+ * Run IO routine dicted by configuration.
+ */
+static void io(reflet* vm) {
+    if (vm->config->extended_io) {
+        extended_io(vm);
+    } else {
+        basic_io(vm);
     }
 }
 

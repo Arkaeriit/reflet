@@ -5,10 +5,11 @@ A simulator to test Reflet machine code.
 ```
 reflet-sim [options] <binary file to execute>
 Available options:
-    -r/--ram-size <size>    : Size in bytes of the available RAM.
-    -w/--word-size <size>   : Size in bits of the processor's words.
-    -c/--config-file <file> : Config file used to describe the VM.
-    -!/--ignore-first-line <file> : Ignore chars up to the first ne line in input binary.
+    -r/--ram-size <size>          : Size in bytes of the available RAM.
+    -w/--word-size <size>         : Size in bits of the processor's words.
+    -c/--config-file <file>       : Config file used to describe the VM.
+    -!/--ignore-first-line <file> : Ignore chars up to the first new line in input binary.
+    -x/--extended-io              : Use extended IOs instead of basic ones.
 ```
 
 
@@ -21,6 +22,16 @@ When reading a char, if the read have been successful, 1 is written back to `rx_
 
 The addresses can be chosen with a config file if you ever feel the need to simulate a reflet-microcontroller and need the addresses at a specific place in memory.
 
+## Extended IOs
+If you want the simulator to perform more IOs such as file operation, you can enable the extended IOs. As this is no longer useful to simulate hardware such as a microcontroller, the used addresses are no longer configurable.
+
+The address 0x0 is the char-out address, the address 0x1 is the char-in address. The address 0x2 is the command address, where you write commands to perform some IOs. The address 0x3 is the status address, where you can see the success or failure of those commands.
+
+|Name|Command|Effect|
+|-|-|-|
+|write|0x01|Write the char in char-out to stdout.|
+|read|0x02|Read a char from stdin to char-in. Set status to 1 if EOF is returned and to 0 otherwise.|
+
 ## Interrupts
 The simulator can handle interrupts. By default, no interrupts will append, but if you can add a line `int_X_freq xxx` to the config file with X the number of the interrupt (between 0 and 3) and xxx the number instruction between each time the interrupt is raised. This will make the desired interrupts be raised at the desired frequency.
 
@@ -28,18 +39,19 @@ The simulator can handle interrupts. By default, no interrupts will append, but 
 The configuration file should contain information about the processor such as the word size or the ram size.
 
 |Parameter name|Value|Default Value|
-|--------------|-----|--|
-|word\_size     |The size of the processor registers in bits.| 8 |
-|ram\_size      |The size of the RAM in bytes.| 255 |
-|log            |A file where debug log will be stored.| disabled |
-|tx\_cmd         |Address to print data | 0 |
-|tx\_data        |Address to select what data to print | 1 |
-|rx\_cmd         |Address used to ask for input | 2 |
-|rx\_data        |Address where the input is stored | 3 |
-|int\_0\_freq    |The number of instructions between each raising of the interrupt 0 | 0 (disabled) |   
-|int\_1\_freq    |The number of instructions between each raising of the interrupt 1 | 0 (disabled) |   
-|int\_2\_freq    |The number of instructions between each raising of the interrupt 2 | 0 (disabled) |   
-|int\_3\_freq    |The number of instructions between each raising of the interrupt 3 | 0 (disabled) |   
+|--------------|-----|-------------|
+|word\_size    |The size of the processor registers in bits.| 8 |
+|ram\_size     |The size of the RAM in bytes.| 255 |
+|log           |A file where debug log will be stored.| disabled |
+|tx\_cmd       |Address to print data | 0 |
+|tx\_data      |Address to select what data to print | 1 |
+|rx\_cmd       |Address used to ask for input | 2 |
+|rx\_data      |Address where the input is stored | 3 |
+|int\_0\_freq  |The number of instructions between each raising of the interrupt 0 | 0 (disabled) |   
+|int\_1\_freq  |The number of instructions between each raising of the interrupt 1 | 0 (disabled) |   
+|int\_2\_freq  |The number of instructions between each raising of the interrupt 2 | 0 (disabled) |   
+|int\_3\_freq  |The number of instructions between each raising of the interrupt 3 | 0 (disabled) |   
+|extended\_io  |0 to disable extended IOs, 1 to enable it | 0 (disabled) |   
 
 You can add comments in the config file by prefixing them with a `;`.
 For example, the following configuration file will help simulate an 8-bit processor with 100 bytes of RAM.

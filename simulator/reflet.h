@@ -39,6 +39,7 @@ struct reflet_config {
     word_t rx_cmd;
     word_t rx_data;
     struct reflet_config_int* ints[4];
+    bool extended_io;
 };
 
 struct reflet_debug {
