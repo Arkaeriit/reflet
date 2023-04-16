@@ -347,10 +347,9 @@ static void io(reflet* vm){
         vm->ram[vm->config->tx_cmd] = 'A';
     }
     if(!vm->ram[vm->config->rx_cmd]){
-        char buff[2048]; //buffer to get a character
-        fgets(buff, 2048, stdin);
-        vm->ram[vm->config->rx_data] = buff[0];
-        vm->ram[vm->config->rx_cmd] = 'R';
+        int ch = getchar();
+        vm->ram[vm->config->rx_data] = (char) ch;
+        vm->ram[vm->config->rx_cmd] = ch == EOF ? 2 : 1;
     }
 }
 

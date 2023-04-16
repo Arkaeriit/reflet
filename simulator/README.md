@@ -13,7 +13,13 @@ Available options:
 
 
 ## IO
-To test your programs, the simulator can do basic IO. To print a character, write it at address `tx_data` (default to 0x1) and then write 0 at address `tx_cmd` (default to 0x0). To get an input char, write 0 at address `rx_cmd` (default to 0x2). The input char will be written at address `rx_data` (default to 0x3).
+
+## Basic IOs
+By default, the simulator only have basic IOs that can only write from stdin and to stdout. This works with 4 memory addresses. To print a character, write it at address `tx_data` (default to 0x1) and then write 0 at address `tx_cmd` (default to 0x0). To get an input char, write 0 at address `rx_cmd` (default to 0x2). The input char will be written at address `rx_data` (default to 0x3).
+
+When reading a char, if the read have been successful, 1 is written back to `rx_cmd`. If nor, 2 is written to `rx_cmd`.
+
+The addresses can be chosen with a config file if you ever feel the need to simulate a reflet-microcontroller and need the addresses at a specific place in memory.
 
 ## Interrupts
 The simulator can handle interrupts. By default, no interrupts will append, but if you can add a line `int_X_freq xxx` to the config file with X the number of the interrupt (between 0 and 3) and xxx the number instruction between each time the interrupt is raised. This will make the desired interrupts be raised at the desired frequency.
