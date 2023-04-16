@@ -14,7 +14,7 @@ static bool magic_word_ok(reflet* vm);
  *      true if the loading went right
  *      false in case of an issue
  */
-bool load_file(const char* filename, reflet* vm){
+bool load_file(const char* filename, reflet* vm, bool ignore_first_line){
     if(vm->ram != NULL)
         free(vm->ram);
     reflet_initRAM(vm);
@@ -25,6 +25,9 @@ bool load_file(const char* filename, reflet* vm){
         reflet_free(vm);
         return false;
     } 
+    if (ignore_first_line) {
+        while(fgetc(f) != '\n' && !feof(f)) {}
+    }
     //reading file
     char* ram_char = (char*) vm->ram;
     for(word_t i=0; i<vm->config->ram_size; i++){

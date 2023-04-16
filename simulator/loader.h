@@ -12,7 +12,7 @@
 #include "constants.h"
 #include "reflet.h"
 
-bool load_file(const char* filename, reflet* vm);
+bool load_file(const char* filename, reflet* vm, bool ignore_first_line);
 
 #endif
 

@@ -25,9 +25,10 @@ static void help(){
     printf("reflet-sim, a virtual machine to run reflet ISA machine code.\n"
            "Usage: reflet-sim [options] <binary file to execute>\n"
            "Available options:\n"
-           "    -r/--ram-size <size>    : Size in bytes of the available RAM.\n"
-           "    -w/--word-size <size>   : Size in bits of the processor's words.\n"
-           "    -c/--config-file <file> : Config file used to describe the VM.\n"
+           "    -r/--ram-size <size>          : Size in bytes of the available RAM.\n"
+           "    -w/--word-size <size>         : Size in bits of the processor's words.\n"
+           "    -c/--config-file <file>       : Config file used to describe the VM.\n"
+           "    -!/--ignore-first-line <file> : Ignore chars up to the first ne line in input binary.\n"
           );
 }
 
@@ -40,6 +41,7 @@ static bool parse_arg(const char* arg, reflet* vm) {
     static bool reading_word_size   = false;
     static bool reading_ram_size    = false;
     static bool rom_loaded          = false;
+    static bool ignore_first_line   = false;
     if (reading_config_file) {
         reading_config_file = false;
         applyConfig(vm, arg);
@@ -69,6 +71,8 @@ static bool parse_arg(const char* arg, reflet* vm) {
     } else {
         if (!strcmp(arg, "--config-file") || !strcmp(arg, "-c")) {
             reading_config_file = true;
+        } else if (!strcmp(arg, "--ignore-first-line") || !strcmp(arg, "-!")) {
+            ignore_first_line = true;
         } else if (!strcmp(arg, "--word-size") || !strcmp(arg, "-w")) {
             reading_word_size = true;
         } else if (!strcmp(arg, "--ram-size") || !strcmp(arg, "-r")) {
@@ -77,7 +81,7 @@ static bool parse_arg(const char* arg, reflet* vm) {
             help();
             exit(0);
         } else if (!rom_loaded) {
-            bool loading = load_file(arg, vm);
+            bool loading = load_file(arg, vm, ignore_first_line);
             if(!loading){
                 fprintf(stderr, "Unable to set the simulator up.\n");
                 exit(RET_NO_VM);

@@ -8,6 +8,7 @@ Available options:
     -r/--ram-size <size>    : Size in bytes of the available RAM.
     -w/--word-size <size>   : Size in bits of the processor's words.
     -c/--config-file <file> : Config file used to describe the VM.
+    -!/--ignore-first-line <file> : Ignore chars up to the first ne line in input binary.
 ```
 
 
@@ -44,4 +45,19 @@ ram_size 100
 ```
 
 Some configuration items such as RAM size or word size can be given both as command line arguments. The last arguments given to when calling the simulator will prevail.
+
+## Shebang
+
+Thanks to the `--ignore-first-line` command line argument, you can add a shebang before a binary file to run it inside the simulator as an executable file. The shebang needs to be somewhat like `#!/usr/bin/env -S reflet-sim --word-size <wordsize> --ram-size <ramsize> --ignore-first-line`. Note the use of `env -S` to give multiple arguments to the simulator.
+
+Here is an example of that in action:
+
+```
+> reflet-asm -word-size 16 hello_world.asm -o hello_world.bin
+> echo '#!/usr/bin/env -S reflet-sim --word-size 16 --ram-size 2000 --ignore-first-line' > hello_world
+> cat hello_world.bin >> hello_world
+> chmod +x hello_world 
+> ./hello_world 
+Hello, word!
+```
 
