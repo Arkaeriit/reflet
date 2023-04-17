@@ -363,6 +363,36 @@ local function gen_set8(num: integer): (block, error_t)
     return make_pure_file_block(local_block), error_t.OK
 end
 
+-- Transform all text after the first space of the input string into a block
+-- of raw bytes. Then add the sufix bytes to it.
+local function make_string(raw_line: string, sufix: vector(byte)) : block
+    local first_space_index = -1
+    for i=1,#raw_line do
+        if raw_line:sub(i,i) == " " then
+            first_space_index = i
+            break
+        end
+    end
+    local raws: vector(byte)
+
+    if first_space_index ~= -1 then
+        local str = raw_line:sub(first_space_index+1, #raw_line)
+        for i=1,#str do
+            raws:push(str:sub(i,i):byte())
+        end
+    end
+
+    for i=0,<#sufix do
+        raws:push(sufix[i])
+    end
+
+    local lab_blk: rawbytes_block  = {raws}
+    local new_block: block
+    new_block.type = block_types.rawbytes
+    new_block.content.rawbytes = lab_blk
+    return new_block
+end
+
 -- Remove directives in pure files
 -- TODO: maybe clean up code with meta-programming
 local function second_step(in_block: vector(block), addr_size: integer) : (vector(block), error_t)
@@ -518,15 +548,19 @@ local function second_step(in_block: vector(block), addr_size: integer) : (vecto
                     ret = insert_block_in_file(ret, i, j, new_block)
                     return ret, error_t.WIP
                 elseif line[0] == "@string" then
-                    local str = line.raw:sub(9, #line.raw)
-                    local raws: vector(byte)
-                    for i=1,#str do
-                        raws:push(str:sub(i,i):byte())
-                    end
-                    local lab_blk: rawbytes_block  = {raws}
-                    local new_block: block
-                    new_block.type = block_types.rawbytes
-                    new_block.content.rawbytes = lab_blk
+                    local new_block = make_string(line.raw, {})
+                    ret = insert_block_in_file(ret, i, j, new_block)
+                    return ret, error_t.WIP
+                elseif line[0] == "@string-0" then
+                    local new_block = make_string(line.raw, {0})
+                    ret = insert_block_in_file(ret, i, j, new_block)
+                    return ret, error_t.WIP
+                elseif line[0] == "@string-nl" then
+                    local new_block = make_string(line.raw, {10})
+                    ret = insert_block_in_file(ret, i, j, new_block)
+                    return ret, error_t.WIP
+                elseif line[0] == "@string-nl-0" then
+                    local new_block = make_string(line.raw, {10, 0})
                     ret = insert_block_in_file(ret, i, j, new_block)
                     return ret, error_t.WIP
                 end
