@@ -22,7 +22,7 @@ full_compilation: purge
 	$(MAKE) reflet-asm.bin
 
 install: | reflet-asm.bin
-	cp -f reflet-asm.bin $(INSTALL_DIR)/reflet-asm
+	cp -f reflet-asm.bin $(INSTALL_DIR)/reflet-asm-nelua
 
 uninstall:
 	rm -f $(INSTALL_DIR)/reflet-asm
