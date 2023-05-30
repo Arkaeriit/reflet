@@ -1,3 +1,16 @@
+use crate::tree::AsmNode;
+use crate::tree::AsmNode::*;
+
+/// Takes some text and convert it into an AsmNode containing each lines parsed
+pub fn parse_source(text: &str) -> AsmNode {
+    let mut nodes: Vec<AsmNode> = vec![];
+    for parsed_line in parse_text(text) {
+        let node: AsmNode = Source(parsed_line);
+        nodes.push(node);
+    }
+    Inode(nodes)
+}
+
 /* ---------------------------- Helper functions ---------------------------- */
 
 /// Takes as input a line of assembly source code and return a list of each
@@ -52,7 +65,7 @@ fn parse_text(text: &str) -> Vec<Vec<String>> {
 /* --------------------------------- Testing -------------------------------- */
 
 #[test]
-fn test_pase_line() {
+fn test_parse_line() {
     fn test_eq(line: &str, split: Vec<&str>) {
         let converted = parse_line(line);
         assert_eq!(converted, split);
@@ -73,7 +86,12 @@ fn test_parse_text() {
 
     test_eq("abc def\na b;lol\n", vec![vec!["abc", "def"], vec!["a", "b"]]);
     test_eq("abc def ; lol\na b;lol", vec![vec!["abc", "def"], vec!["a", "b"]]);
-    test_eq("abc def ; lol\na b\r\n", vec![vec!["abc", "def"], vec!["a", "b"]]);
+    test_eq("abc def ; lol\n\n\na b\r\n", vec![vec!["abc", "def"], vec!["a", "b"]]);
     test_eq("abc def\na b", vec![vec!["abc", "def"], vec!["a", "b"]]);
+}
+
+#[test]
+fn test_parse_source() {
+    assert_eq!(parse_source("a b\nc d"), Inode(vec![Source(vec!["a".to_string(), "b".to_string()]), Source(vec!["c".to_string(), "d".to_string()])]));
 }
 
