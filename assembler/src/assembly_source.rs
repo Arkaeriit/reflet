@@ -1,5 +1,4 @@
-use crate::tree::AsmNode;
-use crate::tree::Metadata;
+use crate::tree::*;
 use crate::tree::AsmNode::*;
 
 /// Takes some text and convert it into an AsmNode containing each lines parsed

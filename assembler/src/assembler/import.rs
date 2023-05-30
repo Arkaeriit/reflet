@@ -1,0 +1,64 @@
+use std::path::Path;
+use std::fs;
+use crate::tree::AsmNode::*;
+use crate::tree::*;
+use crate::assembly_source::parse_source;
+use crate::assembler::*;
+
+fn include_source(asm: &mut Assembler) {
+
+    fn _include_source(node: &AsmNode) -> Option<AsmNode> {
+        match node {
+            Source{code, meta} => {
+                if code[0] == "@import" {
+                    if code.len() == 2 {
+                        let origin_dir = match Path::new(&meta.source_file).parent() {
+                            Some(x) => x,
+                            None => {
+                                println!("Error, invalid path {}", &meta.source_file);
+                                Path::new(".")
+                            },
+                        };
+                        match origin_dir.to_str() {
+                            Some(path) => {
+                                let mut target_path = path.to_string();
+                                target_path.push_str("/");
+                                target_path.push_str(&code[1]);
+                                match fs::read_to_string(&target_path) {
+                                    Ok(txt) => {
+                                        let mut ret_node = parse_source(&txt, &target_path);
+                                        ret_node.traverse_tree(&_include_source);
+                                        Some(ret_node)
+                                    },
+                                    Err(_) => {
+                                        Some(Error{msg: "Error, unable to open file for @import directive.".to_string(), meta: meta.clone()})
+                                    }
+                                }
+                            },
+                            None => {
+                                Some(Error{msg: "Error, unable to open file for @import directive.\nAll path should be valid UTF-8".to_string(), meta: meta.clone()})
+                            },
+                        }
+                    } else {
+                        Some(Error{msg: "Error, @import directive should have a single argument that is the relative path of the file to import. Whitespace in path are not supported.".to_string(), meta: meta.clone()})
+                    }
+                } else {
+                    None
+                }
+            }
+            _ => None
+        }
+    }
+
+    asm.root.traverse_tree(&_include_source);
+}
+
+/* --------------------------------- Testing -------------------------------- */
+
+#[test]
+fn test_include() {
+    let mut assembler = Assembler::from_file("test/include/root");
+    include_source(&mut assembler);
+    assert_eq!(assembler.root.to_string(), "a\na\nd\nd\nb\na\na\n");
+}
+
