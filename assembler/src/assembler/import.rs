@@ -27,7 +27,7 @@ fn include_source(asm: &mut Assembler) {
                                 match fs::read_to_string(&target_path) {
                                     Ok(txt) => {
                                         let mut ret_node = parse_source(&txt, &target_path);
-                                        ret_node.traverse_tree(&_include_source);
+                                        ret_node.traverse_tree(&mut _include_source);
                                         Some(ret_node)
                                     },
                                     Err(_) => {
@@ -50,7 +50,7 @@ fn include_source(asm: &mut Assembler) {
         }
     }
 
-    asm.root.traverse_tree(&_include_source);
+    asm.root.traverse_tree(&mut _include_source);
 }
 
 /* --------------------------------- Testing -------------------------------- */

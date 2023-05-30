@@ -1,10 +1,14 @@
 mod import;
+mod macros;
 
 use crate::tree::*;
 use crate::assembly_source::parse_source;
+use std::collections::HashMap;
+use macros::*;
 
-struct Assembler {
+pub struct Assembler {
     root: AsmNode,
+    macros: HashMap<String, Macro>,
 }
 
 impl Assembler {
@@ -12,6 +16,7 @@ impl Assembler {
     pub fn from_text(text: &str) -> Self {
         Assembler {
             root: parse_source(text, "./__asm_init"),
+            macros: HashMap::new(),
         }
     }
 

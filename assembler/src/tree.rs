@@ -1,3 +1,4 @@
+use AsmNode::*;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Metadata {
@@ -18,7 +19,7 @@ impl AsmNode {
     /// Run a function that can transform each leaf node of the tree if it
     /// is not empty. The function should return `None` if the leaf should stay
     /// untouched and `Some(newNode)` to change the node
-    pub fn traverse_tree(&mut self, f: &dyn Fn(&AsmNode) -> Option<AsmNode>) {
+    pub fn traverse_tree(&mut self, f: &mut dyn FnMut(&AsmNode) -> Option<AsmNode>) {
         match self {
             Self::Empty => {},
             Self::Inode(nodes) => {
@@ -50,7 +51,6 @@ impl std::string::ToString for AsmNode {
                     ret.push_str(" ");
                     ret.push_str(&code[i]);
                 }
-                println!("-{}-", ret);
                 ret.push_str("\n");
                 ret
             }
@@ -76,11 +76,10 @@ pub fn tree() -> String {
 
 /* --------------------------------- Testing -------------------------------- */
 
-use AsmNode::*;
-use crate::assembly_source::parse_source;
-
 #[test]
 fn test_traverse_tree() {
+    use crate::assembly_source::parse_source;
+
     fn empty_tree(_: &AsmNode) -> Option<AsmNode> {
         Some(Empty)
     }
@@ -88,7 +87,7 @@ fn test_traverse_tree() {
                          parse_source("a b\nc d", "path"),
                          parse_source(" a\nb\nc", "path"),
                          Empty,]);
-    tree.traverse_tree(&empty_tree);
+    tree.traverse_tree(&mut empty_tree);
     assert_eq!(tree, Inode(vec![
                            Inode(vec![Empty, Empty]),
                            Inode(vec![Empty, Empty, Empty]),
