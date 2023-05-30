@@ -1,11 +1,12 @@
 use crate::tree::AsmNode;
+use crate::tree::Metadata;
 use crate::tree::AsmNode::*;
 
 /// Takes some text and convert it into an AsmNode containing each lines parsed
-pub fn parse_source(text: &str) -> AsmNode {
+pub fn parse_source(text: &str, meta_path: &str) -> AsmNode {
     let mut nodes: Vec<AsmNode> = vec![];
-    for parsed_line in parse_text(text) {
-        let node: AsmNode = Source(parsed_line);
+    for (parsed_line, meta_line, meta_raw) in parse_text(text) {
+        let node: AsmNode = Source{code: parsed_line, meta: Metadata{raw: meta_raw, source_file: meta_path.to_string(), line: meta_line}};
         nodes.push(node);
     }
     Inode(nodes)
@@ -51,13 +52,17 @@ fn parse_line(line: &str) -> Vec<String> {
 
 /// Take a bunch of text as input and cut it in a lines which are then parsed
 /// Empty lines are ignored
-fn parse_text(text: &str) -> Vec<Vec<String>> {
-    let mut ret: Vec<Vec<String>> = vec![];
+/// The relative position of all lines is also returned along with their raw
+/// values
+fn parse_text(text: &str) -> Vec<(Vec<String>, usize, String)> {
+    let mut ret: Vec<(Vec<String>, usize, String)> = vec![];
+    let mut line_index = 1;
     for line in text.split("\n") {
         let parsed = parse_line(line);
         if parsed.len() != 0 {
-            ret.push(parse_line(line));
+            ret.push((parse_line(line), line_index, line.to_string()));
         }
+        line_index += 1;
     }
     ret
 }
@@ -81,7 +86,11 @@ fn test_parse_line() {
 fn test_parse_text() {
     fn test_eq(text: &str, split: Vec<Vec<&str>>) {
         let converted = parse_text(text);
-        assert_eq!(converted, split);
+        let mut converted_vec: Vec<Vec<String>> = vec![];
+        for (elem, _meta1, _meta2) in converted {
+            converted_vec.push(elem);
+        }
+        assert_eq!(converted_vec, split);
     }
 
     test_eq("abc def\na b;lol\n", vec![vec!["abc", "def"], vec!["a", "b"]]);
@@ -92,6 +101,8 @@ fn test_parse_text() {
 
 #[test]
 fn test_parse_source() {
-    assert_eq!(parse_source("a b\nc d"), Inode(vec![Source(vec!["a".to_string(), "b".to_string()]), Source(vec!["c".to_string(), "d".to_string()])]));
+    assert_eq!(parse_source("a b\nc d", "path"), Inode(vec![
+            Source{code: vec!["a".to_string(), "b".to_string()], meta: Metadata{raw: "a b".to_string(), source_file: "path".to_string(), line: 1}},
+            Source{code: vec!["c".to_string(), "d".to_string()], meta: Metadata{raw: "c d".to_string(), source_file: "path".to_string(), line: 2}}]));
 }
 

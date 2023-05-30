@@ -1,9 +1,16 @@
 
 #[derive(Debug, PartialEq, Eq)]
+pub struct Metadata {
+    pub raw: String,
+    pub source_file: String,
+    pub line: usize,
+}
+
+#[derive(Debug, PartialEq, Eq)]
 pub enum AsmNode {
     Empty,
     Inode(Vec<AsmNode>),
-    Source(Vec<String>),
+    Source{code: Vec<String>, meta: Metadata},
 }
 
 impl AsmNode {
@@ -37,8 +44,8 @@ fn test_traverse_tree() {
         Empty
     }
     let mut tree = Inode(vec![
-                         parse_source("a b\nc d"),
-                         parse_source(" a\nb\nc"),
+                         parse_source("a b\nc d", "path"),
+                         parse_source(" a\nb\nc", "path"),
                          Empty,]);
     tree.traverse_tree(&empty_tree);
     assert_eq!(tree, Inode(vec![
