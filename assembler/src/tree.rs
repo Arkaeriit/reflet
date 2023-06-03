@@ -33,6 +33,9 @@ pub enum AsmNode {
     /// the error is replaced with an error node that contain a message that
     /// should be displayed to the user.
     Error{msg: String, meta: Metadata},
+
+    /// Raw value in bytes, very close from the final result
+    Raw(Vec<u8>),
 }
 
 impl AsmNode {
@@ -85,7 +88,15 @@ impl std::string::ToString for AsmNode {
                 ret.push_str(&meta.raw);
                 ret.push_str("\n");
                 ret
-            }
+            },
+            Raw(data) => {
+                let mut ret = "".to_string();
+                for byte in data {
+                    ret.push_str(&format!("0x{:02X} ", byte));
+                }
+                ret.push_str("\n");
+                ret
+            },
         }
     }
 }
