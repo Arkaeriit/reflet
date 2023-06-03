@@ -2,6 +2,9 @@ use crate::assembler::*;
 use crate::tree::AsmNode::*;
 use crate::tree::*;
 
+/// The content of a macro is defined by the number of arguments in need to be
+/// substituted and the source code content that will replace the macro
+/// invocation.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Macro {
     number_of_arguments: usize,
@@ -9,6 +12,8 @@ pub struct Macro {
 }
 
 impl Macro {
+    /// Generate a new empty macro. Its content will be filled with new lines
+    /// of source code.
     fn new(number_of_arguments: usize) -> Self {
         Macro {
             number_of_arguments: number_of_arguments,
@@ -17,6 +22,10 @@ impl Macro {
     }
 }
 
+/// Traverse the source in search of `@define` lines. At those line a new macro
+/// is defined and all lines until a `@end` line will be put in the macro.
+/// Then, the resulting macro is registered in the assembler's state.
+/// All used up lines are replaced with Empty nodes.
 pub fn register_macros(asm: &mut Assembler) {
     let mut in_macro = false;
     let mut new_macro = Macro::new(0);
@@ -74,6 +83,9 @@ pub fn register_macros(asm: &mut Assembler) {
     asm.root.traverse_tree(&mut register_macros_closure);
 }
 
+/// Search all the sources lines of the code for macro to be expanded. In those
+/// cases, the content of the macro is fetched from the assembler's macro list
+/// and the lines are replaced with an Inode containing the expanded macro.
 pub fn expand_macros(asm: &mut Assembler) {
 
     let mut expand_macros_closure = | node: &AsmNode | -> Option<AsmNode> {

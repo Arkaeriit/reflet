@@ -1,4 +1,9 @@
+/// A module containing the functions used to import assembly files with the
+/// `@import` directive.
 mod import;
+
+/// A module used to register macros with the `@define` directive and expand
+/// macros called in the source.
 mod macros;
 
 use crate::tree::*;
@@ -6,8 +11,13 @@ use crate::assembly_source::parse_source;
 use std::collections::HashMap;
 use macros::*;
 
+/// The collection of the assembly code tree and all the mutable context needed
+/// to process it
 pub struct Assembler {
+    /// The root element of the tree used to represent and process the assembly
+    /// code
     root: AsmNode,
+    /// A map of all the macros linking their names to their contents
     macros: HashMap<String, Macro>,
 }
 

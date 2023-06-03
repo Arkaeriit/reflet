@@ -1,24 +1,44 @@
 use AsmNode::*;
 
+/// Metadata used to store information regarding the source line of a node.
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Metadata {
+    /// The original and unprocessed line of assembly code.
     pub raw: String,
+
+    /// The path of the file that line comes from.
     pub source_file: String,
+
+    /// The number of the line.
     pub line: usize,
 }
 
+/// The nodes for the tree representing the assembly code.
 #[derive(Debug, PartialEq, Eq)]
 pub enum AsmNode {
+    /// Some steps of the assembly consume nodes to update the assembler's state
+    /// such as when registering macros. In those case, a empty node is left.
+    /// This is made for performance reason in order not to resize inodes.
     Empty,
+
+    /// While all actual content is stored in leaf nodes, the structure of tree
+    /// is made with inodes that can have an arbitrary number of children.
     Inode(Vec<AsmNode>),
+
+    /// A line of assembly language code. Each token in the line is an element
+    /// of the vector.
     Source{code: Vec<String>, meta: Metadata},
+
+    /// When a step of the compilation causes an error, the node responsible for
+    /// the error is replaced with an error node that contain a message that
+    /// should be displayed to the user.
     Error{msg: String, meta: Metadata},
 }
 
 impl AsmNode {
     /// Run a function that can transform each leaf node of the tree if it
     /// is not empty. The function should return `None` if the leaf should stay
-    /// untouched and `Some(newNode)` to change the node
+    /// untouched and `Some(newNode)` to change the node.
     pub fn traverse_tree(&mut self, f: &mut dyn FnMut(&AsmNode) -> Option<AsmNode>) {
         match self {
             Self::Empty => {},
