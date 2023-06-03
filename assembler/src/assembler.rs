@@ -14,8 +14,13 @@ pub struct Assembler {
 impl Assembler {
     /// Takes some assembly code as input and set up the assembler state with it
     pub fn from_text(text: &str) -> Self {
+        Self::from_named_text(text, "./__asm_init")
+    }
+
+    /// As from_text but the name is choosen
+    pub fn from_named_text(text: &str, name: &str) -> Self {
         Assembler {
-            root: parse_source(text, "./__asm_init"),
+            root: parse_source(text, name),
             macros: HashMap::new(),
         }
     }

@@ -37,7 +37,7 @@ impl AsmNode {
 impl std::string::ToString for AsmNode {
     fn to_string(&self) -> String {
         match self {
-            Empty => "???".to_string(),
+            Empty => "".to_string(),
             Inode(nodes) => {
                 let mut ret = "".to_string();
                 for node in nodes {

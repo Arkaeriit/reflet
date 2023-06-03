@@ -74,6 +74,50 @@ pub fn register_macros(asm: &mut Assembler) {
     asm.root.traverse_tree(&mut register_macros_closure);
 }
 
+pub fn expand_macros(asm: &mut Assembler) {
+
+    let mut expand_macros_closure = | node: &AsmNode | -> Option<AsmNode> {
+        // All the work is done in this function. The outer closure is needed to
+        // access the macro list of the Assembler; but we need to do the
+        // expansion recursively, which cannot be done from the closure.
+        fn expand_macro_helper(node: &AsmNode, macros: &HashMap<String, Macro>) -> Option<AsmNode> {
+            match node {
+                Source{code, meta} => {
+                    match macros.get(&code[0]) {
+                        Some(macro_txt) => {
+                            if code.len() == macro_txt.number_of_arguments + 1 {
+                                // Formatting name for error reporting
+                                let mut macro_name = "macro_".to_string();
+                                macro_name.push_str(&code[0]);
+                                // Arguments substitution
+                                let mut expanded_text = macro_txt.content.clone();
+                                for i in 0..macro_txt.number_of_arguments {
+                                    let pattern = format!("${}", i+1);
+                                    expanded_text = expanded_text.replace(&pattern, &code[1+i]);
+                                }
+                                // Result generation
+                                let mut expanded_macro = Assembler::from_named_text(&expanded_text, &macro_name);
+                                expanded_macro.macros = macros.clone();
+                                expand_macros(&mut expanded_macro);
+                                Some(expanded_macro.root)
+                            } else {
+                                let msg = format!("Error, invalid number of arguments for macro {}. Expected {}, got {}", &code[0], macro_txt.number_of_arguments, code.len() - 1);
+                                Some(Error{msg, meta: meta.clone()})
+                            }
+                        },
+                        None => None,
+                    }
+                },
+                _ => None,
+            }
+        }
+        expand_macro_helper(node, &asm.macros)
+    };
+
+
+    asm.root.traverse_tree(&mut expand_macros_closure);
+}
+
 /* --------------------------------- Testing -------------------------------- */
 
 #[test]
@@ -85,5 +129,21 @@ fn test_register_macros() {
 
     register_macros(&mut assembler);
     assert_eq!(expected_hash_map, assembler.macros);
+}
+
+#[test]
+fn test_expand_macro_no_arg_substitution() {
+    let mut assembler = Assembler::from_text("@define m 0\nx x\n@end\nm\nm\n");
+    register_macros(&mut assembler);
+    expand_macros(&mut assembler);
+    assert_eq!(assembler.root.to_string(), "x x\nx x\n");
+}
+
+#[test]
+fn test_expand_macro() {
+    let mut assembler = Assembler::from_text("@define m 2\nx $1 $2\n@end\nm a A\nm b B\n");
+    register_macros(&mut assembler);
+    expand_macros(&mut assembler);
+    assert_eq!(assembler.root.to_string(), "x a A\nx b B\n");
 }
 
