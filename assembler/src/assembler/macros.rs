@@ -91,39 +91,38 @@ pub fn expand_macros(asm: &mut Assembler) {
     let mut expand_macros_closure = | node: &AsmNode | -> Option<AsmNode> {
         // All the work is done in this function. The outer closure is needed to
         // access the macro list of the Assembler; but we need to do the
-        // expansion recursively, which cannot be done from the closure.
-        fn expand_macro_helper(node: &AsmNode, macros: &HashMap<String, Macro>) -> Option<AsmNode> {
-            match node {
-                Source{code, meta} => {
-                    match macros.get(&code[0]) {
-                        Some(macro_txt) => {
-                            if code.len() == macro_txt.number_of_arguments + 1 {
-                                // Formatting name for error reporting
-                                let mut macro_name = "macro_".to_string();
-                                macro_name.push_str(&code[0]);
-                                // Arguments substitution
-                                let mut expanded_text = macro_txt.content.clone();
-                                for i in 0..macro_txt.number_of_arguments {
-                                    let pattern = format!("${}", i+1);
-                                    expanded_text = expanded_text.replace(&pattern, &code[1+i]);
-                                }
-                                // Result generation
-                                let mut expanded_macro = Assembler::from_named_text(&expanded_text, &macro_name);
-                                expanded_macro.macros = macros.clone();
-                                expand_macros(&mut expanded_macro);
-                                Some(expanded_macro.root)
-                            } else {
-                                let msg = format!("Error, invalid number of arguments for macro {}. Expected {}, got {}", &code[0], macro_txt.number_of_arguments, code.len() - 1);
-                                Some(Error{msg, meta: meta.clone()})
+        // expansion recursively, which cannot be done from the closure and we
+        // must call expand_macros inside of it.
+        match node {
+            Source{code, meta} => {
+                match asm.macros.get(&code[0]) {
+                    Some(macro_txt) => {
+                        if code.len() == macro_txt.number_of_arguments + 1 {
+                            // Formatting name for error reporting
+                            let mut macro_name = "macro_".to_string();
+                            macro_name.push_str(&code[0]);
+                            // Arguments substitution
+                            let mut expanded_text = macro_txt.content.clone();
+                            for i in 0..macro_txt.number_of_arguments {
+                                let pattern = format!("${}", i+1);
+                                expanded_text = expanded_text.replace(&pattern, &code[1+i]);
                             }
-                        },
-                        None => None,
-                    }
-                },
-                _ => None,
-            }
+                            // Result generation
+                            let mut expanded_macro = Assembler::from_named_text(&expanded_text, &macro_name);
+                            expanded_macro.macros = asm.macros.clone();
+                            expanded_macro.macros.remove(&code[0]); // Remove the macro name to prevent infinite recursion. Instead an error will be raised when the macro is not found. Furthermore, this can be used to shadow macros or instructions.
+                            expand_macros(&mut expanded_macro);
+                            Some(expanded_macro.root)
+                        } else {
+                            let msg = format!("Error, invalid number of arguments for macro {}. Expected {}, got {}", &code[0], macro_txt.number_of_arguments, code.len() - 1);
+                            Some(Error{msg, meta: meta.clone()})
+                        }
+                    },
+                    None => None,
+                }
+            },
+            _ => None,
         }
-        expand_macro_helper(node, &asm.macros)
     };
 
 
@@ -157,5 +156,20 @@ fn test_expand_macro() {
     register_macros(&mut assembler);
     expand_macros(&mut assembler);
     assert_eq!(assembler.root.to_string(), "x a A\nx b B\n");
+}
+
+#[test]
+fn test_expand_macro_recursive() {
+    let mut assembler = Assembler::from_text("@define m 2
+                                                  $1 $2
+                                              @end
+                                              @define in 1
+                                                  x $1
+                                              @end
+                                              m in a
+                                              m in b");
+    register_macros(&mut assembler);
+    expand_macros(&mut assembler);
+    assert_eq!(assembler.root.to_string(), "x a\nx b\n");
 }
 
