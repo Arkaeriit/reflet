@@ -36,6 +36,10 @@ pub enum AsmNode {
 
     /// Raw value in bytes, very close from the final result
     Raw(Vec<u8>),
+
+    /// Number of bytes the next node should be aligned to. Will be replaced by
+    /// some raw bytes.
+    Align(usize),
 }
 
 impl AsmNode {
@@ -96,6 +100,9 @@ impl std::string::ToString for AsmNode {
                 }
                 ret.push_str("\n");
                 ret
+            },
+            Align(size) => {
+                format!("Align to {} bytes\n", size)
             },
         }
     }
