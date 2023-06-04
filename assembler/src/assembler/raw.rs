@@ -70,6 +70,34 @@ fn expand_constants(asm: &mut Assembler) {
     asm.root.traverse_tree(&mut apply_computed_constants);
 }
 
+/// Register the `@rawbytes` directives into Raw nodes
+fn decode_raw_bytes(asm: &mut Assembler) {
+    fn decoding_raw_bytes(node: &AsmNode) -> Option<AsmNode> {
+        match node {
+            Source{code, meta} => {
+                if &code[0] == "@rawbytes" {
+                    // An empty rawbyte statement can be considered valid so no length checking
+                    let mut data: Vec<u8> = vec![];
+                    for i in 1..code.len() {
+                        match u8::from_str_radix(&code[i], 16) {
+                            Ok(num) => {data.push(num);},
+                            Err(_) => {
+                                return Some(Error{msg: format!("Error, unable to read byte {} in @rawbyte directive.", &code[i]), meta: meta.clone()});
+                            },
+                        }
+                    }
+                    Some(Raw(data))
+                } else {
+                    None
+                }
+            },
+            _ => None,
+        }
+    }
+
+    asm.root.traverse_tree(&mut decoding_raw_bytes);
+}
+
 /* --------------------------------- Testing -------------------------------- */
 
 #[test]
@@ -78,5 +106,12 @@ fn test_constants() {
     assert_eq!(asm.set_word_size(8), None);
     expand_constants(&mut asm);
     assert_eq!(asm.root.to_string(), "0x0A \n0x10 \n")
+}
+
+#[test]
+fn test_raw_bytes() {
+    let mut asm = Assembler::from_text("@rawbytes 10 1 99");
+    decode_raw_bytes(&mut asm);
+    assert_eq!(asm.root.to_string(), "0x10 0x01 0x99 \n");
 }
 
