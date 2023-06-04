@@ -4,7 +4,7 @@ use crate::assembler::*;
 use std::collections::HashMap;
 
 /// Expands the @constant directives into raw bytes
-fn expand_constants(asm: &mut Assembler) {
+pub fn expand_constants(asm: &mut Assembler) {
     let mut all_constants: Vec<String> = vec![];
     let mut had_error = false;
 
@@ -71,7 +71,7 @@ fn expand_constants(asm: &mut Assembler) {
 }
 
 /// Register the `@rawbytes` directives into Raw nodes
-fn decode_raw_bytes(asm: &mut Assembler) {
+pub fn decode_raw_bytes(asm: &mut Assembler) {
     fn decoding_raw_bytes(node: &AsmNode) -> Option<AsmNode> {
         match node {
             Source{code, meta} => {

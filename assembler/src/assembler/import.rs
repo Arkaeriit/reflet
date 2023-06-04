@@ -7,7 +7,7 @@ use crate::assembler::*;
 
 /// Traverse the tree searching for @import directive in source nodes. When
 /// found, they are replaced with the content of the file to be imported.
-fn include_source(asm: &mut Assembler) {
+pub fn include_source(asm: &mut Assembler) {
 
     fn _include_source(node: &AsmNode) -> Option<AsmNode> {
         match node {

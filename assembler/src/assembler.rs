@@ -10,6 +10,9 @@ mod macros;
 /// `@constant`
 mod raw;
 
+/// A module to check and expand `@align` directives.
+mod align;
+
 use crate::tree::*;
 use crate::assembly_source::parse_source;
 use std::collections::HashMap;
@@ -27,6 +30,12 @@ pub struct Assembler {
 
     /// The number of bytes in a constant or address
     wordsize: usize,
+
+    /// The pattern that will be put as padding to replace `@align` directives
+    align_pattern: Vec<u8>,
+
+    /// Address of the first instruction of first data in the resulting binary
+    start_address: usize,
 }
 
 impl Assembler {
@@ -41,6 +50,8 @@ impl Assembler {
             root: parse_source(text, name),
             macros: HashMap::new(),
             wordsize: 0,
+            align_pattern: vec![0],
+            start_address: 0,
         }
     }
 
