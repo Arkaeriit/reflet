@@ -40,6 +40,10 @@ pub enum AsmNode {
     /// Number of bytes the next node should be aligned to. Will be replaced by
     /// some raw bytes.
     Align(usize),
+
+    /// A node related to addresses. It can be either the definition of a new
+    /// label or a reference to that label.
+    Label{name: String, is_definition: bool, meta: Metadata},
 }
 
 impl AsmNode {
@@ -103,6 +107,13 @@ impl std::string::ToString for AsmNode {
             },
             Align(size) => {
                 format!("Align to {} bytes\n", size)
+            },
+            Label{name, is_definition, meta: _} => {
+                if *is_definition {
+                    format!("Definition of label {}\n", name)
+                } else {
+                    format!("Reference to label {}\n", name)
+                }
             },
         }
     }

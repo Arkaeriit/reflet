@@ -7,11 +7,14 @@ mod import;
 mod macros;
 
 /// A module used to register raw values with the directives `@rawbytes` or
-/// `@constant`
+/// `@constant`.
 mod raw;
 
 /// A module to check and expand `@align` directives.
 mod align;
+
+/// A module to register labels and link to them.
+mod label;
 
 use crate::tree::*;
 use crate::assembly_source::parse_source;
@@ -44,7 +47,7 @@ impl Assembler {
         Self::from_named_text(text, "./__asm_init")
     }
 
-    /// As from_text but the name is choosen
+    /// As from_text but the name is chosen
     fn from_named_text(text: &str, name: &str) -> Self {
         Assembler {
             root: parse_source(text, name),
