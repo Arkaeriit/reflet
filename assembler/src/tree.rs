@@ -119,10 +119,6 @@ impl std::string::ToString for AsmNode {
     }
 }
 
-pub fn tree() -> String {
-    "Hello from the trees".to_string()
-}
-
 /* --------------------------------- Testing -------------------------------- */
 
 #[test]

@@ -2,11 +2,19 @@
 name = "reflet-asm"
 version = "0.1.0"
 edition = "2021"
+authors = ["Maxime Bouillot maxbouillot@gmail.com"]
+license = "BSD-3-Clause"
+description = "A library to make macro-assemblers and a macro assembler for the Reflet architectures build as a reference."
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "macro_asm_builder"
+path = "src/macro_asm_builder.rs"
 
 [dependencies]
 
 [[bin]]
 name = "reflet-asm"
 path = "src/main.rs"
+
+
+

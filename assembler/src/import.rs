@@ -3,7 +3,7 @@ use std::fs;
 use crate::tree::AsmNode::*;
 use crate::tree::*;
 use crate::assembly_source::parse_source;
-use crate::assembler::*;
+use crate::Assembler;
 
 /// Traverse the tree searching for @import directive in source nodes. When
 /// found, they are replaced with the content of the file to be imported.

@@ -1,4 +1,4 @@
-use crate::assembler::*;
+use crate::Assembler;
 use crate::tree::AsmNode::*;
 use crate::tree::*;
 

@@ -1,6 +1,7 @@
-use crate::assembler::*;
+use crate::Assembler;
 use crate::tree::AsmNode::*;
 use crate::tree::*;
+use std::collections::HashMap;
 
 /// The content of a macro is defined by the number of arguments in need to be
 /// substituted and the source code content that will replace the macro

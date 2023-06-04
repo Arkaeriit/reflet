@@ -1,6 +1,6 @@
 use crate::tree::AsmNode::*;
 use crate::tree::*;
-use crate::assembler::*;
+use crate::Assembler;
 use std::collections::HashMap;
 
 /// Expands the @constant directives into raw bytes
