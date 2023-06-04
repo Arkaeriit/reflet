@@ -25,13 +25,14 @@ mod align;
 mod label;
 
 use crate::tree::*;
+use crate::tree::AsmNode::*;
 use crate::assembly_source::parse_source;
 use std::collections::HashMap;
 use macros::*;
 
 /// The collection of the assembly code tree and all the mutable context needed
 /// to process it
-pub struct Assembler {
+pub struct Assembler<'a> {
     /// The root element of the tree used to represent and process the assembly
     /// code
     root: AsmNode,
@@ -47,9 +48,23 @@ pub struct Assembler {
 
     /// Address of the first instruction of first data in the resulting binary
     start_address: usize,
+
+    /// A function that expand implementation-specifics macros. Takes a vector
+    /// of tokens from a line of code and return Ok<None> if the macro expansion
+    /// is needed, Ok<txt> to replace the text with txt, or Err<txt> to return
+    /// an error message destined to the user.
+    pub user_macro: &'a dyn Fn(&Vec<String>) -> Result<Option<String>, String>,
+
+    /// A function used to compile assembly source code into machine code. It
+    /// is implementation-specific. It takes a vector if tokens from a line of
+    /// code and return Ok<bytes> to return the machine code or Err<txt> to
+    /// return an error message destined to the user. When this function is run,
+    /// all code left in the tree should be raw assembly and not macros or
+    /// directive. Thus, there is no way this function can ignore code.
+    pub micro_assembly: &'a dyn Fn(&Vec<String>) -> Result<Vec<u8>, String>,
 }
 
-impl Assembler {
+impl Assembler<'_> {
     /// Takes some assembly code as input and set up the assembler state with it
     pub fn from_text(text: &str) -> Self {
         Self::from_named_text(text, "./__asm_init")
@@ -57,12 +72,21 @@ impl Assembler {
 
     /// As from_text but the name is chosen
     fn from_named_text(text: &str, name: &str) -> Self {
+        fn default_user_macros(_: &Vec<String>) -> Result<Option<String>, String> {
+            Ok(None)
+        }
+        fn default_micro_assembly(_: &Vec<String>) -> Result<Vec<u8>, String> {
+            Err("Micro assembly function should be given by the assembler implementation.".to_string())
+        }
+
         Assembler {
             root: parse_source(text, name),
             macros: HashMap::new(),
             wordsize: 0,
             align_pattern: vec![0],
             start_address: 0,
+            user_macro: &default_user_macros,
+            micro_assembly: &default_micro_assembly,
         }
     }
 
@@ -87,6 +111,30 @@ impl Assembler {
                 } else {
                     Some("Valid word sizes should be 8 bits times a power of two such as 8, 16, or 32.")
                 }
+            },
+        }
+    }
+
+    /// Add some text at the beginning of the tree.
+    pub fn add_text_before(&mut self, txt: &str, name: &str) {
+        match &mut self.root {
+            Inode(list) => {
+                list.insert(0, parse_source(txt, name));
+            },
+            _ => {
+                panic!("Assembler's root should have been an inode!");
+            },
+        }
+    }
+
+    /// Add some text at the end of the tree.
+    pub fn add_text_after(&mut self, txt: &str, name: &str) {
+        match &mut self.root {
+            Inode(list) => {
+                list.push(parse_source(txt, name));
+            },
+            _ => {
+                panic!("Assembler's root should have been an inode!");
             },
         }
     }

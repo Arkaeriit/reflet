@@ -1,7 +1,6 @@
 use crate::Assembler;
 use crate::tree::AsmNode::*;
 use crate::tree::*;
-use std::collections::HashMap;
 
 /// The content of a macro is defined by the number of arguments in need to be
 /// substituted and the source code content that will replace the macro
@@ -135,7 +134,7 @@ pub fn expand_macros(asm: &mut Assembler) {
 #[test]
 fn test_register_macros() {
     let mut assembler = Assembler::from_text("@define my_macro 3\nmacromacro\ntxttxt\n@end");
-    let expected_hash_map = HashMap::from([
+    let expected_hash_map = std::collections::HashMap::from([
         ("my_macro".to_string(), Macro{number_of_arguments: 3, content: "macromacro\ntxttxt\n".to_string()}),
     ]);
 
