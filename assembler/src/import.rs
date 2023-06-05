@@ -59,7 +59,7 @@ pub fn include_source(asm: &mut Assembler) {
 
 #[test]
 fn test_include() {
-    let mut assembler = Assembler::from_file("test/include/root");
+    let mut assembler = Assembler::from_file("tests/include/root");
     include_source(&mut assembler);
     assert_eq!(assembler.root.to_string(), "a\na\nd\nd\nb\na\na\n");
 }

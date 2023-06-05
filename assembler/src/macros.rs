@@ -37,7 +37,7 @@ pub fn register_macros(asm: &mut Assembler) {
                 match code[0].as_str() {
                     "@define" => {
                         if in_macro {
-                            Some(Error{msg: "Error, macro definitions can't be nested".to_string(), meta: meta.clone()})
+                            Some(Error{msg: "Error, macro definitions can't be nested.".to_string(), meta: meta.clone()})
                         } else {
                             if code.len() == 3 {
                                 in_macro = true;
@@ -49,10 +49,10 @@ pub fn register_macros(asm: &mut Assembler) {
                                         Some(Empty)
                                     },
                                     Err(_) =>
-                                        Some(Error{msg: "Error, macro definitions should have the form `@define <macro name> <number_of_arguments>`".to_string(), meta: meta.clone()})
+                                        Some(Error{msg: "Error, macro definitions should have the form `@define <macro name> <number_of_arguments>`.".to_string(), meta: meta.clone()})
                                 }
                             } else {
-                                Some(Error{msg: "Error, macro definitions should have the form `@define <macro name> <number_of_arguments>`".to_string(), meta: meta.clone()})
+                                Some(Error{msg: "Error, macro definitions should have the form `@define <macro name> <number_of_arguments>`.".to_string(), meta: meta.clone()})
                             }
                         }
                     },
@@ -62,7 +62,7 @@ pub fn register_macros(asm: &mut Assembler) {
                             asm.macros.insert(new_macro_name.clone(), new_macro.clone());
                             Some(Empty)
                         } else {
-                            Some(Error{msg: "Error, @end should only be used to end macro definitions".to_string(), meta: meta.clone()})
+                            Some(Error{msg: "Error, @end should only be used to end macro definitions.".to_string(), meta: meta.clone()})
                         }
                     },
                     _ => {
@@ -114,7 +114,7 @@ pub fn expand_macros(asm: &mut Assembler) {
                             expand_macros(&mut expanded_macro);
                             Some(expanded_macro.root)
                         } else {
-                            let msg = format!("Error, invalid number of arguments for macro {}. Expected {}, got {}", &code[0], macro_txt.number_of_arguments, code.len() - 1);
+                            let msg = format!("Error, invalid number of arguments for macro {}. Expected {}, got {}.", &code[0], macro_txt.number_of_arguments, code.len() - 1);
                             Some(Error{msg, meta: meta.clone()})
                         }
                     },

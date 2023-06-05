@@ -21,7 +21,7 @@ pub fn expand_constants(asm: &mut Assembler) {
                         None
                     } else {
                         had_error = true;
-                        Some(Error{msg: "Error, @import directive should have a single argument that is constant to include.".to_string(), meta: meta.clone()})
+                        Some(Error{msg: "Error, @constant directive should have a single argument that is its constant.".to_string(), meta: meta.clone()})
                     }
                 } else {
                     None

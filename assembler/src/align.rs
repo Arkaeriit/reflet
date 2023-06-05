@@ -11,7 +11,7 @@ pub fn register_align(asm: &mut Assembler) {
                     if code.len() == 2 {
                         match usize::from_str_radix(&code[1], 10) {
                             Ok(num) => Some(Align(num)),
-                            Err(_) => Some(Error{msg: "Error, @align directive should take a single numeric argument in base 10.".to_string(), meta: meta.clone()}),
+                            Err(_) => Some(Error{msg: "Error, @align directive should take a single positive numeric argument in base 10.".to_string(), meta: meta.clone()}),
                         }
                     } else {
                         Some(Error{msg: "Error, @align directive should take a single numeric argument in base 10.".to_string(), meta: meta.clone()})
