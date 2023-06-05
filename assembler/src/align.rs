@@ -56,6 +56,7 @@ pub fn expand_align(asm: &mut Assembler) {
                 }
                 None
             },
+            Error{msg: _, meta: _} => None,
             x => {
                 Some(Error{msg: format!("There is a bug in the assembler. A node should not have been left while in expand_align: {}.", x.to_string()), meta: Metadata{raw: "!!!".to_string(), source_file: "!!!".to_string(), line: !0}})
             },

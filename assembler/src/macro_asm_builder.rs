@@ -53,7 +53,7 @@ pub struct Assembler<'a> {
     /// of tokens from a line of code and return Ok<None> if the macro expansion
     /// is needed, Ok<txt> to replace the text with txt, or Err<txt> to return
     /// an error message destined to the user.
-    pub user_macro: &'a dyn Fn(&Vec<String>) -> Result<Option<String>, String>,
+    pub implementation_macro: &'a dyn Fn(&Vec<String>) -> Result<Option<String>, String>,
 
     /// A function used to compile assembly source code into machine code. It
     /// is implementation-specific. It takes a vector if tokens from a line of
@@ -72,7 +72,7 @@ impl Assembler<'_> {
 
     /// As from_text but the name is chosen
     fn from_named_text(text: &str, name: &str) -> Self {
-        fn default_user_macros(_: &Vec<String>) -> Result<Option<String>, String> {
+        fn default_implementation_macro(_: &Vec<String>) -> Result<Option<String>, String> {
             Ok(None)
         }
         fn default_micro_assembly(_: &Vec<String>) -> Result<Vec<u8>, String> {
@@ -85,7 +85,7 @@ impl Assembler<'_> {
             wordsize: 0,
             align_pattern: vec![0],
             start_address: 0,
-            user_macro: &default_user_macros,
+            implementation_macro: &default_implementation_macro,
             micro_assembly: &default_micro_assembly,
         }
     }
@@ -137,6 +137,97 @@ impl Assembler<'_> {
                 panic!("Assembler's root should have been an inode!");
             },
         }
+    }
+
+    /// Perform a complete assembly process. Return a vector of bytes of the
+    /// resulting binary in case of success and an error message in case of
+    /// error.
+    pub fn assemble(&mut self) -> Result<Vec<u8>, String> {
+        // First pass of transformation
+        import::include_source(self);
+        macros::register_macros(self);
+        macros::expand_macros(self);
+        import::include_source(self); // This should not do anything but it will show more useful error messages if there was some include directives inside of a macro.
+        label::register_labels(self);
+        align::register_align(self);
+        raw::expand_constants(self);
+        raw::decode_raw_bytes(self);
+
+        // User defined macros
+        self.run_implementation_macros();
+
+        // An other run of first ass transformations if the
+        // implementation-macros include some directives
+        macros::register_macros(self);
+        macros::expand_macros(self);
+        label::register_labels(self);
+        align::register_align(self);
+        raw::expand_constants(self);
+        raw::decode_raw_bytes(self);
+
+        // Run the micro-assembler
+        self.run_micro_assembler();
+
+        // Finish the linking and padding
+        align::expand_align(self);
+        label::expand_labels(self);
+        let ret = self.collect_raw();
+
+        // Return raw or report errors
+        match self.root.check_for_errors() {
+            Some(txt) => Err(txt),
+            None => Ok(ret),
+        }
+    }
+
+    /// Executes the implementation-specific macros.
+    fn run_implementation_macros(&mut self) {
+        let mut running_implementation_macros = | node: &AsmNode | -> Option<AsmNode> {
+            match node {
+                Source{code, meta} => match (self.implementation_macro)(code) {
+                    Err(msg) => Some(Error{msg, meta: meta.clone()}),
+                    Ok(None) => None,
+                    Ok(Some(txt)) => Some(parse_source(&txt, &format!("Expantion of line {} from file {}, being {}", meta.line, &meta.source_file, &meta.raw))),
+                },
+                _ => None,
+            }
+        };
+
+        self.root.traverse_tree(&mut running_implementation_macros);
+    }
+
+    /// Executes the implementation-specific micro-assembler.
+    fn run_micro_assembler(&mut self) {
+        let mut running_micro_assembler = | node: &AsmNode | -> Option<AsmNode> {
+            match node {
+                Source{code, meta} => match (self.micro_assembly)(code) {
+                    Err(msg) => Some(Error{msg, meta: meta.clone()}),
+                    Ok(raw) => Some(Raw(raw)),
+                },
+                _ => None,
+            }
+        };
+
+        self.root.traverse_tree(&mut running_micro_assembler);
+    }
+
+    /// Gather all the raw part of a tree and extract them. Make an error for
+    /// non-raw parts.
+    fn collect_raw(&mut self) -> Vec<u8> {
+        let mut ret: Vec<u8> = vec![];
+        let mut collecting_raw = | node: &AsmNode | -> Option<AsmNode> {
+            match node {
+                Raw(data) => {
+                    ret.extend(data);
+                    Some(Empty)
+                },
+                Error{msg: _, meta: _} => None,
+                x => Some(Error{msg: format!("There is a bug in the assembler, the node {} should not be left over in collect_raw.", &x.to_string()), meta: Metadata{line: !0, raw: "!!!".to_string(), source_file: "!!!".to_string()}}),
+            }
+        };
+
+        self.root.traverse_tree(&mut collecting_raw);
+        ret
     }
 
     /// From a number, convert it into a stream of bytes of the size required by

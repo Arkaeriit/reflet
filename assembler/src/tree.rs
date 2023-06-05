@@ -63,6 +63,27 @@ impl AsmNode {
             },
         }
     }
+
+    /// Traverse a tree in search for error. If they any are present, return a
+    /// text explaining them. If none are present, return None
+    pub fn check_for_errors(&mut self) -> Option<String> {
+        let mut ret = "".to_string();
+        let mut checking_for_errors = | node: &AsmNode | -> Option<AsmNode> {
+            match node {
+                Error{msg, meta} => {
+                    ret.push_str(&format!("{}\nAt line {} from file {}: `{}`\n--------------\n", msg, meta.line, meta.source_file, meta.raw));
+                    None
+                },
+                _ => None,
+            }
+        };
+
+        self.traverse_tree(&mut checking_for_errors);
+        match ret.len() {
+            0 => None,
+            _ => Some(ret),
+        }
+    }
 }
 
 impl std::string::ToString for AsmNode {
