@@ -8,13 +8,13 @@ description = "A library to make macro-assemblers and a macro assembler for the 
 
 [lib]
 name = "macro_asm_builder"
-path = "src/macro_asm_builder.rs"
+path = "src/macro_asm_builder/macro_asm_builder.rs"
 
 [dependencies]
 
 [[bin]]
 name = "reflet-asm"
-path = "src/main.rs"
+path = "src/reflet-asm/main.rs"
 
 
 
