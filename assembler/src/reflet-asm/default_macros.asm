@@ -210,3 +210,29 @@
     add WR
 @end
 
+; Less or equal
+@define leseq 1
+    cpy R12
+    read $1
+    les R12
+    cmpnot
+@end
+
+; Greater
+@define great 1
+    leseq $1
+    cmpnot
+@end
+
+; Greater or equal
+@define greateq 1
+    les $1
+    cmpnot
+@end
+
+; Not equal
+@define neq 1
+    eq $1
+    cmpnot
+@end
+
