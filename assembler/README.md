@@ -102,13 +102,13 @@ Registers name are case insensitive. They can either be named (`SP`, `wr`) or be
 
 ## Compilation and installation
 
-The Reflet assember is written in [Nelua](https://nelua.io). But as everyone might not have the Nelua compiler install, I included the generated C file in this repository.
+The Reflet assembler is written in Rust.
 
-Running `make` will compile the C file. To compile from the nelua file, run `make full_compilation`.
+Running `make` will compile it with cargo.
 
-You can then install it with `make install` or uninstall it with `make uninstall`.
+You can then install to `/usr/local/bin` it with `make install` or uninstall it with `make uninstall`.
 
 ## Legacy assemblers
 
-Before writting this assembler, I had written two other that can be found in the `legacy_assemblers` folder. Note that even if they can write correct code, `reflet-masm` is not suitable to write code that is complient with alignement constrain.
+Before writing this assembler, I had written two other that can be found in the `legacy_assemblers` folder. Note that even if they can write correct code, `reflet-masm` is not suitable to write code that is compliant with alignment constrain, and `reflet-asm-nelua` is very similar in features as this one but is way slower.
 
