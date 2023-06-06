@@ -39,6 +39,11 @@ label testingMath
     callf intPow
     read R1
     debug ;expecting 10^4 = 10000 = 0x2710
+    set 12 ; testing clog2
+    cpy R1
+    callf clog2
+    read R1
+    debug ; expecting clog2(12) = 4
     ret
 
 label testingPrinting

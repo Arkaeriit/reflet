@@ -44,7 +44,7 @@ label intMult
         ; count down and loop back if needed
         set 1
         cc2
-        addup R3
+        addup. R3
         set 0
         eq R3
         cmpnot
@@ -92,6 +92,42 @@ label intDiv
     popr R6
     popr R5
     popr R3
+    ret
+
+;--------------------------
+;Puts in R1 ceil(log2(R1))
+label clog2
+    pushr. R2 ; tmp result
+    set 0
+    cpy R2
+    pushr. R3 ; loop start pointer
+    setlab clog2.loop
+    cpy R3
+    pushr. R4 ; loop start pointer
+    setlab clog2.loop_end
+    cpy R4
+    pushr. R5 ; 1
+    set 1
+    cpy R5
+    label clog2.loop
+        set 0
+        eq R1
+        read R4 ;loop_end
+        jif
+        set 1
+        addup. R2
+        read R1
+        lsr R5
+        cpy R1
+        ; jump back
+        read R3
+        jmp
+    label clog2.loop_end
+    mov. R1 R2
+    popr. R5
+    popr. R4
+    popr. R3
+    popr. R2
     ret
     
 ;--------------------------
