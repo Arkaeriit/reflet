@@ -60,7 +60,7 @@ Beyond the `@define` directive to declare macros, the assembler offers other dir
 * `@import <path>` include in the assembly the content of the given file. The path is relative to the path of the file where the import directive is.
 * `set8 <number>` sets the 8 bit number into the WR.
 
-As alternatives to `@string`, there is also `@string-ln`, `@string-0`, and `@string-nl-0` which add respectively a new line, a null byte, and a new line followed by a null byte after the string.
+As alternatives to `@string`, there is also `@string-nl`, `@string-0`, and `@string-nl-0` which add respectively a new line, a null byte, and a new line followed by a null byte after the string.
 
 ### Predefined macro
 

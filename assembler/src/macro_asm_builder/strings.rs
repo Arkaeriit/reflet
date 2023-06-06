@@ -7,7 +7,7 @@ pub fn register_strings(asm: &mut Assembler) {
     fn registering_strings(node: &AsmNode) -> Option<AsmNode> {
         match node {
             Source{code, meta} => match code[0].as_str() {
-                "@string" | "@string-0" | "@string-ln" | "@string-ln-0" => {
+                "@string" | "@string-0" | "@string-nl" | "@string-nl-0" => {
                     if code.len() == 2 {
                         Some(Raw(string_registration(&code)))
                     } else {
@@ -29,10 +29,10 @@ fn string_registration(code: &Vec<String>) -> Vec<u8> {
         "@string-0" => {
             ret.push(0);
         },
-        "@string-ln" => {
+        "@string-nl" => {
             ret.push('\n' as u8);
         },
-        "@string-ln-0" => {
+        "@string-nl-0" => {
             ret.push('\n' as u8);
             ret.push(0);
         },
@@ -49,12 +49,12 @@ fn string_registration(code: &Vec<String>) -> Vec<u8> {
 #[test]
 fn test_string_registration() {
     assert_eq!(string_registration(&vec!["@string".to_string(), "test test".to_string()]), vec![0x74, 0x65, 0x73, 0x74, 0x20, 0x74, 0x65, 0x73, 0x74]);
-    assert_eq!(string_registration(&vec!["@string-ln-0".to_string(), "test test".to_string()]), vec![0x74, 0x65, 0x73, 0x74, 0x20, 0x74, 0x65, 0x73, 0x74, 0x0A, 0x0]);
+    assert_eq!(string_registration(&vec!["@string-nl-0".to_string(), "test test".to_string()]), vec![0x74, 0x65, 0x73, 0x74, 0x20, 0x74, 0x65, 0x73, 0x74, 0x0A, 0x0]);
 }
 
 #[test]
 fn test_register_strings() {
-    let mut asm = Assembler::from_text("@string-0 t\n@string-ln \"tt\"\n");
+    let mut asm = Assembler::from_text("@string-0 t\n@string-nl \"tt\"\n");
     register_strings(&mut asm);
     assert_eq!(asm.root.to_string(), "0x74 0x00 \n0x74 0x74 0x0A \n");
 }
