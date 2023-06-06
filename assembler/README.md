@@ -58,7 +58,7 @@ Beyond the `@define` directive to declare macros, the assembler offers other dir
 * `@rawbytes <byte 1> <byte 2> ... <byte N>` writes the given bytes (in hexadecimal) in the machine code.
 * `@string ...` writes the sting following the directive (and after a complementary space) in the machine code. Comments are not supported and will be considered as part of the string.
 * `@import <path>` include in the assembly the content of the given file. The path is relative to the path of the file where the import directive is.
-* `set8 <number>` sets the 8 bit number into the WR.
+* `@set8 <number>` sets the 8 bit number into the WR.
 
 As alternatives to `@string`, there is also `@string-ln`, `@string-0`, and `@string-nl-0` which add respectively a new line, a null byte, and a new line followed by a null byte after the string.
 
@@ -72,6 +72,7 @@ To ease the use of the assembler, some macros are predefined.
 * `pushr <reg>` pushes the value of the given register in the stack.
 * `popr <reg>` pops the value on top of the stack in the given register.
 * `label <name>` is an alias to `@label <name>`.
+* `set8 <number>` is an alias to `@set8 <number>`.
 * `setlab <name>` sets the working register to the address of the given label.
 * `callf <name>` calls the function at the given label.
 * `goto <name>` jumps to the given label.
