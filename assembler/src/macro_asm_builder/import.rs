@@ -23,9 +23,15 @@ pub fn include_source(asm: &mut Assembler) {
                         };
                         match origin_dir.to_str() {
                             Some(path) => {
-                                let mut target_path = path.to_string();
-                                target_path.push_str("/");
-                                target_path.push_str(&code[1]);
+                                let target_path = 
+                                    if &code[1].as_str()[0..1] == "/" {
+                                        code[1].clone()
+                                    } else {
+                                        let mut target_path_mut = path.to_string();
+                                        target_path_mut.push_str("/");
+                                        target_path_mut.push_str(&code[1]);
+                                        target_path_mut
+                                    };
                                 match fs::read_to_string(&target_path) {
                                     Ok(txt) => {
                                         let mut ret_node = parse_source(&txt, &target_path);
@@ -42,7 +48,7 @@ pub fn include_source(asm: &mut Assembler) {
                             },
                         }
                     } else {
-                        Some(Error{msg: "Error, @import directive should have a single argument that is the relative path of the file to import. Whitespace in path are not supported.".to_string(), meta: meta.clone()})
+                        Some(Error{msg: "Error, @import directive should have a single argument that is the path of the file to import. If there is whitespace in the path, put it between quotes.".to_string(), meta: meta.clone()})
                     }
                 } else {
                     None

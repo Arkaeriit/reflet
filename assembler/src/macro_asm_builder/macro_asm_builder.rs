@@ -95,8 +95,9 @@ impl Assembler<'_> {
 
     /// Initialize the assembler state to be ready to read the input file
     pub fn from_file(path: &str) -> Self {
-        let mut import_directive = "@import ".to_string();
+        let mut import_directive = "@import \"".to_string();
         import_directive.push_str(path);
+        import_directive.push_str("\"");
         Self::from_text(&import_directive)
     }
 

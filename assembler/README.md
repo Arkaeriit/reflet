@@ -56,7 +56,7 @@ Beyond the `@define` directive to declare macros, the assembler offers other dir
 * `@align <number>` align the next instruction to the number given in bytes.
 * `@constant <number>` put the value of the number in the machine code.
 * `@rawbytes <byte 1> <byte 2> ... <byte N>` writes the given bytes (in hexadecimal) in the machine code.
-* `@string ...` writes the sting following the directive (and after a complementary space) in the machine code. Comments are not supported and will be considered as part of the string.
+* `@string "..."` writes the strings in the quotes following the directive in the machine code.
 * `@import <path>` include in the assembly the content of the given file. The path is relative to the path of the file where the import directive is.
 * `set8 <number>` sets the 8 bit number into the WR.
 
