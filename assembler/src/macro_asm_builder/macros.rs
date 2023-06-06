@@ -81,6 +81,16 @@ pub fn register_macros(asm: &mut Assembler) {
     };
 
     asm.root.traverse_tree(&mut register_macros_closure);
+    if in_macro {
+        match &mut asm.root {
+            Inode(nodes) => {
+                nodes.push(Error{msg: format!("Error, macro {} is not closed with `@end` directive", new_macro_name), meta: Metadata{raw: "!!!".to_string(), source_file: "!!!".to_string(), line: !0}});
+            },
+            _ => {
+                panic!("Assembler's root should be an inode");
+            },
+        }
+    }
 }
 
 /// Search all the sources lines of the code for macro to be expanded. In those
@@ -108,7 +118,7 @@ pub fn expand_macros(asm: &mut Assembler) {
                                 expanded_text = expanded_text.replace(&pattern, &code[1+i]);
                             }
                             // Result generation
-                            let mut expanded_macro = Assembler::from_named_text(&expanded_text, &macro_name);
+                            let mut expanded_macro = Assembler::from_named_text(&expanded_text, &format!("`macro '{}' expanded from file {} at line {}`", macro_name, meta.source_file, meta.line));
                             expanded_macro.macros = asm.macros.clone();
                             expanded_macro.macros.remove(&code[0]); // Remove the macro name to prevent infinite recursion. Instead an error will be raised when the macro is not found. Furthermore, this can be used to shadow macros or instructions.
                             expand_macros(&mut expanded_macro);
