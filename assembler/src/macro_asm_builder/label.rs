@@ -40,7 +40,7 @@ pub fn expand_labels(asm: &mut Assembler) {
                         Some(Error{msg: format!("Error, label {} is defined multiple times.\n", &name), meta: meta.clone()})
                     } else {
                         label_table.insert(name.clone(), current_offset);
-                        Some(Empty)
+                        None
                     }
                 } else {
                     current_offset = current_offset+asm.wordsize;
@@ -73,7 +73,7 @@ pub fn expand_labels(asm: &mut Assembler) {
         match node {
             Label{name, is_definition, meta} => {
                 if *is_definition {
-                    panic!("There should not be any definitions left is expanding_label_references!");
+                    return None
                 }
                 match computed_label_references.get(&name.clone()) {
                     Some(offset_result) => match offset_result {
@@ -104,6 +104,6 @@ fn test_raw_bytes() {
     assert_eq!(asm.set_word_size(16), None);
     register_labels(&mut asm);
     expand_labels(&mut asm);
-    assert_eq!(asm.root.to_string(), "0x04 0x00 \n0x00 0x00 \n");
+    assert_eq!(asm.root.to_string(), "Definition of label start\n0x04 0x00 \n0x00 0x00 \nDefinition of label end\n");
 }
 

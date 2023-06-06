@@ -227,6 +227,7 @@ impl Assembler<'_> {
                     Some(Empty)
                 },
                 Error{msg: _, meta: _} => None,
+                Label{name: _, is_definition: true, meta: _} => None,
                 x => Some(Error{msg: format!("There is a bug in the assembler, the node {} should not be left over in collect_raw.", &x.to_string()), meta: Metadata{line: !0, raw: "!!!".to_string(), source_file: "!!!".to_string()}}),
             }
         };
