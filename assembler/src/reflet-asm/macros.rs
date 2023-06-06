@@ -27,7 +27,7 @@ fn set8(code: &Vec<String>) -> Result<Option<String>, String> {
 /// Generates the code used for a set8 macro
 fn format_set8(num: u8) -> String {
     format!("set 4
-    cpy 12
+    cpy R12
     set {}
     lsl R12
     cpy R12
