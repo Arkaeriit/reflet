@@ -24,6 +24,9 @@ mod align;
 /// A module to register labels and link to them.
 mod label;
 
+/// A module to register string and transform them in raw bytes;
+mod strings;
+
 use crate::tree::*;
 use crate::tree::AsmNode::*;
 use crate::assembly_source::parse_source;
@@ -152,6 +155,7 @@ impl Assembler<'_> {
         align::register_align(self);
         raw::expand_constants(self);
         raw::decode_raw_bytes(self);
+        strings::register_strings(self);
 
         // User defined macros
         self.run_implementation_macros();
@@ -164,6 +168,7 @@ impl Assembler<'_> {
         align::register_align(self);
         raw::expand_constants(self);
         raw::decode_raw_bytes(self);
+        strings::register_strings(self);
 
         // Run the micro-assembler
         self.run_micro_assembler();
