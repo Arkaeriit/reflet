@@ -15,11 +15,11 @@ require 'stringbuilder'
 
 -------------------------------- Parsing arguments -----------------------------
 
-local help_msg <comptime> = [[reflet-fpu-asm, an assembler for the Reflet FPU architecture.
+local help_msg <comptime> = [[reflet-asm, an assembler for the Reflet architecture.
 
 Usage:
-    reflet-fpu-asm <input-file> <options> -o <output-file>
-    reflet-fpu-asm -help
+    reflet-asm <input-file> <options> -o <output-file>
+    reflet-asm -help
 
 Options:
 * -no-prefix: does not put the 'ASRM' prefix at the beginning of the output file.
@@ -409,7 +409,7 @@ end
 ---------------------------------- Main function -------------------------------
 
 -- Main function. Returns an error exit code.
-local function reflet_fpu_asm_main(): error_t
+local function reflet_asm_main(): error_t
     local flags = parse_args()
     check_flags_ok(flags)
     local machine_code, asm_error = assemble(flags.input, make_start_runtime(flags), end_runtime, flags.word_size/8, flags.start_addr, flags.label_dump)
@@ -428,6 +428,6 @@ local function reflet_fpu_asm_main(): error_t
     return error_t.OK
 end
 
-local exit_code = reflet_fpu_asm_main()
+local exit_code = reflet_asm_main()
 os.exit(exit_code)
 
