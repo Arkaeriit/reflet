@@ -38,7 +38,7 @@ static INSTRUCTION_LIST: &'static [Instruction] = &[
     Instruction{mnemonic: "lsr",    argument: Register,   opcode: 0xB},
     Instruction{mnemonic: "eq",     argument: Register,   opcode: 0xC},
     Instruction{mnemonic: "les",    argument: Register,   opcode: 0xD},
-    Instruction{mnemonic: "srt",    argument: Register,   opcode: 0xE},
+    Instruction{mnemonic: "str",    argument: Register,   opcode: 0xE},
     Instruction{mnemonic: "load",   argument: Register,   opcode: 0xF},
     Instruction{mnemonic: "setint", argument: Number(2),  opcode: 0x1},
     // Instructions without arguments
