@@ -89,6 +89,36 @@ pub fn expand_labels(asm: &mut Assembler) {
     asm.root.traverse_tree(&mut expanding_label_references);
 }
 
+/// Generate a nice list showing the address of each label
+pub fn label_dump(asm: &mut Assembler) -> String {
+    let mut ret = String::new();
+    let mut current_offset = 0;
+    let mut dumping_labels = | node: &AsmNode | -> Option<AsmNode> {
+        match node {
+            Label{name, is_definition, meta: _} => {
+                if *is_definition {
+                    ret.push_str(&format!("{}: 0x{:X}\n", &name, current_offset));
+                } else {
+                    current_offset = current_offset+asm.wordsize;
+                }
+            },
+            Raw(data) => {
+                current_offset = current_offset + data.len();
+            },
+            Error{msg: _, meta: _} => {
+                return None;
+            },
+            x => {
+                ret.push_str(&format!("The size of the node {} is not known. Thus, we can't make a label dump.", &x.to_string()));
+            },
+        }
+        None
+    };
+
+    asm.root.traverse_tree(&mut dumping_labels);
+    ret
+}
+
 /* --------------------------------- Testing -------------------------------- */
 
 #[test]

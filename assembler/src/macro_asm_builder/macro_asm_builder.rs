@@ -216,6 +216,11 @@ impl Assembler<'_> {
         self.root.traverse_tree(&mut running_micro_assembler);
     }
 
+    /// Return a label dump of the tree
+    pub fn label_dump(&mut self) -> String {
+        label::label_dump(self)
+    }
+
     /// Gather all the raw part of a tree and extract them. Make an error for
     /// non-raw parts.
     fn collect_raw(&mut self) -> Vec<u8> {
@@ -224,7 +229,7 @@ impl Assembler<'_> {
             match node {
                 Raw(data) => {
                     ret.extend(data);
-                    Some(Empty)
+                    None
                 },
                 Error{msg: _, meta: _} => None,
                 Label{name: _, is_definition: true, meta: _} => None,
