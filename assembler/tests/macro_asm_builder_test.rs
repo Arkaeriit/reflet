@@ -30,8 +30,8 @@ const MY_RUNTIME_START: &str = "@define set_10_plus 1
     add $1
 @end
 
-@rawbytes 11
-@align 4
+@rawbytes \"11\"
+@align \"4\"
 @label start
 ";
 

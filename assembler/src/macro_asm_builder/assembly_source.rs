@@ -28,23 +28,47 @@ fn parse_line(line: &str) -> Vec<String> {
     // Splitting line in words
     let mut ret: Vec<String> = vec![];
     let mut in_whitespace = true;
+    let mut in_quote = false;
+    let mut last_escaped = false;
+    let mut new_quoted_string = Vec::<char>::new();
     let mut word_start = 0;
     for i in 0..line_as_char.len() {
-        match in_whitespace {
-            true => {
-                if !line_as_char[i].is_whitespace() {
+        if in_quote {
+            if last_escaped {
+                new_quoted_string.push(match line_as_char[i] {
+                    'n' => '\n',
+                    'r' => '\r',
+                    't' => '\t',
+                    x => x,
+                });
+                last_escaped = false;
+            } else {
+                if line_as_char[i] == '"' {
+                    in_quote = false;
+                    ret.push(new_quoted_string.iter().collect());
+                } else if line_as_char[i] == '\\' {
+                    last_escaped = true;
+                } else {
+                    new_quoted_string.push(line_as_char[i]);
+                }
+            }
+        } else {
+            if in_whitespace {
+                if line_as_char[i] == '"' {
+                    in_quote = true;
+                    new_quoted_string = Vec::<char>::new();
+                } else if !line_as_char[i].is_whitespace() {
                     in_whitespace = false;
                     word_start = i;
                 }
-            },
-            false => {
+            } else {
                 if line_as_char[i].is_whitespace() {
                     in_whitespace = true;
                     let word_to_add = &line_as_char[word_start..i];
                     ret.push(word_to_add.iter().cloned().collect::<String>());
                 }
-            },
-        };
+            }
+        }
     }
     ret
 }
@@ -103,5 +127,17 @@ fn test_parse_source() {
     assert_eq!(parse_source("a b\nc d", "path"), Inode(vec![
             Source{code: vec!["a".to_string(), "b".to_string()], meta: Metadata{raw: "a b".to_string(), source_file: "path".to_string(), line: 1}},
             Source{code: vec!["c".to_string(), "d".to_string()], meta: Metadata{raw: "c d".to_string(), source_file: "path".to_string(), line: 2}}]));
+}
+
+#[test]
+fn test_parse_line_string() {
+    fn test_eq(line: &str, split: Vec<&str>) {
+        let converted = parse_line(line);
+        assert_eq!(converted, split);
+    }
+
+    test_eq("abc \"def hij\"", vec!["abc", "def hij"]);
+    test_eq("abc \"def \\n hij\"", vec!["abc", "def \n hij"]);
+    test_eq("abc \"def \\\" hij\"", vec!["abc", "def \" hij"]);
 }
 
