@@ -4,55 +4,63 @@
 ;---------------------
 ;Multiplies R1 by R2 and put the result in R1
 label intMult
-    pushr R2
-    callf intMult.max
-    pushr R3 ;tmp result
-    pushr R4 ;loop counter
-    pushr R5 ;end loop pointer
-    pushr R6 ;start loop pointer
+    pushr. R2
+    pushr. R3 ; loop counter
+    pushr. R4 ; tmp result
     set 0
-    cpy R3
     cpy R4
-    setlab intMultLoopEnd
+    pushr R5 ; scratch register (1)
+    set 1
     cpy R5
-    setlab intMultLoopStart
+    pushr. R6 ; start loop pointer
+    setlab intMult.loop
     cpy R6
-    set 0
-    label intMultLoopStart
-        read R4  ;Testing for end loop
-        eq R2
+    pushr. R7 ; mid loop pointer
+    setlab intMult.midloop
+    cpy R7
+    ; Number of bits in a number
+    @set_wordsize_byte
+    add WR
+    add WR
+    add WR
+    cpy R3
+    label intMult.loop
+        ; Check if we need to increase result in that loop turn
         read R5
-        jif
-        set 1    ;increasing loop counter
-        add R4
-        cpy R4
-        read R1  ;increasing R3
-        add R3
-        cpy R3
-        read R6  ;back to top
-        jmp
-    label intMultLoopEnd
-    read R3
-    cpy R1
-    popr R6
-    popr R5
-    popr R4
-    popr R3
-    popr R2
-    ret
-
-    ;-----------
-    ;Put the max of R1, R2 in R1 and the min in R2
-    label intMult.max
+        and R2
+        eq R5
+        cmpnot
+        read R7
+        jif ; jump to .midloop
+        ; Increase tmp result
         read R1
-        les R2
-        jifl intMult.max.swap
-        ret
-        label intMult.max.swap
-            pushr R1
-            mov R1 R2
-            popr R2
-            ret
+        addup R4
+        read r4
+        label intMult.midloop
+        ; Update R1 and R2
+        read R1
+        lsl R5
+        cpy R1
+        read R2
+        lsr R5
+        cpy R2
+        ; count down and loop back if needed
+        set 1
+        cc2
+        addup R3
+        set 0
+        eq R3
+        cmpnot
+        read R6 ; jump to .loop
+        jif
+    mov. R1 R4
+    popr. R7
+    popr. R6
+    popr. R5
+    popr. R4
+    popr. R3
+    popr. R2
+    ret
 
 ;--------------------------
 ;Put the quotient of the integer division of R1 by R2 into R1 and the modulo in R2
