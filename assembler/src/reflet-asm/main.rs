@@ -36,6 +36,10 @@ pub fn main() {
         }
     };
 
+    if args.label_dump {
+        println!("{}", asm.label_dump());
+    }
+
     let mut output_file = match File::create(&args.output) {
         Ok(file) => file,
         Err(_) => {

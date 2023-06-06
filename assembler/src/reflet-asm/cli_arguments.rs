@@ -15,9 +15,9 @@ Options:
   * -start-addr xxx : tell the linker that the code should start at the given
     address.
   * -ignore-start : if set, the program will not start at the \"start\" label
-    but at the beginning of the input file.";
-  //* -label-dump: if set, a dump of all labels will be printed just before
-    //linkage.
+    but at the beginning of the input file.
+  * -label-dump: if set, a dump of all labels will be printed just before
+    linkage.";
 
 /// State of all the command line options.
 pub struct Arguments {
@@ -47,7 +47,9 @@ pub struct Arguments {
 
     /// Should we remove the 'ASRM' prefix?
     pub no_prefix: bool,
-    //TODO: pub label_dump: bool,
+
+    /// Sould we do a label dump ?
+    pub label_dump: bool,
 }
 
 /// Parse the arguments and fill and argument struct. Return None in case of
@@ -78,6 +80,7 @@ fn read_args() -> Option<Arguments> {
         start_addr: 0,
         ignore_start: false,
         no_prefix: false,
+        label_dump: false,
     };
 
     for arg in &args {
@@ -133,9 +136,9 @@ fn read_args() -> Option<Arguments> {
             "-ignore-start" => {
                 ret.ignore_start = true;
             },
-            /*"-label-dump" => {
+            "-label-dump" => {
                 ret.label_dump = true;
-            },*/
+            },
             _ => {
                 if ret.input == "" {
                     ret.input = args[i].clone();
