@@ -202,3 +202,11 @@
     tbm
 @end
 
+; Sets the wordsize in bits into WR
+@define set_wordsize_bit 0
+    @set_wordsize_byte
+    add WR
+    add WR
+    add WR
+@end
+

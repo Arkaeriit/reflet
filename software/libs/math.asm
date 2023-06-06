@@ -19,10 +19,7 @@ label intMult
     setlab intMult.midloop
     cpy R7
     ; Number of bits in a number
-    @set_wordsize_byte
-    add WR
-    add WR
-    add WR
+    set_wordsize_bit
     cpy R3
     label intMult.loop
         ; Check if we need to increase result in that loop turn

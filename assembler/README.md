@@ -86,6 +86,7 @@ To ease the use of the assembler, some macros are predefined.
 * `addup <reg>` increase the target register with the value in the working register.
 * `inc <reg>` increase by one the value in the target register.
 * `inc_ws <reg>` increase by the word size in bytes the value in the target register.
+* `set_wordsize_bit` set the number of bits in a word into the working register.
 
 Most of those macro will overwrite the register R12, only `load<X>`, `str<X>`, `setlab`, `setr`, and `set+` will overwrite R11. If you use a macro to edit the PC, it might not work and will generate unexpected behaviors.
 
