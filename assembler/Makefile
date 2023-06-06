@@ -1,29 +1,17 @@
-CFLAGS := -g
-#CFLAGS := -Os -fdata-sections -ffunction-sections -Wl,--gc-sections
-
 all: reflet-asm.bin
 
-INSTALL_DIR := /usr/local/bin
+reflet-asm.bin: src/macro_asm_builder/* src/reflet-asm/*
+	cargo build --release
+	cp ./target/release/reflet-asm $@
 
-reflet-asm.bin: objsrc/reflet-asm.c
-	gcc $< $(CFLAGS) -o $@
+.PHONY: install
+install: reflet-asm.bin
+	mkdir -p /usr/local/bin
+	cp $< /usr/local/bin/reflet-asm
 
-objsrc/reflet-asm.c: | main.nelua
-	mkdir -p objsrc
-	nelua --code -o $@ main.nelua
+uninstall:
+	rm -f /usr/local/bin/reflet-asm
 
 clean:
 	rm -f reflet-asm.bin
-
-purge: clean
-	rm -f objsrc/reflet-asm.c
-
-full_compilation: purge
-	$(MAKE) reflet-asm.bin
-
-install: | reflet-asm.bin
-	cp -f reflet-asm.bin $(INSTALL_DIR)/reflet-asm
-
-uninstall:
-	rm -f $(INSTALL_DIR)/reflet-asm
 

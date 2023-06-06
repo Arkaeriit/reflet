@@ -56,11 +56,11 @@ Beyond the `@define` directive to declare macros, the assembler offers other dir
 * `@align <number>` align the next instruction to the number given in bytes.
 * `@constant <number>` put the value of the number in the machine code.
 * `@rawbytes <byte 1> <byte 2> ... <byte N>` writes the given bytes (in hexadecimal) in the machine code.
-* `@string ...` writes the sting following the directive (and after a complementary space) in the machine code. Comments are not supported and will be considered as part of the string.
+* `@string "..."` writes the strings in the quotes following the directive in the machine code.
 * `@import <path>` include in the assembly the content of the given file. The path is relative to the path of the file where the import directive is.
 * `@set8 <number>` sets the 8 bit number into the WR.
 
-As alternatives to `@string`, there is also `@string-ln`, `@string-0`, and `@string-nl-0` which add respectively a new line, a null byte, and a new line followed by a null byte after the string.
+As alternatives to `@string`, there is also `@string-nl`, `@string-0`, and `@string-nl-0` which add respectively a new line, a null byte, and a new line followed by a null byte after the string.
 
 ### Predefined macro
 
@@ -103,13 +103,13 @@ Registers name are case insensitive. They can either be named (`SP`, `wr`) or be
 
 ## Compilation and installation
 
-The Reflet assember is written in [Nelua](https://nelua.io). But as everyone might not have the Nelua compiler install, I included the generated C file in this repository.
+The Reflet assembler is written in Rust.
 
-Running `make` will compile the C file. To compile from the nelua file, run `make full_compilation`.
+Running `make` will compile it with cargo.
 
-You can then install it with `make install` or uninstall it with `make uninstall`.
+You can then install to `/usr/local/bin` it with `make install` or uninstall it with `make uninstall`.
 
 ## Legacy assemblers
 
-Before writting this assembler, I had written two other that can be found in the `legacy_assemblers` folder. Note that even if they can write correct code, `reflet-masm` is not suitable to write code that is complient with alignement constrain.
+Before writing this assembler, I had written two other that can be found in the `legacy_assemblers` folder. Note that even if they can write correct code, `reflet-masm` is not suitable to write code that is compliant with alignment constrain, and `reflet-asm-nelua` is very similar in features as this one but is way slower.
 
