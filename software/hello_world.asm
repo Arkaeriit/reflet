@@ -1,7 +1,7 @@
 @import libs/import_all_libs.asm
 
 label hello
-@string-nl-0 Hello, word!
+@string-nl-0 "Hello, word!"
 
 label start
     setlab hello

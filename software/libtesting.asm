@@ -6,7 +6,7 @@
 
 @align_word
 label testString
-@string Reflet is a neat ISA!
+@string "Reflet is a neat ISA!"
 @rawbytes 0A 0
 
 label start

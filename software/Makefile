@@ -68,6 +68,13 @@ test_interrupt.bin: test_interrupt.asm
 test_interrupt: test_interrupt.bin
 	reflet-sim -c config16 $<
 
+hello_world.bin : hello_world.asm
+	reflet-asm $< -o $@ -word-size 32
+
+.PHONY: hello_world
+hello_world: hello_world.bin
+	reflet-sim -w 32 -r 3000 $<
+
 clean :
 	rm -f *.bin
 
