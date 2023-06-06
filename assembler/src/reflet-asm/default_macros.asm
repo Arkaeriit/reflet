@@ -152,8 +152,6 @@
     cpy R11
     ; Preserve and set SR
     mov. R12 SR
-    read SR
-    cpy R12
     set $1
     or SR
     cpy SR
