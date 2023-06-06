@@ -1,6 +1,8 @@
 extern crate macro_asm_builder;
 use std::process::exit;
 use macro_asm_builder::*;
+use std::io::Write;
+use std::fs::File;
 
 /// This module contains implementation-specific macros such as `@set8`.
 mod macros;
@@ -24,15 +26,26 @@ pub fn main() {
         }
     };
     let mut asm = make_assembler(&args);
-    match asm.assemble() {
+    let assembled_bin = match asm.assemble() {
         Err(txt) => {
             eprintln!("{}", txt);
             exit(3);
         },
         Ok(data) => {
-            println!("{:?}", data);
-            exit(0);
+            data
         }
+    };
+
+    let mut output_file = match File::create(&args.output) {
+        Ok(file) => file,
+        Err(_) => {
+            eprintln!("Error, unable to open output file {}", &args.output);
+            exit(4);
+        },
+    };
+    if let Err(_) = output_file.write(&assembled_bin) {
+        eprintln!("Error, unable to write in file {}", &args.output);
+        exit(5);
     }
 }
 
