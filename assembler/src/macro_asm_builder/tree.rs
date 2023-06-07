@@ -1,4 +1,6 @@
 use AsmNode::*;
+use super::align::AlignKind;
+use super::align::AlignKind::*;
 
 /// Metadata used to store information regarding the source line of a node.
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -39,7 +41,7 @@ pub enum AsmNode {
 
     /// Number of bytes the next node should be aligned to. Will be replaced by
     /// some raw bytes.
-    Align(usize),
+    Align{kind: AlignKind, meta: Metadata},
 
     /// A node related to addresses. It can be either the definition of a new
     /// label or a reference to that label.
@@ -126,8 +128,9 @@ impl std::string::ToString for AsmNode {
                 ret.push_str("\n");
                 ret
             },
-            Align(size) => {
-                format!("Align to {} bytes\n", size)
+            Align{kind, meta: _} => match kind {
+                AlignTo(size) => format!("Align to {} bytes\n", size),
+                PadUntil(addr) => format!("Pad until address {}\n", addr),
             },
             Label{name, is_definition, meta: _} => {
                 if *is_definition {

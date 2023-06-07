@@ -54,6 +54,7 @@ Beyond the `@define` directive to declare macros, the assembler offers other dir
 * `@label <name>` defines a position in the code.
 * `@labref <name>` write in the code the address of the label with the given name.
 * `@align <number>` align the next instruction to the number given in bytes.
+* `@pad-until <address>` Add padding until the given address is reached.
 * `@constant <number>` put the value of the number in the machine code.
 * `@rawbytes <byte 1> <byte 2> ... <byte N>` writes the given bytes (in hexadecimal) in the machine code.
 * `@string "..."` writes the strings in the quotes following the directive in the machine code.

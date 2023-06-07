@@ -24,8 +24,11 @@ mod align;
 /// A module to register labels and link to them.
 mod label;
 
-/// A module to register string and transform them in raw bytes;
+/// A module to register string and transform them in raw bytes.
 mod strings;
+
+/// A mod with miscelaneous usefull functions.
+pub mod utils;
 
 use crate::tree::*;
 use crate::tree::AsmNode::*;
@@ -262,51 +265,22 @@ impl Assembler<'_> {
     /// Tries to convert the string representation of a number into a stream of
     /// bytes.
     fn format_string_into_number(&self, s: &str) -> Option<Vec<u8>> {
-        if s.len() == 0 {
-            None
-        } else {
-            if &s[0..1] == "-" {
-                match i128::from_str_radix(s, 10) {
-                    Ok(num) => {
-                        let positive = num * -1;
-                        let true_positive = positive as u128;
-                        let not = !true_positive;
-                        let cc2_u128 = not + 1;
-                        let mut cc2 = 0;
-                        let mut mask = 0xFF;
-                        let mut leftover = cc2_u128;
-                        for _i in 0..self.wordsize {
-                            cc2 = cc2 | (cc2_u128 & mask);
-                            leftover = (mask >> 1) | leftover;
-                            mask = mask << 8;
-                        }
-                        match !leftover {
-                            0 => self.format_number(cc2),
-                            _ => None
-                        }
-                    },
-                    Err(_) => None,
-                }
-            } else {
-                if s.len() > 3 {
-                    if &s[0..2] == "0x" {
-                        match u128::from_str_radix(&s[2..s.len()], 0x10) {
-                            Ok(num) => self.format_number(num),
-                            Err(_) => None,
-                        }
-                    } else {
-                        match u128::from_str_radix(s, 10) {
-                            Ok(num) => self.format_number(num),
-                            Err(_) => None,
-                        }
+        match utils::format_string_into_number(s) {
+            Some((num, false)) => self.format_number(num),
+            Some((num, true)) => {
+                let mut num_shorten = num;
+                for i in self.wordsize..(128/8) {
+                    // Ensure that there is no data bits above the wordsize
+                    let mask: u128 = (0xFF << (i * 8)) >> 1;
+                    if ((num & mask) << 1) >> (i * 8) != 0xFF {
+                        return None
                     }
-                } else {
-                    match u128::from_str_radix(s, 10) {
-                        Ok(num) => self.format_number(num),
-                        Err(_) => None,
-                    }
+                    // Remove sign extenton bits
+                    num_shorten = num_shorten & !(0xFF << (i*8));
                 }
-            }
+                self.format_number(num_shorten)
+            },
+            None => None,
         }
     }
 }
@@ -354,3 +328,4 @@ fn format_string_into_number() {
     assert_eq!(asm.format_string_into_number("0xFFF"), Some(vec![0xFF, 0xF]));
     assert_eq!(asm.format_string_into_number("-10"), Some(vec![0xF6, 0xFF]));
 }
+

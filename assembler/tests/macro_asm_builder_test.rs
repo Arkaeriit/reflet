@@ -128,7 +128,7 @@ At line 2 from file ./__asm_init: `@end`
 Error, unable to read byte 777 in @rawbyte directive.
 At line 3 from file ./__asm_init: `@rawbytes 777`
 --------------
-Error, @align directive should take a single positive numeric argument in base 10.
+Error, @align directive should take a single positive numeric argument.
 At line 4 from file ./__asm_init: `@align -1`
 --------------
 Error, unable to read number.
