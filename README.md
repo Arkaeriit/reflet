@@ -25,7 +25,8 @@ R13 or SR is the status register.
 * The bits 2 to 4 are the flags to enable interrupts. Bit 3 enables interrupt 0, the bit 4 enables interrupt 1 up to bit 6 which enables interrupt 4.
 * When bit 5 is set to 1, interrupt 0 is raised when invalid memory access is made.
 * The bits 8 and up are the reduced behaviors bits. When they are all set to 0, the processor behaves normally. When they are set to `bxxxx1`, if the word size of the processor is above 8 bits, the processor will act as a 8-bit processor when interfacing with memory. When they are set to `bxxxx10`, if the word size of the processor is above 16 bits, the processor will act as a 16-bit processor when interfacing with memory. To summarize, The processor will act as a `8 * (2 ^ (reduced-behavior - 1))` processor when interacting with memory. Those bits are not taken into account when interacting with the stack such as with `pop` and `push` instructions.
-Its reset value is  0x1.
+
+Its reset value is 0.
 
 ### Program counter
 R14 or PC is the program counter. It contains the address of the current address. It can also be used to jump to a specific code address when forcefully modified by the user. Its reset value is 4.
