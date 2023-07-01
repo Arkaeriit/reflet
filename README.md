@@ -22,9 +22,9 @@ R1 to R12 are the 12 general-purpose registers. They are meant to store values u
 R13 or SR is the status register. 
 
 * The first bit is the comparison bit. It is set to 1 when a comparison instruction is realized and 0 otherwise. The comparison bit is used for conditional jumps.  
-* The bits 2 and 1 are the reduced behaviors bits. When they are both set to 0, the processor behaves normally. When they are set to `b01`, if the word size of the processor is above 32 bits, the processor will act as a 32-bit processor when interfacing with memory. When they are set to `b10`, if the word size of the processor is above 16 bits, the processor will act as a 16-bit processor when interfacing with memory. When they are set to `b11`, the processor will act as an 8-bit processor when interfacing with memory.
-* The bits 3 to 6 are the flags to enable interrupts. Bit 3 enables interrupt 0, the bit 4 enables interrupt 1 up to bit 6 which enables interrupt 4.
-* When bit 7 is set to 1, interrupt 0 is raised when invalid memory access is made.
+* The bits 2 to 4 are the flags to enable interrupts. Bit 3 enables interrupt 0, the bit 4 enables interrupt 1 up to bit 6 which enables interrupt 4.
+* When bit 5 is set to 1, interrupt 0 is raised when invalid memory access is made.
+* The bits 8 and up are the reduced behaviors bits. When they are all set to 0, the processor behaves normally. When they are set to `bxxxx1`, if the word size of the processor is above 8 bits, the processor will act as a 8-bit processor when interfacing with memory. When they are set to `bxxxx10`, if the word size of the processor is above 16 bits, the processor will act as a 16-bit processor when interfacing with memory. To summarize, The processor will act as a `8 * (2 ^ (reduced-behavior - 1))` processor when interacting with memory. Those bits are not taken into account when interacting with the stack such as with `pop` and `push` instructions.
 Its reset value is  0x1.
 
 ### Program counter
@@ -36,36 +36,41 @@ R15 or SP is the stack pointer. It is updated when doing pop or push instruction
 ## Instructions
 Here is a list of the instruction of Reflet processor. 
 
-|Mnemonic|Opcode|Operand|Effect|
-|--|--|--|--|
-| slp | 0x00 | Nothing | Does nothing, wait for the next instruction |
-| set | 0x1 | A 4 bits number | Put the number in the working register|
-| read | 0x2 | A register | Copies the value in the argument register into the working register |
-| cpy | 0x3 | A register | Copies the value of the working register into the argument register |
-| add | 0x4 | A register | Add the value in the working directory to the value in the argument register and put the result in the working register |
-| sub | 0x5 | A register | Subtract to the value in the working directory the value in the argument register and put the result in the working register |
-| and | 0x6 | A register | Do a bit-wise and between the working register and the argument register |
-| or | 0x7 | A register | Do a bit-wise or between the working register and the argument register |
-| xor | 0x8 | A register | Do a bitwise xor between the working register and the argument register |
-| not | 0x9 | A register | Put in the working register the bit-wise not of the argument register |
-| lsl | 0xA | A register | Shit the bits in working register to the left n times, where n is the content of the argument register |
-| lsr | 0xB | A register | Shit the bits in working register to the right n times, where n is the content of the argument register |
-| eq | 0xC | A register | If the content of the working register is the same as the one in the argument registers, sets the comparison bit of the status register to 1. Otherwise, sets it to 0 |
-| les | 0xD | A register | If the content of the working register is less than the one in the argument registers, sets the comparison bit of the status register to 1. Otherwise, sets it to 0 |
-| str | 0xE | A register with an address | Store the value in the working register to the address given in the argument register |
-| load | 0xF | A register with an address | Put in the working register the value at the address given in the argument register |
-| cc2 | 0x08 | Nothing | Put in the working register the opposite in two-complement of the working register. |
-| jif | 0x09 | Nothing | Jump to the address in the working register if the comparison register is not equal to 0, does not affect the stack |
-| pop | 0x0A | Nothing | Put the content of the working register on the stack and updates the stack pointer. |
-| push | 0x0B | Nothing | Put the value on top of the stack in the working register and updates the stack pointer. |
-| call | 0xC | Nothing | Put the current address in the stack and jump to the address in the working register. | 
-| ret | 0x0D | Nothing | Jump to the address just after the address on top of the stack. |
-| quit | 0x0E | Nothing | Reset the processor or stop it. |
-| debug | 0x0F | Nothing | Does not modify any registers but the processor sends a signal to tell it is executing a debug instruction. |
-| cmpnot | 0x01 | Nothing | Flip the comparison bit of the status register. |
-| retint | 0x02 | Nothing | Return from an interruption context. | 
-| setint | b000001 | A two-bit number | Set the routine of the interruption of the given number to the address in the working register. |
-| tbm | 0x03 | Nothing | Toggle byte mode. Toggle the memory accesses from the size specified by the status register to 8 bit and back. |
+|Mnemonic     |Opcode   |Operand                     |Effect|
+|-------------|---------|----------------------------|--|
+| read        | 0x0     | A register                 | Copies the value in the argument register into the working register |
+| cpy         | 0x1     | A register                 | Copies the value of the working register into the argument register |
+| set         | 0x2     | A 4 bits number            | Put the number in the working register|
+| add         | 0x3     | A register                 | Add the value in the working directory to the value in the argument register and put the result in the working register |
+| and         | 0x4     | A register                 | Do a bit-wise and between the working register and the argument register |
+| or          | 0x5     | A register                 | Do a bit-wise or between the working register and the argument register |
+| xor         | 0x6     | A register                 | Do a bitwise xor between the working register and the argument register |
+| not         | 0x7     | A register                 | Put in the working register the bit-wise not of the argument register |
+| lsl         | 0x8     | A register                 | Shit the bits in working register to the left n times, where n is the content of the argument register |
+| lsr         | 0x9     | A register                 | Shit the bits in working register to the right n times, where n is the content of the argument register |
+| eq          | 0xA     | A register                 | If the content of the working register is the same as the one in the argument registers, sets the comparison bit of the status register to 1. Otherwise, sets it to 0 |
+| les         | 0xB     | A register                 | If the content of the working register is less than the one in the argument registers, sets the comparison bit of the status register to 1. Otherwise, sets it to 0 |
+| str         | 0xC     | A register with an address | Store the value in the working register to the address given in the argument register |
+| load        | 0xD     | A register with an address | Put in the working register the value at the address given in the argument register |
+| jif         | 0xE0    | Nothing                    | Jump to the address in the working register if the comparison register is not equal to 0, does not affect the stack |
+| call        | 0xE1    | Nothing                    | Put the current address in the stack and jump to the address in the working register. | 
+| ret         | 0xE2    | Nothing                    | Jump to the address just after the address on top of the stack. |
+| pop         | 0xE3    | Nothing                    | Put the content of the working register on the stack and updates the stack pointer. |
+| push        | 0xE4    | Nothing                    | Put the value on top of the stack in the working register and updates the stack pointer. |
+| cc2         | 0xE5    | Nothing                    | Put in the working register the opposite in two-complement of the working register. |
+| cmpnot      | 0xE6    | Nothing                    | Flip the comparison bit of the status register. |
+| tbm         | 0xE7    | Nothing                    | Toggle byte mode. Toggle the memory accesses from the size specified by the status register to 8 bit and back. |
+| quit        | 0xE8    | Nothing                    | Reset the processor or stop it. |
+| debug       | 0xE9    | Nothing                    | Does not modify any registers but the processor sends a signal to tell it is executing a debug instruction. |
+| atom        | 0xEA    | Nothing                    | Set the content of the address in the working register to 1 and set the status bit to whether or not the content of this address was 0.
+| retint      | 0xEB    | Nothing                    | Return from an interruption context. | 
+| setint      | b111011 | A two-bit number           | Set the routine of the interruption of the given number to the address in the working register. |
+| getint      | b111100 | A two-bit number           | Get the routine of the interruption of the given number and put it in the working register. |
+| getintstack | b111101 | A two-bit number           | Get the address at the given place in the interrupt stack. |
+| setintstack | b111110 | A two-bit number           | Get the address at the given place in the interrupt stack. |
+| softint     | b111111 | A two-bit number           | Triggers the interrupt of the given number. |
+
+There is no no-op instructions, but a few instructions have no effects such as `read WR`, `cpy WR`, or `and WR`. As `read WR` is encoded as 0x00, it makes for a fine no-op instruction.
 
 ## Connection to memory
 ### Word size
