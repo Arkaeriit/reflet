@@ -1,26 +1,41 @@
+use macro_asm_builder::utils::format_string_into_number;
 
 /// Runs all the implementation-specifics macros
 pub fn macros(code: &Vec<String>) -> Result<Option<String>, String> {
-    match set8(code) {
-        Ok(None) => Ok(None), // Replace with more macro if there is some in the future
-        x => x
+    match get_macro_to_use(&code[0]) {
+        Some(f) => match f(code) {
+            Ok(x) => Ok(Some(x)),
+            Err(x) => Err(x),
+        },
+        None => Ok(None)
     }
 }
 
+/// Gets the function needed
+fn get_macro_to_use(code0: &str) -> Option<&dyn Fn(&Vec<String>) -> Result<String, String>> {
+    match code0 {
+        "@set8" => Some(&set8),
+        "@set_sr_for" => Some(&set_sr_for),
+        _ => None,
+    }
+}
+
+/* ---------------------------------- Set 8 --------------------------------- */
+
 /// Expands the set8 macro
-fn set8(code: &Vec<String>) -> Result<Option<String>, String> {
+fn set8(code: &Vec<String>) -> Result<String, String> {
     match code[0].as_str() {
         "@set8" => {
             if code.len() == 2 {
                 match format_string_into_byte(&code[1]) {
-                    Some(num) => Ok(Some(format_set8(num))),
+                    Some(num) => Ok(format_set8(num)),
                     None => Err(format!("Error, macro @set8 should take a single 1-byte number as argument.")),
                 }
             } else {
                 Err(format!("Error, macro @set8 should take a single 1-byte number as argument."))
             }
         },
-        _ => Ok(None),
+        _ => Err(format!("Error in the assembler, set8 should not parse {:?}!", code)),
     }
 }
 
@@ -72,5 +87,42 @@ fn format_string_into_byte(s: &str) -> Option<u8> {
             }
         }
     }
+}
+
+/* ------------------------------- @set_sr_for ------------------------------ */
+
+/// Comput the ceil of the log2 of a number
+fn clog2(n: u128) -> usize {
+    (u128::BITS - n.leading_zeros()).try_into().unwrap()
+}
+
+/// Expands the @set_sr_for macro
+fn set_sr_for(code: &Vec<String>) -> Result<String, String> {
+    match code[0].as_str() {
+        "@set_sr_for" => {
+            if code.len() == 2 {
+                match format_string_into_number(&code[1]) {
+                    Some((num, false)) => {
+                        let sr_value = clog2(num / 8) + 1;
+                        if sr_value < 16 {
+                            Ok(format_set_sr_for(sr_value))
+                        } else {
+                            Err(format!("Error, the assembler does not support @set_sr_for with a value of {}.", num))
+                        }
+                    },
+                    None | Some((_, true)) => Err(format!("Error, macro @set_sr_for should take a single number as argument.")),
+                }
+            } else {
+                Err(format!("Error, macro @set_sr_for should take a single 1-byte number as argument."))
+            }
+        },
+        _ => Err(format!("Error in the assembler, set_sr_for should not parse {:?}!", code)),
+    }
+}
+
+/// Generates the code used for a @set_sr_for macro
+fn format_set_sr_for(sr_value: usize) -> String {
+    format!("set {}
+    cpy SR", sr_value)
 }
 

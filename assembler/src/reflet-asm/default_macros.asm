@@ -136,9 +136,7 @@
 @define @loadX 2
     ; Preserve and set SR
     mov. R12 SR
-    set $1
-    or SR
-    cpy SR
+    @set_sr_for $1
     ; load
     load $2
     cpy R11
@@ -152,9 +150,7 @@
     cpy R11
     ; Preserve and set SR
     mov. R12 SR
-    set $1
-    or SR
-    cpy SR
+    @set_sr_for $1
     ; store
     read R11
     str $2
@@ -166,26 +162,26 @@
 
 ; load/store 8 bits
 @define load8 1
-    @loadX 6 $1
+    @loadX 8 $1
 @end
 @define str8 1
-    @strX 6 $1
+    @strX 8 $1
 @end
 
 ; Load/store 16 bits
 @define load16 1
-    @loadX 4 $1
+    @loadX 16 $1
 @end
 @define str16 1
-    @strX 4 $1
+    @strX 16 $1
 @end
 
 ; Load/store 32 bits
 @define load32 1
-    @loadX 2 $1
+    @loadX 32 $1
 @end
 @define str32 1
-    @strX 2 $1
+    @strX 32 $1
 @end
 
 ; load/store 8 bits swifters
