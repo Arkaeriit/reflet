@@ -229,6 +229,7 @@ static void run_inst(reflet* vm){
             break;
         case NOT:
             vm->WR = ~(vm->reg[reg]);
+            vm->WR &= reg_mask;
             break;
         case LSL:
             vm->WR = vm->WR << vm->reg[reg];
@@ -236,7 +237,6 @@ static void run_inst(reflet* vm){
             break;
         case LSR:
             vm->WR = vm->WR >> vm->reg[reg];
-            vm->WR &= reg_mask;
             break;
         case EQ:
             if(vm->WR == vm->reg[reg]){

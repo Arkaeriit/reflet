@@ -152,8 +152,6 @@
     cpy R11
     ; Preserve and set SR
     mov. R12 SR
-    read SR
-    cpy R12
     set $1
     or SR
     cpy SR
@@ -202,21 +200,57 @@
     tbm
 @end
 
+; WR = $1 - WR
 @define subto 1
     cc2
     add $1
 @end
 
+; WR = WR - $1
 @define sub 1
     subto $1
     cc2
 @end
 
+; No op
 @define nop 0
     read WR
 @end
-
 @define slp 0
     nop
+@end
+
+; Sets the wordsize in bits into WR
+@define set_wordsize_bit 0
+    @set_wordsize_byte
+    add WR
+    add WR
+    add WR
+@end
+
+; Less or equal
+@define leseq 1
+    cpy R12
+    read $1
+    les R12
+    cmpnot
+@end
+
+; Greater
+@define great 1
+    leseq $1
+    cmpnot
+@end
+
+; Greater or equal
+@define greateq 1
+    les $1
+    cmpnot
+@end
+
+; Not equal
+@define neq 1
+    eq $1
+    cmpnot
 @end
 
