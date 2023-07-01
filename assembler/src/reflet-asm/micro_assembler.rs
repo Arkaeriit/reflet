@@ -24,36 +24,40 @@ struct Instruction {
 
 /// List of all instructions. THE MNEMONOC MUST BE LOWER CASE!
 static INSTRUCTION_LIST: &'static [Instruction] = &[
-    // Instructions with arguments
-    Instruction{mnemonic: "set",    argument: Number(4),  opcode: 0x1},
-    Instruction{mnemonic: "read",   argument: Register,   opcode: 0x2},
-    Instruction{mnemonic: "cpy",    argument: Register,   opcode: 0x3},
-    Instruction{mnemonic: "add",    argument: Register,   opcode: 0x4},
-    Instruction{mnemonic: "sub",    argument: Register,   opcode: 0x5},
-    Instruction{mnemonic: "and",    argument: Register,   opcode: 0x6},
-    Instruction{mnemonic: "or",     argument: Register,   opcode: 0x7},
-    Instruction{mnemonic: "xor",    argument: Register,   opcode: 0x8},
-    Instruction{mnemonic: "not",    argument: Register,   opcode: 0x9},
-    Instruction{mnemonic: "lsl",    argument: Register,   opcode: 0xA},
-    Instruction{mnemonic: "lsr",    argument: Register,   opcode: 0xB},
-    Instruction{mnemonic: "eq",     argument: Register,   opcode: 0xC},
-    Instruction{mnemonic: "les",    argument: Register,   opcode: 0xD},
-    Instruction{mnemonic: "str",    argument: Register,   opcode: 0xE},
-    Instruction{mnemonic: "load",   argument: Register,   opcode: 0xF},
-    Instruction{mnemonic: "setint", argument: Number(2),  opcode: 0x1},
+    // Instructions with 4 bits arguments
+    Instruction{mnemonic: "read",        argument: Register,   opcode: 0x0},
+    Instruction{mnemonic: "cpy",         argument: Register,   opcode: 0x1},
+    Instruction{mnemonic: "set",         argument: Number(4),  opcode: 0x2},
+    Instruction{mnemonic: "add",         argument: Register,   opcode: 0x3},
+    Instruction{mnemonic: "and",         argument: Register,   opcode: 0x4},
+    Instruction{mnemonic: "or",          argument: Register,   opcode: 0x5},
+    Instruction{mnemonic: "xor",         argument: Register,   opcode: 0x6},
+    Instruction{mnemonic: "not",         argument: Register,   opcode: 0x7},
+    Instruction{mnemonic: "lsl",         argument: Register,   opcode: 0x8},
+    Instruction{mnemonic: "lsr",         argument: Register,   opcode: 0x9},
+    Instruction{mnemonic: "eq",          argument: Register,   opcode: 0xA},
+    Instruction{mnemonic: "les",         argument: Register,   opcode: 0xB},
+    Instruction{mnemonic: "str",         argument: Register,   opcode: 0xC},
+    Instruction{mnemonic: "load",        argument: Register,   opcode: 0xD},
     // Instructions without arguments
-    Instruction{mnemonic: "slp",    argument: NoArg,      opcode: 0x00},
-    Instruction{mnemonic: "cmpnot", argument: NoArg,      opcode: 0x01},
-    Instruction{mnemonic: "retint", argument: NoArg,      opcode: 0x02},
-    Instruction{mnemonic: "tbm",    argument: NoArg,      opcode: 0x03},
-    Instruction{mnemonic: "cc2",    argument: NoArg,      opcode: 0x08},
-    Instruction{mnemonic: "jif",    argument: NoArg,      opcode: 0x09},
-    Instruction{mnemonic: "pop",    argument: NoArg,      opcode: 0x0A},
-    Instruction{mnemonic: "push",   argument: NoArg,      opcode: 0x0B},
-    Instruction{mnemonic: "call",   argument: NoArg,      opcode: 0x0C},
-    Instruction{mnemonic: "ret",    argument: NoArg,      opcode: 0x0D},
-    Instruction{mnemonic: "quit",   argument: NoArg,      opcode: 0x0E},
-    Instruction{mnemonic: "debug",  argument: NoArg,      opcode: 0x0F},
+    Instruction{mnemonic: "jif",         argument: NoArg,      opcode: 0xE0},
+    Instruction{mnemonic: "call",        argument: NoArg,      opcode: 0xE1},
+    Instruction{mnemonic: "ret",         argument: NoArg,      opcode: 0xE2},
+    Instruction{mnemonic: "pop",         argument: NoArg,      opcode: 0xE3},
+    Instruction{mnemonic: "push",        argument: NoArg,      opcode: 0xE4},
+    Instruction{mnemonic: "cc2",         argument: NoArg,      opcode: 0xE5},
+    Instruction{mnemonic: "cmpnot",      argument: NoArg,      opcode: 0xE6},
+    Instruction{mnemonic: "tbm",         argument: NoArg,      opcode: 0xE7},
+    Instruction{mnemonic: "quit",        argument: NoArg,      opcode: 0xE8},
+    Instruction{mnemonic: "debug",       argument: NoArg,      opcode: 0xE9},
+    Instruction{mnemonic: "atom",        argument: NoArg,      opcode: 0xEA},
+    Instruction{mnemonic: "retint",      argument: NoArg,      opcode: 0xEB},
+    // Instructions with two bit arguments
+    Instruction{mnemonic: "setint",      argument: Number(2),  opcode: 0xEC},
+    Instruction{mnemonic: "getint",      argument: Number(2),  opcode: 0xF0},
+    Instruction{mnemonic: "getintstack", argument: Number(2),  opcode: 0xF4},
+    Instruction{mnemonic: "setintstack", argument: Number(2),  opcode: 0xF8},
+    Instruction{mnemonic: "softint",     argument: Number(2),  opcode: 0xFC},
 ];
 
 /// Try to read the number or give error message in case of failure.
@@ -173,9 +177,9 @@ fn test_format_byte_from_string() {
 
 #[test]
 fn test_get_instruction() {
-    assert_eq!(get_instruction("set"), Some(&INSTRUCTION_LIST[0]));
-    assert_eq!(get_instruction("SET"), Some(&INSTRUCTION_LIST[0]));
-    assert_eq!(get_instruction("sEt"), Some(&INSTRUCTION_LIST[0]));
+    assert_eq!(get_instruction("set"), Some(&INSTRUCTION_LIST[2]));
+    assert_eq!(get_instruction("SET"), Some(&INSTRUCTION_LIST[2]));
+    assert_eq!(get_instruction("sEt"), Some(&INSTRUCTION_LIST[2]));
 
     assert_eq!(get_instruction("Not-a-valid-instruction"), None);
 }
@@ -194,11 +198,11 @@ fn test_get_register() {
 
 #[test]
 fn test_micro_assembler() {
-    assert_eq!(micro_assembler(&vec!["set".to_string(), "8".to_string()]),  Ok(vec![0x18]));
-    assert_eq!(micro_assembler(&vec!["and".to_string(), "R2".to_string()]), Ok(vec![0x62]));
-    assert_eq!(micro_assembler(&vec!["EQ".to_string(), "PC".to_string()]),  Ok(vec![0xCE]));
-    assert_eq!(micro_assembler(&vec!["Slp".to_string()]),                   Ok(vec![0x00]));
-    assert_eq!(micro_assembler(&vec!["cc2".to_string()]),                   Ok(vec![0x08]));
+    assert_eq!(micro_assembler(&vec!["set".to_string(), "8".to_string()]),  Ok(vec![0x28]));
+    assert_eq!(micro_assembler(&vec!["and".to_string(), "R2".to_string()]), Ok(vec![0x42]));
+    assert_eq!(micro_assembler(&vec!["EQ".to_string(), "PC".to_string()]),  Ok(vec![0xAE]));
+    assert_eq!(micro_assembler(&vec!["Tbm".to_string()]),                   Ok(vec![0xE7]));
+    assert_eq!(micro_assembler(&vec!["cc2".to_string()]),                   Ok(vec![0xE5]));
 
     assert_eq!(micro_assembler(&vec!["lolnope".to_string()]), Err("Error, lolnope is not a valid instruction.".to_string()));
     assert_eq!(micro_assembler(&vec!["set".to_string()]), Err("Error, instruction set takes one single arguments.".to_string()));
