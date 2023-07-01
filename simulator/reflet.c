@@ -123,10 +123,8 @@ static void run_inst(reflet* vm){
 #endif
     bool edited_pc = false;
     switch(opperand){
-        case 0:
+        case 0xE:
             switch(instruction){
-                case SLP:
-                    break;
                 case CC2:
                     vm->WR = ~vm->WR + 1;
                     break;
@@ -170,6 +168,16 @@ static void run_inst(reflet* vm){
                 case TBM:
                     vm->byte_mode = !vm->byte_mode;
                     break;
+                case ATOM: {
+                    word_t currentValue = loadWordRAM(vm, vm->WR, false);
+                    putRAMWord(vm, vm->WR, 1, false);
+                    if(currentValue == 0){
+                        vm->SR |= 1;
+                    }else{
+                        vm->SR = vm->SR >> 1;
+                        vm->SR = vm->SR << 1;
+                    }
+                    } break;
                 default:
                     if(isSETINT(instruction)){
                         uint8_t int_number = instruction & 3;
@@ -181,6 +189,20 @@ static void run_inst(reflet* vm){
                     }
             }
             break;
+        case 0xF: {
+            uint8_t int_number = instruction & 3;
+            if (isGETINT(instruction)) {
+                vm->WR = vm->ints[int_number]->routine;
+            } else if (isGETINTSTACK(instruction)) {
+                vm->WR = vm->int_level->routine_stack[int_number];
+            } else if (isSETINTSTACK(instruction)) {
+                vm->int_level->routine_stack[int_number] = vm->WR;
+            } else if (isSOFTINT(instruction)) {
+                triger_int(vm, int_number);
+            } else {
+                fprintf(stderr, "Warning, unknow instruction (%X) at address %" WORD_P ".\n",instruction, vm->PC);
+            }
+            } break;
         case SET:
             vm->WR = reg;
             break;
@@ -194,10 +216,6 @@ static void run_inst(reflet* vm){
             break;
         case ADD:
             vm->WR += vm->reg[reg];
-            vm->WR &= reg_mask;
-            break;
-        case SUB:
-            vm->WR -= vm->reg[reg];
             vm->WR &= reg_mask;
             break;
         case AND:
