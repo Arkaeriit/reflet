@@ -28,6 +28,7 @@ reflet* reflet_init(){
     ret->ram = NULL; //Left blank, should be written a value depending of its configuration
     ret->active = true;
     ret->byte_mode = false;
+    memset(ret->reg, 0, sizeof(word_t) * 16);
     //default config
     struct reflet_config* conf = malloc(sizeof(struct reflet_config));
     conf->word_size = WORD_SIZE;
@@ -63,7 +64,6 @@ reflet* reflet_init(){
     level->stack_depth = 0;
     ret->int_level = level;
     //Input reset values not equal to 0
-    ret->SR = 1;
     ret->PC = START_CHAR;
     return ret;
 }
@@ -283,19 +283,11 @@ static int byteExchanged(const reflet* vm, bool stack_b){
         return vm->config->word_size_byte;
     if(vm->byte_mode && (vm->int_level->level == LEVEL_NORMAL))
         return 1;
-    switch((vm->SR & 0x6) >> 1){
-        case 0:
-            return vm->config->word_size_byte;
-        case 1:
-            return min(vm->config->word_size_byte, 4);
-        case 2:
-            return min(vm->config->word_size_byte, 2);
-        case 3:
-            return 1;
-        default: //We should never be there
-            fprintf(stderr, "Error in byteExchanged\n");
-            return 0;
-    }
+    int reduced_behavior_bits = vm->SR >> 8;
+    if (reduced_behavior_bits == 0)
+        return vm->config->word_size_byte;
+    else
+        return 1 << (reduced_behavior_bits - 1);
 }
 
 /*
@@ -428,7 +420,7 @@ static void io(reflet* vm) {
 }
 
 /*
- * When a nex interrupt is activated, this function
+ * When a new interrupt is activated, this function
  * update the stacks and returns the address of the interrupt routine
  *  Arguments:
  *      vm: the reflet struct
