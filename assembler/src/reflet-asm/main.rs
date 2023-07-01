@@ -88,7 +88,9 @@ fn make_assembler(args: &cli_arguments::Arguments) -> Assembler {
     if !args.no_prefix {
         runtime_start.push_str("@string \"ASRM\"\n");
     }
-    runtime_start.push_str("@set_default_sr\ncpy SR\n");
+    if !args.no_compatibility {
+        runtime_start.push_str("@set_default_sr\ncpy SR\n");
+    }
     if args.set_stack {
         if args.stack_addr.as_str() == "" {
             runtime_start.push_str("setlab __code__end__\n");

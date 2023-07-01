@@ -16,6 +16,8 @@ Options:
     address.
   * -ignore-start : if set, the program will not start at the \"start\" label
     but at the beginning of the input file.
+  * -ignore-compatibility-runtime: do not write the code that edit the status
+    register to make the binary works on larger processors.
   * -label-dump: if set, a dump of all labels will be printed just before
     linkage.";
 
@@ -48,9 +50,14 @@ pub struct Arguments {
     /// Should we remove the 'ASRM' prefix?
     pub no_prefix: bool,
 
-    /// Sould we do a label dump ?
+    /// Should we remove the SR initialization
+    pub no_compatibility: bool,
+
+    /// Should we do a label dump ?
     pub label_dump: bool,
 }
+
+use macro_asm_builder::utils::format_string_into_number;
 
 /// Parse the arguments and fill and argument struct. Return None in case of
 /// invalid arguments
@@ -80,6 +87,7 @@ fn read_args() -> Option<Arguments> {
         start_addr: 0,
         ignore_start: false,
         no_prefix: false,
+        no_compatibility: false,
         label_dump: false,
     };
 
@@ -117,12 +125,12 @@ fn read_args() -> Option<Arguments> {
             },
             "-start-addr" => {
                 not_last_arg!();
-                match usize::from_str_radix(&args[i], 10) {
-                    Ok(num) => {
-                        ret.start_addr = num;
+                match format_string_into_number(&args[i]) {
+                    Some((num, false)) => {
+                        ret.start_addr = num.try_into().unwrap();
                     },
-                    Err(_) => {
-                        eprintln!("Error, -set-stack-to flag should take a number as argument.");
+                    None | Some((_, true)) => {
+                        eprintln!("Error, -start-addr flag should take a positive number as argument.");
                         return None;
                     },
                 }
@@ -139,6 +147,9 @@ fn read_args() -> Option<Arguments> {
             "-label-dump" => {
                 ret.label_dump = true;
             },
+            "-ignore-compatibility-runtime" => {
+                ret.no_compatibility = true;
+            }
             _ => {
                 if ret.input == "" {
                     ret.input = args[i].clone();

@@ -17,7 +17,7 @@ pub fn format_string_into_number(s: &str) -> Option<(u128, bool)> {
                 Err(_) => None,
             }
         } else {
-            if s.len() > 3 {
+            if s.len() >= 3 {
                 if &s[0..2] == "0x" {
                     match u128::from_str_radix(&s[2..s.len()], 0x10) {
                         Ok(num) => Some((num, false)),
