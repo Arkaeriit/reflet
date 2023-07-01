@@ -202,3 +202,21 @@
     tbm
 @end
 
+@define subto 1
+    cc2
+    add $1
+@end
+
+@define sub 1
+    subto $1
+    cc2
+@end
+
+@define nop 0
+    read WR
+@end
+
+@define slp 0
+    nop
+@end
+

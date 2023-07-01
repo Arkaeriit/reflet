@@ -78,7 +78,7 @@ To ease the use of the assembler, some macros are predefined.
 * `goto <name>` jumps to the given label.
 * `jmp` jumps to the address in the working register.
 * `jifl <name>` jump  to the given label if the comparison bit is set to 1.
-* `@set_wordsize_byte`: sets the number of bytes in a word in the working register.
+* `@set_wordsize_byte` sets the number of bytes in a word in the working register.
 * `@align_word` align to the size of the word.
 * `load<bit number> <reg>` calls `load <reg>` after setting the status register to only interact with the given numbers of bits.
 * `str<bit number> <reg>` calls `str <reg>` after setting the status register to only interact with the given numbers of bits.
@@ -86,6 +86,9 @@ To ease the use of the assembler, some macros are predefined.
 * `addup <reg>` increase the target register with the value in the working register.
 * `inc <reg>` increase by one the value in the target register.
 * `inc_ws <reg>` increase by the word size in bytes the value in the target register.
+* `subto <reg>` put in the working register `<reg> - wr`.
+* `sub <reg>` put in the working register `wr - <reg>`.
+* `nop` and `spl` both do nothing.
 
 Most of those macro will overwrite the register R12, only `load<X>`, `str<X>`, `setlab`, `setr`, and `set+` will overwrite R11. If you use a macro to edit the PC, it might not work and will generate unexpected behaviors.
 
@@ -111,5 +114,5 @@ You can then install to `/usr/local/bin` it with `make install` or uninstall it 
 
 ## Legacy assemblers
 
-Before writing this assembler, I had written two other that can be found in the `legacy_assemblers` folder. Note that even if they can write correct code, `reflet-masm` is not suitable to write code that is compliant with alignment constrain, and `reflet-asm-nelua` is very similar in features as this one but is way slower.
+Before writing this assembler, I had written two other that can be found in the `legacy_assemblers` folder. They were written for a previous version of the ISA so they will not write correct code.
 
