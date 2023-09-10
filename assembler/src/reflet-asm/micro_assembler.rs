@@ -53,11 +53,11 @@ static INSTRUCTION_LIST: &'static [Instruction] = &[
     Instruction{mnemonic: "atom",        argument: NoArg,      opcode: 0xEA},
     Instruction{mnemonic: "retint",      argument: NoArg,      opcode: 0xEB},
     // Instructions with two bit arguments
-    Instruction{mnemonic: "setint",      argument: Number(2),  opcode: 0xEC},
-    Instruction{mnemonic: "getint",      argument: Number(2),  opcode: 0xF0},
-    Instruction{mnemonic: "getintstack", argument: Number(2),  opcode: 0xF4},
-    Instruction{mnemonic: "setintstack", argument: Number(2),  opcode: 0xF8},
-    Instruction{mnemonic: "softint",     argument: Number(2),  opcode: 0xFC},
+    Instruction{mnemonic: "setint",      argument: Number(2),  opcode: 0xEC >> 2},
+    Instruction{mnemonic: "getint",      argument: Number(2),  opcode: 0xF0 >> 2},
+    Instruction{mnemonic: "getintstack", argument: Number(2),  opcode: 0xF4 >> 2},
+    Instruction{mnemonic: "setintstack", argument: Number(2),  opcode: 0xF8 >> 2},
+    Instruction{mnemonic: "softint",     argument: Number(2),  opcode: 0xFC >> 2},
 ];
 
 /// Try to read the number or give error message in case of failure.

@@ -91,7 +91,7 @@ To ease the use of the assembler, some macros are predefined.
 * `inc_ws <reg>` increase by the word size in bytes the value in the target register.
 * `subto <reg>` put in the working register `<reg> - wr`.
 * `sub <reg>` put in the working register `wr - <reg>`.
-* `nop` and `spl` both do nothing.
+* `nop` and `slp` both do nothing.
 * `set_wordsize_bit` set the number of bits in a word into the working register.
 * `leseq <reg>` set the comparison bit if the working register is smaller or equal to the target register.
 * `great <reg>` set the comparison bit if the working register is greater than the target register.
