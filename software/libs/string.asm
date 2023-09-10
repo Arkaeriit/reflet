@@ -73,62 +73,49 @@ label memset
 ;-------------------------------------------
 ;Flip the string in R1
 label strFlip
-    pushr R2 ;length
-    pushr R3 ;current offset
-    pushr R4 ;max offset
-    pushr R5 ;loop pointer
-    pushr R6
-    pushr R8 ;scratch register
-    pushr R1 ;init registers
+    pushr. R1 ; pointer to start of string
+    pushr. R2 ; pointer to end of string
+    pushr. R3 ; loop pointer
+    pushr. R4 ; scatch register
+    ; Preparing R2
+    pushr. R1
     callf strlen
-    read R1
     cpy R2
     popr R1
-    set 0
-    cpy R3
+    add R1
+    cpy R2
     set 1
-    cpy R12
-    read R2
-    lsr R12
-    cpy R4
+    subto R2
+    cpy R2
+    ; eparing R3
     setlab strFlipLoop
-    cpy R5
-    setlab strFlipLoopEnd
-    cpy R6
+    cpy R3
     label strFlipLoop
-        read R3 ;if done, go to the end
-        eq R4
-        read R6
-        jif
-        read R1 ;geting the start char
-        add R3
-        cpy R11 ;copy of the start index
-        load8 WR
-        push
-        set 1 ;getting the end char
-        cpy R12
+        ; swap two chars
+        load8 R1
+        cpy R4
+        load8 R2
+        str8 R1
+        read R4
+        str8 R2
+        ; Update R1 and R2
+        set 1
+        cpy R4
         read R1
-        add R2
-        sub R3
-        sub R12
-        cpy R12 ;copy of the end index
-        load8 R12
-        cpy R8
-        pop  ;putting the front char at the end
-        str8 R12
-        read R8 ;putting the end char at the front
-        str8 R11
-        set 1 ;updating R3
-        add R3
-        cpy R3
-        read R5 ;jumping back
-        jmp
-    label strFlipLoopEnd
-    popr R8 ;restoring registers
-    popr R6
-    popr R5
-    popr R4
-    popr R3
-    popr R2
+        add R4
+        cpy R1
+        read R2
+        sub R4
+        cpy R2
+        ; If R1 is still before R2, loop bakc
+        read R1
+        les R2
+        read R3
+        jif
+    ; Cleanup
+    popr. R4
+    popr. R3
+    popr. R2
+    popr. R1
     ret
 

@@ -116,11 +116,13 @@ label num2dec
     label num2dec0 ;If the number to convert is 0
     set+ 48 ;writing '0' in the first byte
     str8 R2
+    pushr. R2
     set 1 ;null-terminating the next one
     add R2
-    str8 R12
+    cpy R2
     set 0
-    str8 R12
+    str8 R2
+    popr. R2
     ret
 
 ;-----------------------
