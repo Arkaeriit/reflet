@@ -7,11 +7,6 @@ label strlen
     pushr R2 ;str pointer
     pushr R3 ;loop pointer
     pushr R4 ;buffer register to store a null byte as a comparaison test
-    pushr R5 ;Copy of the status register
-    read SR
-    cpy R5
-    set 6    ;getting in byte-mode
-    cpy SR
     read R1 ;init registers
     cpy R2
     setlab strlenLoop 
@@ -19,7 +14,7 @@ label strlen
     set 0
     cpy R4
     label strlenLoop
-        load R2 ;reading byte
+        load8 R2 ;reading byte
         eq R4   ;comparing
         cmpnot
         set 1   ;incresing the str pointer
@@ -33,10 +28,7 @@ label strlen
     sub R3
     sub R1 ;computing the offset
     cpy R1 ;puting the result
-    read R5 ;restoring SR
-    cpy SR
-    popr R5 ;restoring tmp registers
-    popr R4
+    popr R4 ;restoring tmp registers
     popr R3
     popr R2
     ret
@@ -49,10 +41,6 @@ label memset
     pushr R3
     pushr R5 ;loop pointer
     pushr R6
-    pushr R4 ;saving the status register
-    mov R4 SR
-    set 6
-    cpy SR
     setlab memsetLoop
     cpy R5
     setlab memsetLoopEnd
@@ -65,7 +53,7 @@ label memset
         read R6
         jif
         read R3 ;setting mem
-        str R1
+        str8 R1
         read R1 ;updating R1 and R2
         add R12
         cpy R1
@@ -75,11 +63,8 @@ label memset
         read R5 ;looping back
         jmp
     label memsetLoopEnd
-    read R4 ;restoring SR
-    cpy SR
-    popr R4 ;restoring registers
-    popr R6
-    popr R4
+    popr R6 ;restoring registers
+    popr R5
     popr R3
     popr R2
     popr R1
@@ -93,7 +78,6 @@ label strFlip
     pushr R4 ;max offset
     pushr R5 ;loop pointer
     pushr R6
-    pushr R7 ;save status register
     pushr R8 ;scratch register
     pushr R1 ;init registers
     callf strlen
@@ -111,9 +95,6 @@ label strFlip
     cpy R5
     setlab strFlipLoopEnd
     cpy R6
-    mov R7 SR ;byte mode
-    set 6
-    cpy SR
     label strFlipLoop
         read R3 ;if done, go to the end
         eq R4
@@ -122,7 +103,7 @@ label strFlip
         read R1 ;geting the start char
         add R3
         cpy R11 ;copy of the start index
-        load WR
+        load8 WR
         push
         set 1 ;getting the end char
         cpy R12
@@ -131,22 +112,19 @@ label strFlip
         sub R3
         sub R12
         cpy R12 ;copy of the end index
-        load R12
+        load8 R12
         cpy R8
         pop  ;putting the front char at the end
-        str R12
+        str8 R12
         read R8 ;putting the end char at the front
-        str R11
+        str8 R11
         set 1 ;updating R3
         add R3
         cpy R3
         read R5 ;jumping back
         jmp
     label strFlipLoopEnd
-    read R7 ;restoring SR
-    cpy SR
     popr R8 ;restoring registers
-    popr R7
     popr R6
     popr R5
     popr R4

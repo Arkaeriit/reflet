@@ -6,6 +6,7 @@
 ;----------------------
 ;Print a string whose pointer is in R1 and whose length is in R2
 label (print)
+    read R1
     pushr R1
     pushr R2
     pushr R3 ;loop pointer
@@ -26,7 +27,7 @@ label (print)
         read R4
         jif
         tbm
-        load R1 ;printing the char pointed at R1
+        load8 R1 ;printing the char pointed at R1
         tbm
         cpy R12 ;saving R1 while calling the function printc
         pushr R1
@@ -78,10 +79,6 @@ label num2dec
     pushr R5 ;R5 will hold 48 to convert numbers to ASCII
     pushr R6 ;loop pointer
     pushr R7 ;pointer to intDiv
-    pushr R8 ;copy of the status register
-    mov R8 SR ;byte mode
-    set 6
-    cpy SR
     mov R3 R2 ;init registers
     setlab num2decLoop
     cpy R6
@@ -95,7 +92,7 @@ label num2dec
         call
         read R2 ;converting modulo to ASCII
         add R5
-        str R3 ;writing result in string. Reflet is little endian so no need for masks
+        str8 R3 ;writing result in string. Reflet is little endian so no need for masks
         set 1 ;updating R3
         add R3
         cpy R3
@@ -105,10 +102,8 @@ label num2dec
         cmpnot
         jif
     set 0  ;Null-terminating the string
-    str R3
-    mov SR R8
-    popr R8 ;restauring registers
-    popr R7
+    str8 R3
+    popr R7 ;restauring registers
     popr R6
     popr R5
     popr R4
@@ -120,12 +115,12 @@ label num2dec
     ret
     label num2dec0 ;If the number to convert is 0
     set+ 48 ;writing '0' in the first byte
-    str R2
+    str8 R2
     set 1 ;null-terminating the next one
     add R2
-    str R12
+    str8 R12
     set 0
-    str R12
+    str8 R12
     ret
 
 ;-----------------------

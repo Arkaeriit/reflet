@@ -4,20 +4,17 @@
 ;---------------------
 ;Prints the char in R1
 label printc
-    pushr R2 ;storing SR
-    mov R2 SR
-    set 6
-    cpy SR
+    pushr R2
+    pushr R3
     set 0    ;tx_cmd
-    cpy R11
+    cpy R2
     set 1    ;tx_data
-    cpy R12
+    cpy R3
     read R1 ;writing char
-    str R12
+    str8 R3
     set 0   ;command
-    str R11
-    read R2 ;restoring SR
-    cpy SR
+    str8 R2
+    popr R3
     popr R2
     ret
         
