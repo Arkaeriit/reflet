@@ -185,6 +185,7 @@ static void run_inst(reflet* vm){
                         vm->ints[int_number]->routine = vm->WR;
                     }else if(instruction == RETINT){
                         ret_int(vm);
+                        edited_pc = true;
                     }else{
                         fprintf(stderr, "Warning, unknow instruction (%X) at address %" WORD_P ".\n",instruction, vm->PC);
                     }
