@@ -27,9 +27,17 @@ module reflet_interrupt#(
     );
     integer i; //loop counter
 
+    // Instruction decoding
+    wire [5:0] oppcode = instruction[7:2];
+    wire [1:0] arg = instruction[1:0];
+
+    // Handling softint
+    wire [3:0] softint_request = (oppcode == `opp_softint ?
+        (4'h1 << arg) : 4'h0);
+
     //Masking interrupts and ensuring they stay long enough to see the next
     //cpu update
-    wire [3:0] int_masked = interrupt_request & int_mask;
+    wire [3:0] int_masked = (interrupt_request | softint_request) & int_mask;
     reg [3:0] int_masked_latched;
     always @ (posedge clk)
         if (!reset)
@@ -45,14 +53,6 @@ module reflet_interrupt#(
                         int_masked_latched[i] <= 1;
                 end
 
-    //Instructions handeling
-    reg [wordsize-1:0] prev_counter_slow; //Addr for returning from interrupts
-    wire [5:0] setint_oppcode = instruction[7:2];
-    wire [wordsize-1:0] out_setint = ( setint_oppcode == `opp_setint ? working_register : 0 ); //When doing a setint, we do not want to change any registers so we do the same thing as for slp
-    wire [wordsize-1:0] out_retint = ( instruction == `inst_retint ? prev_counter_slow - 1 : 0 );
-    assign out = out_setint | out_retint;
-    assign out_reg = ( instruction == `inst_retint ? `pc_id : 0 );
-
     //Level of interrupts
     reg [2:0] level; //4 means normal context, otherwise, take the number of the current interrupts
     assign in_interrupt_context = !(level == 4);
@@ -62,60 +62,82 @@ module reflet_interrupt#(
                                   ( int_masked_latched[2] ? 2 :
                                     ( int_masked_latched[3] ? 3 : 4))));
     wire new_int = target_level < level && cpu_update;
-    wire quit_int = !new_int && cpu_update && instruction == `inst_retint;
+
+    // Two memories used to store the address before we went into an interrupt
+    // context and the level of interrupt we were in. They are indexed by
+    // interrupt context. Level 4 correspond to normal context. If we are in
+    // level 2 and we get a level 0 interrupt, we will put the current address
+    // at index 0 of the memory for addresses and 2 at index 0 of the memory
+    // for level.
+    reg [2:0] level_memory [3:0]; // TODO: as 0 will never be stored here, I can make it 1 bit thiner and assume a +1
+    reg [wordsize-1:0] addr_memory [3:0];
+
+    wire [2:0] previous_level = level_memory[level];
+    wire [wordsize-1:0] previous_addr = addr_memory[level];
+    
+    // Interracting with the memories and current level
+    reg [wordsize-1:0] addr_memory_out;
     always @ (posedge clk)
-        if(!reset)
-            level <= 4;
-        else if(enable)
+        if (!reset)
         begin
-            if(new_int)
+            addr_memory_out <= 0;
+            level <= 4;
+        end
+        else if (enable)
+        begin
+            if (new_int)
+            begin
                 level <= target_level;
+                // No need to change addr_memory_out as the main cpu module
+                // will ony read the interruption, as it takes priority on its
+                // handling
+            end
+            else if (instruction == `inst_retint)
+            begin
+                addr_memory_out <= previous_addr;
+                if (cpu_update)
+                begin
+                    level <= previous_level;
+                end
+            end
+            else if (oppcode == `opp_getintstack)
+            begin
+                addr_memory_out <= addr_memory[arg];
+            end
+            else if (oppcode == `opp_setintstack)
+            begin
+                addr_memory[arg] <= working_register;
+                addr_memory_out <= working_register;
+            end
             else
-                if(quit_int)
-                    level <= prev_level_slow;
+            begin
+                addr_memory_out <= 0;
+            end
         end
 
     //Storing interruption routines' addresses
     reg [wordsize-1:0] routines [3:0];
-    wire [1:0] arg = instruction[1:0];
+    reg [wordsize-1:0] getint_out;
     always @ (posedge clk)
-        if(!reset)
-            for(i=0; i<4; i=i+1)
-                routines[i] <= 0;
-        else
-            if(setint_oppcode == `opp_setint)
+        if (!reset)
+            getint_out <= 0;
+        else if(enable)
+        begin
+            if(oppcode == `opp_setint)
+            begin
                 routines[arg] <= working_register;
+                getint_out <= 0;
+            end
+            else if (oppcode == `opp_getint)
+                getint_out <= routines[arg];
+            else
+                getint_out <= 0;
+        end
     
-    //Storing the program counter and the level of interrupts
-    wire [wordsize-1:0] prev_counter;
-    wire [2:0] prev_level; //Store the previous state
-    reg [2:0] current_level_slow; //Store the current level with a small delay to put the right value in the stack
-    reg [2:0] current_level_slow_slow;
-    always @ (posedge clk)
-    begin
-        prev_counter_slow <= prev_counter;
-        prev_level_slow <= prev_level;
-        current_level_slow <= level;
-        current_level_slow_slow <= current_level_slow;
-    end
-    reflet_stack #(.wordsize(wordsize), .depth(4)) stack_counter(
-        .clk(clk),
-        .reset(reset),
-        .enable(enable),
-        .push(new_int),
-        .pop(quit_int),
-        .in(program_counter),
-        .out(prev_counter));
-    reflet_stack #(.wordsize(3), .depth(4)) stack_level(
-        .clk(clk),
-        .reset(reset),
-        .enable(enable),
-        .push(new_int),
-        .pop(quit_int),
-        .in(current_level_slow_slow),
-        .out(prev_level));
 
-    //Telling the CPU about a new instruction
+    // Outputs to main CPU
+    assign out = getint_out | addr_memory_out;
+    assign out_reg = ( instruction == `inst_retint ? `pc_id : 0 );
     assign interrupt = new_int;
     assign out_routine = routines[target_level]; 
 
