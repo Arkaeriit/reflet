@@ -2,4 +2,4 @@
 ; a 16-bit Reflet processor 
 word_size 16
 ram_size 3000
-int_1_freq 100
+int_1_freq 1000

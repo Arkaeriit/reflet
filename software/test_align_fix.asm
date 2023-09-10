@@ -23,8 +23,7 @@ str R1
 inc_R1 4
 
 ; Testing 16 bit writes
-set 4
-cpy SR
+@set_sr_for 16
 
 read R2
 str R1
@@ -35,8 +34,7 @@ str R1
 inc_R1 2
 
 ; Testing 8 bit writes
-set 6
-cpy SR
+@set_sr_for 8
 
 set 10
 str R1
@@ -55,8 +53,7 @@ str R1
 inc_R1 1
 
 ; Reading the 4 word written
-set 0
-cpy SR
+@set_default_sr
 setr R1 0x1000
 
 load R1
