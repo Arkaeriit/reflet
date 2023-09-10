@@ -127,6 +127,7 @@ static void run_inst(reflet* vm){
             switch(instruction){
                 case CC2:
                     vm->WR = ~vm->WR + 1;
+                    vm->WR &= reg_mask;
                     break;
                 case JIF:
                     if(vm->SR & 1) {
