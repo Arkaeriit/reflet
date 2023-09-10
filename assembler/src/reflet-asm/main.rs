@@ -94,9 +94,10 @@ fn make_assembler(args: &cli_arguments::Arguments) -> Assembler {
         runtime_start.push_str("cpy SP\n");
     }
     if !args.ignore_start {
-        runtime_start.push_str("goto start");
+        runtime_start.push_str("goto start\n");
 
     }
+    runtime_start.push_str("@label __code__start__\n");
     asm.add_text_before(&runtime_start, "runtime_start");
     // End runtime
     asm.add_text_after("@align_word\n@label __code__end__\n", "runtime_end");

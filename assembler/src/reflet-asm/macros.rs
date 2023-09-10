@@ -93,7 +93,8 @@ fn format_string_into_byte(s: &str) -> Option<u8> {
 
 /// Comput the ceil of the log2 of a number
 fn clog2(n: u128) -> usize {
-    (u128::BITS - n.leading_zeros()).try_into().unwrap()
+    let bit_used: u128 = (u128::BITS - n.leading_zeros()).try_into().unwrap();
+    (bit_used - 1).try_into().unwrap()
 }
 
 /// Expands the @set_sr_for macro
@@ -122,7 +123,46 @@ fn set_sr_for(code: &Vec<String>) -> Result<String, String> {
 
 /// Generates the code used for a @set_sr_for macro
 fn format_set_sr_for(sr_value: usize) -> String {
-    format!("set {}
+    format!("set 8
+    cpy R12
+    set {}
+    lsl R12
     cpy SR", sr_value)
+}
+
+/* --------------------------------- Testing -------------------------------- */
+
+#[test]
+fn test_clog2() {
+    assert_eq!(clog2(1), 0);
+    assert_eq!(clog2(2), 1);
+    assert_eq!(clog2(3), 1);
+    assert_eq!(clog2(4), 2);
+    assert_eq!(clog2(5), 2);
+    assert_eq!(clog2(6), 2);
+    assert_eq!(clog2(7), 2);
+    assert_eq!(clog2(8), 3);
+    assert_eq!(clog2(9), 3);
+}
+
+#[test]
+#[should_panic]
+fn test_clog2_fail() {
+    let _ = clog2(0);
+}
+
+#[test]
+fn test_set_sr_for() {
+    fn direct_sr_for(n: usize) -> Result<String, String> {
+        let mut ret = Vec::<String>::new();
+        for s in format!("@set_sr_for {}", n).split(" ") {
+            ret.push(s.to_string());
+        }
+        set_sr_for(&ret)
+    }
+    assert_eq!(direct_sr_for(8), Ok(format_set_sr_for(1)));
+    assert_eq!(direct_sr_for(16), Ok(format_set_sr_for(2)));
+    assert_eq!(direct_sr_for(32), Ok(format_set_sr_for(3)));
+    assert_eq!(direct_sr_for(64), Ok(format_set_sr_for(4)));
 }
 
