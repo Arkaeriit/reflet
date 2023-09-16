@@ -130,7 +130,7 @@ static void run_inst(reflet* vm){
                     vm->WR &= reg_mask;
                     break;
                 case JIF:
-                    if(vm->SR & 1) {
+                    if(vm->SR & SR_COMP_MASK) {
                         vm->PC = vm->WR;
                         edited_pc = true;
                     }
@@ -161,10 +161,10 @@ static void run_inst(reflet* vm){
                     printf("Debug instruction reached at address %" WORD_PX ". The content of the working register is 0x%" WORD_PX "\n", vm->PC, vm->WR);
                     break;
                 case CMPNOT:
-                    if(vm->SR & 1)
-                        vm->SR = (vm->SR >> 1) << 1; //We want to turn the LSB into a 0
+                    if(vm->SR & SR_COMP_MASK)
+                        vm->SR &= ~SR_COMP_MASK; //We want to turn the LSB into a 0
                     else
-                        vm->SR |= 1;
+                        vm->SR |= SR_COMP_MASK;
                     break;
                 case TBM:
                     vm->byte_mode = !vm->byte_mode;
@@ -173,10 +173,9 @@ static void run_inst(reflet* vm){
                     word_t currentValue = loadWordRAM(vm, vm->WR, false);
                     putRAMWord(vm, vm->WR, 1, false);
                     if(currentValue == 0){
-                        vm->SR |= 1;
+                        vm->SR |= SR_COMP_MASK;
                     }else{
-                        vm->SR = vm->SR >> 1;
-                        vm->SR = vm->SR << 1;
+                        vm->SR &= ~SR_COMP_MASK;
                     }
                     } break;
                 default:
@@ -242,18 +241,16 @@ static void run_inst(reflet* vm){
             break;
         case EQ:
             if(vm->WR == vm->reg[reg]){
-                vm->SR |= 1;
+                vm->SR |= SR_COMP_MASK;
             }else{
-                vm->SR = vm->SR >> 1;
-                vm->SR = vm->SR << 1;
+                vm->SR &= ~SR_COMP_MASK;
             }
             break;
         case LES:
             if(vm->WR < vm->reg[reg]){
-                vm->SR |= 1;
+                vm->SR |= SR_COMP_MASK;
             }else{
-                vm->SR = vm->SR >> 1;
-                vm->SR = vm->SR << 1;
+                vm->SR &= ~SR_COMP_MASK;
             }
             break;
         case STR:
@@ -285,7 +282,7 @@ static int byteExchanged(const reflet* vm, bool stack_b){
         return vm->config->word_size_byte;
     if(vm->byte_mode && (vm->int_level->level == LEVEL_NORMAL))
         return 1;
-    int reduced_behavior_bits = vm->SR >> 8;
+    int reduced_behavior_bits = vm->SR >> SR_REDUCED_POS;
     if (reduced_behavior_bits == 0)
         return vm->config->word_size_byte;
     else
@@ -305,11 +302,11 @@ static void check_alignement_ok(reflet* vm, word_t addr, bool stack_b){
     word_t addr_invalid_mask = size-1;
     bool access_ok = !(addr & addr_invalid_mask);
     if(access_ok) return;
-    bool trap_enabled = !(!(vm->SR & 0x88)); //Check that both the trap and the interupt 0 are enabled
-    if(trap_enabled){
-        if(vm->int_level->level != LEVEL_INT_0) //Roll back the PC so that after the interrupt, the program jumps back the the instruction that caused a problem
-            vm->PC--;
+    bool trap_enabled = (vm->SR & SR_INT0_MASK) && (vm->SR & SR_TRAP_MASK); //Check that both the trap and the interupt 0 are enabled
+    if(trap_enabled && vm->int_level->level != LEVEL_INT_0) {
+        vm->PC--; //Roll back the PC so that after the interrupt, the program jumps back the the instruction that caused a problem
         triger_int(vm, 0);
+        vm->PC--; // The instruction will continue and update the PC at the end. We still want to execute the start of the interrupt routine so we must go back an instruction.
     }else{
         printf("Missaligned access at addr 0x%" WORD_PX ". Triying to acces %i bytes from address 0x%" WORD_PX ".\n", vm->PC-1, size, addr);
     }
@@ -485,8 +482,18 @@ static void ret_int(reflet* vm){
  * Check if the interrup the enabled in the status register
  */
 static bool enabled_int(reflet* vm, int interupt){
-    char flags = (vm->SR >> 3) & 0xF;
-    bool ret = (flags >> interupt) & 1;
-    return ret;
+    switch (interupt) {
+        case 0:
+            return vm->SR & SR_INT0_MASK;
+        case 1:
+            return vm->SR & SR_INT1_MASK;
+        case 2:
+            return vm->SR & SR_INT2_MASK;
+        case 3:
+            return vm->SR & SR_INT3_MASK;
+        default:
+            fprintf(stderr, "Error, invalid interrupt number: %i\n", interupt);
+            return false;
+    }
 }
 
