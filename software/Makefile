@@ -47,14 +47,26 @@ fibonacci.bin : fibonacci.asm libs/math.asm libs/printing.asm libs/basicIO.asm l
 test_jump.bin : test_jump.asm
 	$(REFLET_ASM) test_jump.asm -o test_jump.bin -word-size 16 -no-stack-init -label-dump
 
+../rtl/simu/rom03.v: test_jump.bin
+	ROM_maker -name rom03 -input_file $< -output_file $@ -wordsize 2 -min_addr_size 15
+
 test_instructions.bin : test_instructions.asm
 	$(REFLET_ASM) test_instructions.asm -o test_instructions.bin -word-size 16
+
+../rtl/simu/rom04.v: test_instructions.bin
+	ROM_maker -name rom04 -input_file $< -output_file $@ -wordsize 2 -min_addr_size 14
 
 test_inst_mini_str.bin: test_inst_mini_str.asm
 	$(REFLET_ASM) test_inst_mini_str.asm -o test_inst_mini_str.bin -no-stack-init -ignore-start -word-size 8
 
+../rtl/simu/rom01.v: test_inst_mini_str.bin
+	ROM_maker -name rom01 -input_file $< -output_file $@ -wordsize 1 -min_addr_size 7
+
 test_inst_mini_load.bin: test_inst_mini_load.asm
 	$(REFLET_ASM) test_inst_mini_load.asm -o test_inst_mini_load.bin -no-stack-init -ignore-start -word-size 8
+
+../rtl/simu/rom02.v: test_inst_mini_load.bin
+	ROM_maker -name rom02 -input_file $< -output_file $@ -wordsize 1 -min_addr_size 7
 
 test_align_fix.bin: test_align_fix.asm
 	$(REFLET_ASM) test_align_fix.asm -o test_align_fix.bin -no-stack-init -ignore-start -word-size 32
@@ -63,8 +75,8 @@ test_align_fix.bin: test_align_fix.asm
 test_align_fix: test_align_fix.bin
 	$(REFLET_SIM) -c config32 test_align_fix.bin
 
-../rtl/simu/rom11.v: test_align_fix.bin
-	ROM_maker -name rom11 -input_file $< -output_file $@ -wordsize 4 -min_addr_size 30
+../rtl/simu/rom05.v: test_align_fix.bin
+	ROM_maker -name rom05 -input_file $< -output_file $@ -wordsize 4 -min_addr_size 30
 
 test_interrupt.bin: test_interrupt.asm
 	$(REFLET_ASM) $< -o $@ -word-size 16

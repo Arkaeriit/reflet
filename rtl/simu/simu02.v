@@ -1,3 +1,6 @@
+// This test bench runs a basic test of some instruction.
+// It executes the code written in test_inst_mini_load.asm
+// and compares it against expected values.
 
 module simu02();
 
@@ -5,61 +8,69 @@ module simu02();
     always #1 clk <= !clk;
 
     reg reset = 0;
+    reg enable = 1;
     wire [7:0] dIn;
     wire [7:0] dOut;
     wire [7:0] addr;
     wire write_en;
     wire quit;
-    
+    wire debug;
+    wire content_ok;    
     
     reflet_cpu #(.wordsize(8)) cpu(
         .clk(clk), 
         .reset(reset), 
-        .enable(1'b1),
+        .enable(enable),
         .quit(quit), 
+        .debug(debug),
         .data_in(dIn), 
         .addr(addr), 
         .data_out(dOut), 
         .write_en(write_en),
         .interrupt_request(4'h0));
 
-    //The rom got the addresses between 0x00 and 0x7F
+    // The rom got the addresses between 0x0000 and 0x7FFF
     wire [7:0] dataRom;
-    rom2 rom2(
+    rom02 rom02(
         .clk(clk), 
-        .enable_out(!addr[7]), 
-        .addr(addr[4:0]), 
-        .out(dataRom));
-    //The ram got the addresses between 0x80 and 0xFF
-    wire [7:0] dataRam;
-    reflet_ram8 #(.addrSize(7)) ram(
-        .clk(clk), 
-        .reset(reset), 
-        .enable(addr[7]), 
+        .enable(!addr[7]), 
         .addr(addr[6:0]), 
-        .data_in(dOut), 
-        .write_en(write_en), 
-        .data_out(dataRam));
+        .data(dataRom));
 
-    assign dIn = dataRam | dataRom;
+    // Fake ROM testing the result of the program
+    wire [7:0] data_memtester;
+    memory_tester #(
+        .base_addr(8'h80),
+        .addr_size(8),
+        .array_size(4),
+        .word_size(8),
+        .array_content(32'h0806_0402)
+    ) tester (
+        .clk(clk),
+        .reset(reset),
+        .addr(addr),
+        .data_in(dOut),
+        .write_en(write_en),
+        .data_out(data_memtester),
+        .content_ok(content_ok));
+
+    assign dIn = dataRom | data_memtester;
 
     integer i;
+
     initial
     begin
         $dumpfile("simu02.vcd");
         $dumpvars(0, simu02);
         for(i = 0; i<16; i=i+1)
+        begin
             $dumpvars(0, cpu.registers[i]);
-        #10;
-        reset = 1;
-        #200
+        end
+        #100;
+        reset <= 1;
+        #1000;
         $finish;
     end
-
-    always @ (posedge clk)
-        if(quit)
-            reset = 0;
-
 
 endmodule
 
