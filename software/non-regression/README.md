@@ -15,3 +15,5 @@ To ensure that the simulator and the assembler don't have regressions, some prog
 
 Lines starting with `#` will be ignored as comment.
 
+To run all test at once, use the `run_all_tests.sh` script.
+
