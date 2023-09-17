@@ -65,6 +65,12 @@ function read_debug(line)
     end
 end
 
+-- Return true if the line is a misaligned message and false otherwise.
+function read_mis(line)
+    local match = line:match("Missaligned access at addr 0x%x+. Triying to acces %d+ bytes from address 0x%x+.")
+    return match == line
+end
+
 --------------------------------- Executing tests ------------------------------
 
 -- Reads a table of line of a non regression test. Ignore the optional shebang.
@@ -98,8 +104,12 @@ function run_test_line(_command, sim_line)
         print("TODO")
         return false
     elseif command[1] == "mis" then
-        print("TODO")
-        return false
+        if read_mis(sim_line) then
+            return true
+        else
+            print("Error, expected a misaligned access message!")
+            return false
+        end
     elseif command[1] == "dbg" then
         if #command ~= 2 then
             print("Error, command `dbg` expects an argument!")
