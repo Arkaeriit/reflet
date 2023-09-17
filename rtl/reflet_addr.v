@@ -19,7 +19,7 @@ module reflet_addr #(
     input [wordsize-1:0] programCounter,
     input [wordsize-1:0] stackPointer,
     input [wordsize-1:0] otherRegister,
-    input [1:0] reduced_behaviour_bits,
+    input [7:0] reduced_behaviour_bits,
     input in_interrupt_context,
     output reg [7:0] instruction,
     output alignment_error,
@@ -66,11 +66,9 @@ module reflet_addr #(
     reg byte_mode;
     wire [$clog2(wordsize/8):0] size_used_max = $clog2(wordsize/8);
     wire [$clog2(wordsize/8):0] size_used = 
-        ( instruction_ok && (instruction == `inst_pop || instruction == `inst_push || instruction == `inst_ret || instruction == `inst_call) ? size_used_max :
-            ( (byte_mode & !in_interrupt_context) || !instruction_ok || reduced_behaviour_bits == 2'b11 || wordsize <= 8 ? 0 : 
-              ( reduced_behaviour_bits == 2'b10 || wordsize <= 16 ? 1 :
-                ( reduced_behaviour_bits == 2'b01 || wordsize <= 32 ? 2 :
-                  ( size_used_max )))));
+        ( !instruction_ok ? 0 : 
+          ( instruction_ok && (instruction == `inst_pop || instruction == `inst_push || instruction == `inst_ret || instruction == `inst_call) ? size_used_max :
+              (reduced_behaviour_bits - 1)));
 
     always @ (posedge clk)
         if (!reset)

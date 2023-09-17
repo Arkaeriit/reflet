@@ -74,6 +74,7 @@ module reflet_cpu #(
         .out(content_alu),
         .out_reg(index_alu));
 
+    wire [7:0] reduced_behaviour_bits = (wordsize == 8 ? 8'h0 : registers[`sr_id][15:8]);
     reflet_addr #(.wordsize(wordsize)) ram_interface(
         .clk(clk),
         .reset(reset),
@@ -83,7 +84,7 @@ module reflet_cpu #(
         .programCounter(registers[`pc_id]),
         .stackPointer(registers[`sp_id]),
         .otherRegister(other_register),
-        .reduced_behaviour_bits(registers[`sr_id][2:1]),
+        .reduced_behaviour_bits(reduced_behaviour_bits),
         .in_interrupt_context(in_interrupt_context),
         .instruction(instruction),
         .alignment_error(alignment_error),
