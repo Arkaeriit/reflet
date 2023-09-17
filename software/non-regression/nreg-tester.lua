@@ -91,14 +91,32 @@ end
 function run_test_line(_command, sim_line)
     local command = preformat_command(_command)
     if command[1] == "raw" then
+        if #command ~= 2 then
+            print("Error, command `raw` expects an argument!")
+            return false
+        end
         print("TODO")
         return false
     elseif command[1] == "mis" then
         print("TODO")
         return false
     elseif command[1] == "dbg" then
-        print("TODO")
-        return false
+        if #command ~= 2 then
+            print("Error, command `dbg` expects an argument!")
+            return false
+        end
+        local wr = read_debug(sim_line)
+        if wr then
+            if wr == command[2] then
+                return true
+            else
+                print(string.format("Error, command `dbg` expected %s as working register value but got %s!", command[2], wr))
+                return false
+            end
+        else
+            print(string.format("Error, expected debug instruction!"))
+            return false
+        end
     elseif command[1] == "dbg*" then
         return read_debug(sim_line) ~= nil
     else
