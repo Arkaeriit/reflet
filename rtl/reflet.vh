@@ -36,7 +36,7 @@
 `define opp_eq     4'hA
 `define opp_les    4'hB
 `define opp_str    4'hC
-`define opp_load   4'hF
+`define opp_load   4'hD
 
 `define opp_setint      6'b111011
 `define opp_getint      6'b111100
