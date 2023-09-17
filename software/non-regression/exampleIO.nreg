@@ -1,0 +1,4 @@
+#!./nreg-tester.lua
+echo 'a' | sh -c 'reflet-sim ../exampleIO.bin'
+raw aaaaaaaaaa
+

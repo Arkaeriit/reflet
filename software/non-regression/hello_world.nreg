@@ -1,0 +1,4 @@
+#!./nreg-tester.lua
+reflet-sim -w 32 -r 3000 ../hello_world.bin
+raw Hello, world!
+

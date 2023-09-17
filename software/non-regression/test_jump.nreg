@@ -1,0 +1,5 @@
+#!./nreg-tester.lua
+reflet-sim -c ../config16 ../test_jump.bin
+dbg*
+dbg*
+

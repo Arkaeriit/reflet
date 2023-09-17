@@ -1,0 +1,7 @@
+#!./nreg-tester.lua
+reflet-sim -c ../config32 ../test_align_fix.bin
+dbg 0xabcdef00
+dbg  0x1020304
+dbg  0x304ef00
+dbg  0xd0c0b0a
+

@@ -1,0 +1,7 @@
+#!./nreg-tester.lua
+reflet-sim ../test_inst_mini_load.bin
+dbg 0x2
+dbg 0x4
+dbg 0x6
+dbg 0x8
+
