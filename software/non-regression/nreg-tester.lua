@@ -101,8 +101,12 @@ function run_test_line(_command, sim_line)
             print("Error, command `raw` expects an argument!")
             return false
         end
-        print("TODO")
-        return false
+        if command[2] == sim_line then
+            return true
+        else
+            print("Error, mismatch for in `raw` command!")
+            return false
+        end
     elseif command[1] == "mis" then
         if read_mis(sim_line) then
             return true
