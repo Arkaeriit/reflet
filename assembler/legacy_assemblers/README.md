@@ -213,7 +213,3 @@ Running `make` will compile the C file. To compile from the nelua file, run `mak
 
 You can then install it with `make install` or uninstall it with `make uninstall`.
 
-## Legacy assemblers
-
-Before writting this assembler, I had written two other that can be found in the `legacy_assemblers` folder. Note that even if they can write correct code, `reflet-masm` is not suitable to write code that is complient with alignement constrain.
-
