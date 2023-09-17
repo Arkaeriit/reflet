@@ -1,0 +1,4 @@
+#!./nreg-tester.lua
+reflet-sim -w 16 -r 3000 ../test_comparison.bin
+raw The comparison operations are fine. :D
+

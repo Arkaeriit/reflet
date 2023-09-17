@@ -1,0 +1,6 @@
+#!./nreg-tester.lua
+reflet-sim -c ../config16 ../test_interrupt.bin
+dbg 0x1
+dbg 0x2
+dbg 0x3
+
