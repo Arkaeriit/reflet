@@ -13,3 +13,5 @@ To ensure that the simulator and the assembler don't have regressions, some prog
 |`dbg`  |A number      |The tester expects a debug instruction and checks the value of the working register against the argument.|
 |`dbg*` |Nothing       |The tester expects a debug instruction but don't care about the value in the working register.|
 
+Lines starting with `#` will be ignored as comment.
+

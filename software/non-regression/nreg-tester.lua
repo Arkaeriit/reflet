@@ -86,7 +86,9 @@ function prepare_run(tab)
     local ret = {}
     for i=index,#tab do
         if tab[i] ~= "" then
-            ret[#ret+1] = tab[i]
+            if tab[i]:char_at(1) ~= '#' then
+                ret[#ret+1] = tab[i]
+            end
         end
     end
     return handle, ret
@@ -133,6 +135,8 @@ function run_test_line(_command, sim_line)
         end
     elseif command[1] == "dbg*" then
         return read_debug(sim_line) ~= nil
+    elseif command[1] == "#" then
+        return true
     else
         print(string.format("Error, `%s` is not a valid line of command!", _command))
         return false

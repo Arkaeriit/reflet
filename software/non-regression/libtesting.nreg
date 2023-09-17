@@ -1,0 +1,23 @@
+#!./nreg-tester.lua
+echo 'a' | sh -c 'reflet-sim -c ../config16 ../libtesting.bin'
+
+# Test printing
+raw @
+dbg 0x16
+raw Reflet is a neat ISA!
+raw 43981
+raw 34567
+raw 0
+raw aaa
+
+# Test math
+dbg 0xc3
+dbg 0x3
+dbg 0x3
+dbg 0x2710
+dbg 0x4
+
+# Test linked jumps
+dbg*
+dbg*
+dbg*
