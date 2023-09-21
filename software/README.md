@@ -47,4 +47,6 @@ This library contains functions to print things. It depends on the libraries mat
 * print: print the 0-terminated string in R1.
 * num2dec: convert the number in R1 into a decimal number in the string in R2
 * printNum: print the number stored in R1
+* `prints <string>`: Macros that prints the string given in its argument.
+* `_prints <string>`: Same as `prints` but reuse code. Needed if you want to print the same string multiple places in the code.
 

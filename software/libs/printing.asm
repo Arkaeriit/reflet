@@ -142,4 +142,24 @@ label printNum
     popr R1
     popr R2
     ret
-    
+
+;-----------------------
+; Prints the string given as macro argument
+@define prints 1
+    @in-section prints-strings
+        label $1
+        @string-0 $1
+    @end-section
+    _prints $1
+@end
+@section prints-strings    
+
+;-----------------------
+; Same as `prints` but if the string is already
+; used in a `prints`.
+@define _prints 1
+    setlab $1
+    cpy R1
+    callf print
+@end
+

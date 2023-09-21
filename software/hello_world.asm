@@ -1,11 +1,6 @@
 @import libs/import_all_libs.asm
 
-label hello
-@string-nl-0 "Hello, world!"
-
 label start
-    setlab hello
-    cpy R1
-    callf print
+    prints "Hello, world!\n"
     quit
 
