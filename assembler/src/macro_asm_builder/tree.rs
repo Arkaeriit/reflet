@@ -16,7 +16,7 @@ pub struct Metadata {
 }
 
 /// The nodes for the tree representing the assembly code.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum AsmNode {
     /// Some steps of the assembly consume nodes to update the assembler's state
     /// such as when registering macros. In those case, a empty node is left.
@@ -46,6 +46,10 @@ pub enum AsmNode {
     /// A node related to addresses. It can be either the definition of a new
     /// label or a reference to that label.
     Label{name: String, is_definition: bool, meta: Metadata},
+
+    /// A node with denote a section. It contains an inode with every elements
+    /// in that section.
+    Section{name: String, content: Vec<AsmNode>},
 }
 
 impl AsmNode {
@@ -85,6 +89,24 @@ impl AsmNode {
             0 => None,
             _ => Some(ret),
         }
+    }
+
+    /// Add an element to the tree if it is an inode, panic otherwise. Useful to
+    /// add error messages on a root.
+    pub fn add_on_top(&mut self, node: AsmNode) {
+        match self {
+            Inode(nodes) => {
+                nodes.push(node);
+            },
+            _ => {
+                panic!("Assembler's root should be an inode");
+            },
+        }
+    }
+
+    /// Add an error on an inode.
+    pub fn error_on_top(&mut self, msg: String) {
+        self.add_on_top(Error{msg: msg, meta: Metadata{raw: "!!!".to_string(), source_file: "!!!".to_string(), line: 0}});
     }
 }
 
@@ -139,6 +161,9 @@ impl std::string::ToString for AsmNode {
                     format!("Reference to label {}\n", name)
                 }
             },
+            Section{name, content: _} => {
+                 format!("Section {}\n", name)
+            }
         }
     }
 }

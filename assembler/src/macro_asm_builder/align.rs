@@ -6,7 +6,7 @@ use crate::utils::format_string_into_number;
 
 
 /// The different type of alignment we can require
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum AlignKind {
     /// Align to a certain modulus of address
     AlignTo(usize),

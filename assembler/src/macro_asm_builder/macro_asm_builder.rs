@@ -27,7 +27,10 @@ mod label;
 /// A module to register string and transform them in raw bytes.
 mod strings;
 
-/// A mod with miscelaneous usefull functions.
+/// A module to register sections and put code in them.
+mod section;
+
+/// A mod with miscellaneous useful functions.
 pub mod utils;
 
 use crate::tree::*;
@@ -154,6 +157,7 @@ impl Assembler<'_> {
         import::include_source(self);
         macros::register_macros(self);
         macros::expand_macros(self);
+        section::handle_sections(self);
         import::include_source(self); // This should not do anything but it will show more useful error messages if there was some include directives inside of a macro.
         label::register_labels(self);
         align::register_align(self);
@@ -164,10 +168,11 @@ impl Assembler<'_> {
         // User defined macros
         self.run_implementation_macros();
 
-        // An other run of first ass transformations if the
+        // An other run of first pass transformations if the
         // implementation-macros include some directives
         macros::register_macros(self);
         macros::expand_macros(self);
+        section::handle_sections(self);
         label::register_labels(self);
         align::register_align(self);
         raw::expand_constants(self);

@@ -82,14 +82,7 @@ pub fn register_macros(asm: &mut Assembler) {
 
     asm.root.traverse_tree(&mut register_macros_closure);
     if in_macro {
-        match &mut asm.root {
-            Inode(nodes) => {
-                nodes.push(Error{msg: format!("Error, macro {} is not closed with `@end` directive", new_macro_name), meta: Metadata{raw: "!!!".to_string(), source_file: "!!!".to_string(), line: !0}});
-            },
-            _ => {
-                panic!("Assembler's root should be an inode");
-            },
-        }
+        asm.root.error_on_top(format!("Error, macro {} is not closed with `@end` directive", new_macro_name));
     }
 }
 
