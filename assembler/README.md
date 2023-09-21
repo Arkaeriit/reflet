@@ -47,9 +47,15 @@ In assembly, macros are called by doing `<macro_name> <arg1> <arg2> ...`
 
 Note: The first argument is accessed with $1.
 
+### Sections
+
+By default, the content in the generated binary file follows the order of the content in the source files. But you might want to have more flexibility in where to place code or data. You can do so with the `@section <section name>` directive to declare the position of a section. Then, you can put content at that section by placing it between the directives `@in-section <section name>` and `@end-section`.
+
+Nesting section is not recommended and might result in unexpected behaviors. 
+
 ### Assembler directives
 
-Beyond the `@define` directive to declare macros, the assembler offers other directives.
+Beyond the directives to declare macros and sections, the assembler offers other directives.
 
 * `@label <name>` defines a position in the code.
 * `@labref <name>` write in the code the address of the label with the given name.
