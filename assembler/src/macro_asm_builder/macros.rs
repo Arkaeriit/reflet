@@ -108,7 +108,11 @@ pub fn expand_macros(asm: &mut Assembler) {
                             let mut expanded_text = macro_txt.content.clone();
                             for i in 0..macro_txt.number_of_arguments {
                                 let pattern = format!("${}", i+1);
-                                expanded_text = expanded_text.replace(&pattern, &code[1+i]);
+                                let replacement_slashes_escaped = code[1+i].replace("\\", "\\\\");
+                                let replacement_all_escaped = replacement_slashes_escaped.replace("\"", "\\\"");
+                                let replacement_quoted = format!("\"{}\"", replacement_all_escaped);
+                                let replacement_mono_line = replacement_quoted.replace("\n", "\\n");
+                                expanded_text = expanded_text.replace(&pattern, &replacement_mono_line);
                             }
                             // Result generation
                             let mut expanded_macro = Assembler::from_named_text(&expanded_text, &format!("`macro '{}' expanded from file {} at line {}`", macro_name, meta.source_file, meta.line));

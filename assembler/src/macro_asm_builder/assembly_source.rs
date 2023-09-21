@@ -45,7 +45,8 @@ fn parse_line(line: &str) -> Vec<String> {
             } else {
                 if line_as_char[i] == '"' {
                     in_quote = false;
-                    ret.push(new_quoted_string.iter().collect());
+                    let quoted_string: String = new_quoted_string.iter().collect();
+                    ret.push(quoted_string);
                 } else if line_as_char[i] == '\\' {
                     last_escaped = true;
                 } else {
@@ -83,7 +84,7 @@ fn parse_text(text: &str) -> Vec<(Vec<String>, usize, String)> {
     for line in text.split("\n") {
         let parsed = parse_line(line);
         if parsed.len() != 0 {
-            ret.push((parse_line(line), line_index, line.to_string()));
+            ret.push((parsed, line_index, line.to_string()));
         }
         line_index += 1;
     }
