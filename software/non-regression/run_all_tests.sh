@@ -2,6 +2,11 @@
 
 status="ok"
 
+cd ..
+make clean > /dev/null
+make > /dev/null
+cd - > /dev/null
+
 for test in $(find . -name '*.nreg')
 do
     if ./$test
