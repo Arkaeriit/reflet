@@ -36,9 +36,9 @@ module simu04();
         .addr(addr[14:1]), 
         .data(dataRom));
 
-    // A bit of RAM needed for the code to word in the address range 0x8000 to 0x8FFF
+    // A bit of RAM needed for the code to work in the address range 0x8000 to 0x8FFF
     wire [15:0] dataRam;
-    reflet_ram16 #(.addrSize(12), .size(32'h7FF)) ram(
+    reflet_ram #(.addrSize(12), .wordsize(16), .size(32'h7FF)) ram(
         .clk(clk), 
         .reset(reset), 
         .enable(addr[15:12] == 4'h8), 
@@ -76,6 +76,11 @@ module simu04();
         begin
             $dumpvars(0, ram.ram[i]);
             $dumpvars(0, cpu.registers[i]);
+        end
+        for(i = 0; i<20; i=i+1)
+        begin
+            $dumpvars(0, tester.mem[i]);
+            $dumpvars(0, tester.ref[i]);
         end
         #100;
         reset <= 1;

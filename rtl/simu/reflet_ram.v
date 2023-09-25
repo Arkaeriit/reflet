@@ -13,15 +13,15 @@ module reflet_ram #(
     input reset,
     input enable,
     input [addrSize-1:0] addr,
-    input [wordsize:0] data_in,
+    input [wordsize-1:0] data_in,
     input write_en,
-    output [wordsize:0] data_out
+    output [wordsize-1:0] data_out
     );
     integer i; //loop variable
 
     // Declare memory 
-    reg [wordsize:0] memory_ram [size-1:0];
-    reg [wordsize:0] data_out_array;
+    reg [wordsize-1:0] ram [size-1:0];
+    reg [wordsize-1:0] data_out_array;
 
     //addr control
     wire usable = enable && addr < size && reset;
@@ -33,13 +33,13 @@ module reflet_ram #(
                 if(!reset)
                   begin
                     for (i=0;i<size; i=i+1)
-                        memory_ram[i] = 0;
+                        ram[i] = 0;
                   end
                 else
                   begin
                         if(usable && write_en)
-                             memory_ram[addr] <= data_in;
-                        data_out_array <= memory_ram[addr];
+                             ram[addr] <= data_in;
+                        data_out_array <= ram[addr];
                   end
         end
         else
@@ -47,8 +47,8 @@ module reflet_ram #(
             always @(posedge clk)
               begin
                     if(usable && write_en)
-                         memory_ram[addr] <= data_in;
-                    data_out_array <= memory_ram[addr];
+                         ram[addr] <= data_in;
+                    data_out_array <= ram[addr];
               end
         end
     endgenerate
