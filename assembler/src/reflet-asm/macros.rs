@@ -88,10 +88,20 @@ fn set_sr_for(code: &Vec<String>) -> Result<String, String> {
 
 /// Generates the code used for a @set_sr_for macro
 fn format_set_sr_for(sr_value: usize) -> String {
-    format!("set 8
+    format!("
+    ; Use 8 as it is the offset to the reduced behavior bits
+    set 8
     cpy R12
+    ; Clears reduced behaviors bits of the SR but keep the 8 lsb intact
+    read SR
+    lsr R12
+    lsl R12
+    xor SR
+    cpy SR
+    ; The the desires reduced behaviors bits
     set {}
     lsl R12
+    or SR
     cpy SR", sr_value)
 }
 
