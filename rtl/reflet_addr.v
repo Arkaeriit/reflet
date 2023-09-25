@@ -67,8 +67,9 @@ module reflet_addr #(
     wire [$clog2(wordsize/8):0] size_used_max = $clog2(wordsize/8);
     wire [$clog2(wordsize/8):0] size_used = 
         ( !instruction_ok ? 0 : 
-          ( instruction_ok && (instruction == `inst_pop || instruction == `inst_push || instruction == `inst_ret || instruction == `inst_call) ? size_used_max :
-              (reduced_behaviour_bits - 1)));
+          ( (!in_interrupt_context & byte_mode) ? 0 : (
+            ( instruction_ok && (instruction == `inst_pop || instruction == `inst_push || instruction == `inst_ret || instruction == `inst_call) ? size_used_max :
+              (reduced_behaviour_bits - 1)))));
 
     always @ (posedge clk)
         if (!reset)
