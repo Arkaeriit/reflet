@@ -7,6 +7,12 @@ setr R1 0x1000
 setr R2 0xABCDEF00
 setr R3 0x01020304
 
+; Set a trap for alignemnet error to ensure that no error is raised
+setlab quit
+setint 0
+set8 0x22
+cpy SR
+
 @define inc_R1 1
     set $1
     add R1
@@ -68,6 +74,6 @@ inc_R1 4
 load R1
 debug
 
-
+label quit
 quit
 
