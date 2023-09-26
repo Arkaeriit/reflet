@@ -199,7 +199,12 @@ static void run_inst(reflet* vm){
             } else if (isSETINTSTACK(instruction)) {
                 vm->int_level->routine_stack[int_number] = vm->WR;
             } else if (isSOFTINT(instruction)) {
+                int previous_level = vm->int_level->level;
+                vm->PC++; // We do that so we don't fall into an infinite loop after leaving the instructions.
                 triger_int(vm, int_number);
+                if (vm->int_level->level == previous_level) { // No new int
+                    vm->PC--;
+                }
             } else {
                 fprintf(stderr, "Warning, unknow instruction (%X) at address %" WORD_P ".\n",instruction, vm->PC);
             }

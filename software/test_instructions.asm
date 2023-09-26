@@ -226,6 +226,12 @@ label true_test
     register_word ; 18th word should be 0xABCD
     getintstack 3
     register_word ; 19th word should be 0xEF00
+    ; testing setint and softint
+    setlab int
+    setint 3
+    set8 0x10
+    cpy SR ; Enable int
+    softint 3 ; 20th word shoudl be 0x1234
     ret
 
 label test-ret-call
