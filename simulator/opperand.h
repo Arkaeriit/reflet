@@ -43,8 +43,8 @@
 #define SETINT_MASK 0xFC
 #define isSETINT(inst) ((inst & SETINT_MASK) == SETINT)
 #define isGETINT(inst) ((inst & SETINT_MASK) == GETINT)
-#define isGETINTSTACK(inst) ((inst & SETINT_MASK) == SETINTSTACK)
-#define isSETINTSTACK(inst) ((inst & SETINT_MASK) == GETINTSTACK)
+#define isGETINTSTACK(inst) ((inst & SETINT_MASK) == GETINTSTACK)
+#define isSETINTSTACK(inst) ((inst & SETINT_MASK) == SETINTSTACK)
 #define isSOFTINT(inst)     ((inst & SETINT_MASK) == SOFTINT)
 
 #endif

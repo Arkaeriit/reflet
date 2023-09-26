@@ -217,16 +217,35 @@ label true_test
     load R1
     tbm
     register_word ; 17th word should be 255 = 0x00FF
-    ; 18th, 19th, and 20th bytes should stay at 0 = 0x0000
+    ; testing setint, getint, setintstack, and getintstack
+    set+ 0xabcd
+    setint 2
+    set+ 0xef00
+    setintstack 3
+    getint 2
+    register_word ; 18th word should be 0xABCD
+    getintstack 3
+    register_word ; 19th word should be 0xEF00
     ret
-
-label error
-    quit
 
 label test-ret-call
     set 10
     register_word
     ret
+label int
+    set+ 0x1234
+    register_word
+    retint
+
+; Test the instructions related to interrupts
+label test-int
+    setlab int
+    setint 3
+    softint 3
+    ret
+
+label error
+    quit
 
 ;------------------------------------ Main ------------------------------------;
     
