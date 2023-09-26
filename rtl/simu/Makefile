@@ -2,8 +2,8 @@
 # And then show graphs with gtkwave
 
 REFLET       := ../reflet.vh ../reflet_addr.v ../reflet_alu.v ../reflet_cpu.v ../reflet_interrupt.v
-SIM_TOOLS    := memory_tester.v reflet_ram.v rom01.v rom02.v rom03.v rom04.v rom05.v
-TEST_BENCHES := simu01 simu02 simu03 simu04 simu05
+SIM_TOOLS    := memory_tester.v reflet_ram.v rom01.v rom02.v rom03.v rom04.v rom05.v rom06.v
+TEST_BENCHES := simu01 simu02 simu03 simu04 simu05 simu06
 HEADERS      := ../reflet.vh
 
 all:

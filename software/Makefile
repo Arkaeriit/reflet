@@ -79,10 +79,13 @@ test_align_fix: test_align_fix.bin
 	ROM_maker -name rom05 -input_file $< -output_file $@ -wordsize 4 -min_addr_size 30
 
 test_interrupt.bin: test_interrupt.asm
-	$(REFLET_ASM) $< -o $@ -word-size 16
+	$(REFLET_ASM) $< -o $@ -word-size 16 -set-stack-to 0x1000
 
 test_interrupt: test_interrupt.bin
 	$(REFLET_SIM) -c config16 $<
+
+../rtl/simu/rom06.v: test_interrupt.bin
+	ROM_maker -name rom06 -input_file $< -output_file $@ -wordsize 4 -min_addr_size 30
 
 hello_world.bin : hello_world.asm
 	$(REFLET_ASM) $< -o $@ -word-size 32

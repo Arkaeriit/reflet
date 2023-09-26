@@ -61,7 +61,7 @@ module reflet_interrupt#(
                                 ( int_masked_latched[1] ? 1 : 
                                   ( int_masked_latched[2] ? 2 :
                                     ( int_masked_latched[3] ? 3 : 4))));
-    wire new_int = target_level < level && cpu_update;
+    wire new_int = target_level < level;
 
     // Two memories used to store the address before we went into an interrupt
     // context and the level of interrupt we were in. They are indexed by
@@ -76,44 +76,36 @@ module reflet_interrupt#(
     wire [wordsize-1:0] previous_addr = addr_memory[level];
     
     // Interracting with the memories and current level
-    reg [wordsize-1:0] addr_memory_out;
     always @ (posedge clk)
         if (!reset)
         begin
-            addr_memory_out <= 0;
             level <= 4;
         end
         else if (enable)
         begin
-            if (new_int)
+            if (new_int & cpu_update)
             begin
                 level <= target_level;
-                // No need to change addr_memory_out as the main cpu module
-                // will ony read the interruption, as it takes priority on its
-                // handling
+                addr_memory[target_level] <= program_counter;
+                level_memory[target_level] <= level;
             end
             else if (instruction == `inst_retint)
             begin
-                addr_memory_out <= previous_addr;
                 if (cpu_update)
                 begin
                     level <= previous_level;
                 end
             end
-            else if (oppcode == `opp_getintstack)
-            begin
-                addr_memory_out <= addr_memory[arg];
-            end
             else if (oppcode == `opp_setintstack)
             begin
                 addr_memory[arg] <= working_register;
-                addr_memory_out <= working_register;
-            end
-            else
-            begin
-                addr_memory_out <= 0;
             end
         end
+
+    wire [wordsize-1:0] addr_memory_out =
+        ( instruction == `inst_retint ? previous_addr :
+          ( oppcode == `opp_getintstack ? addr_memory[arg] :
+            ( oppcode == `opp_setintstack ? working_register : 0 )));
 
     //Storing interruption routines' addresses
     reg [wordsize-1:0] routines [3:0];
@@ -123,7 +115,7 @@ module reflet_interrupt#(
             getint_out <= 0;
         else if(enable)
         begin
-            if(oppcode == `opp_setint)
+            if(oppcode == `opp_setint && cpu_update)
             begin
                 routines[arg] <= working_register;
                 getint_out <= 0;

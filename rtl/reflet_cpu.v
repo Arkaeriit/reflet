@@ -101,7 +101,7 @@ module reflet_cpu #(
     reflet_interrupt #(.wordsize(wordsize)) interrupt_ctrl (
         .clk(clk),
         .reset(reset),
-        .enable(enable),
+        .enable(enable & !quit),
         .interrupt_request(used_int),
         .instruction(instruction_int),
         .working_register(registers[`wr_id]),
