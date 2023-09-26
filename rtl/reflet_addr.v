@@ -65,11 +65,12 @@ module reflet_addr #(
     // Reduced behavior mode
     reg byte_mode;
     wire [$clog2(wordsize/8):0] size_used_max = $clog2(wordsize/8);
+    wire [$clog2(wordsize/8):0] size_normal_access = (reduced_behaviour_bits == 8'h0 ? size_used_max : reduced_behaviour_bits - 1);
     wire [$clog2(wordsize/8):0] size_used = 
         ( !instruction_ok ? 0 : 
           ( (!in_interrupt_context & byte_mode) ? 0 : (
             ( instruction_ok && (instruction == `inst_pop || instruction == `inst_push || instruction == `inst_ret || instruction == `inst_call) ? size_used_max :
-              (reduced_behaviour_bits - 1)))));
+              (size_normal_access)))));
 
     always @ (posedge clk)
         if (!reset)
@@ -191,14 +192,16 @@ module reflet_addr #(
         .write_request(inst_write && read_ready && instruction_ok),
         .write_ready(write_ready));
 
+    wire alignment_error_continuous;
     reflet_mem_shift_mask #(wordsize) rmsm (
         .addr(addr),
         .size_used(size_used),
         .mask(),
         .shift(),
-        .alignment_error(alignment_error));
+        .alignment_error(alignment_error_continuous));
 
     assign write_en = write_ready;
+    assign alignment_error = alignment_error_continuous & inst_mem;
 
 endmodule
 

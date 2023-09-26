@@ -1,0 +1,57 @@
+module rom07(input clk, input enable, input [15-1:0] addr, output [16-1:0] data);
+    reg [16-1:0] data_reg;
+    always @ (posedge clk)
+        case(addr)
+            15'h0 : data_reg <= 16'h5341;
+            15'h1 : data_reg <= 16'h4D52;
+            15'h2 : data_reg <= 16'h1C28;
+            15'h3 : data_reg <= 16'h9C0D;
+            15'h4 : data_reg <= 16'h6D8C;
+            15'h5 : data_reg <= 16'h221D;
+            15'h6 : data_reg <= 16'h5D8C;
+            15'h7 : data_reg <= 16'h0D1D;
+            15'h8 : data_reg <= 16'h281B;
+            15'h9 : data_reg <= 16'h0D1C;
+            15'hA : data_reg <= 16'h8C9C;
+            15'hB : data_reg <= 16'h1D6D;
+            15'hC : data_reg <= 16'h8C22;
+            15'hD : data_reg <= 16'h1D5D;
+            15'hE : data_reg <= 16'h1C22;
+            15'hF : data_reg <= 16'h3C22;
+            15'h10 : data_reg <= 16'h1E3E;
+            15'h11 : data_reg <= 16'h0037;
+            15'h12 : data_reg <= 16'h3C23;
+            15'h13 : data_reg <= 16'h3EE5;
+            15'h14 : data_reg <= 16'h1CD0;
+            15'h15 : data_reg <= 16'h1D0B;
+            15'h16 : data_reg <= 16'h1E0C;
+            15'h17 : data_reg <= 16'h25E9;
+            15'h18 : data_reg <= 16'h2111;
+            15'h19 : data_reg <= 16'h7081;
+            15'h1A : data_reg <= 16'h1D4D;
+            15'h1B : data_reg <= 16'h0DEB;
+            15'h1C : data_reg <= 16'h281B;
+            15'h1D : data_reg <= 16'h0D1C;
+            15'h1E : data_reg <= 16'h8C9C;
+            15'h1F : data_reg <= 16'h1D6D;
+            15'h20 : data_reg <= 16'h8C22;
+            15'h21 : data_reg <= 16'h1D5D;
+            15'h22 : data_reg <= 16'h1C22;
+            15'h23 : data_reg <= 16'h3C22;
+            15'h24 : data_reg <= 16'h1E3E;
+            15'h25 : data_reg <= 16'h002E;
+            15'h26 : data_reg <= 16'h3C23;
+            15'h27 : data_reg <= 16'h3EE5;
+            15'h28 : data_reg <= 16'h1CD0;
+            15'h29 : data_reg <= 16'h1D0B;
+            15'h2A : data_reg <= 16'hEC0C;
+            15'h2B : data_reg <= 16'h1125;
+            15'h2C : data_reg <= 16'h8121;
+            15'h2D : data_reg <= 16'h1D5D;
+            15'h2E : data_reg <= 16'h5D22;
+            15'h2F : data_reg <= 16'h211D;
+            15'h30 : data_reg <= 16'hE8D0;
+            default : data_reg <= 0;
+        endcase
+    assign data = ( enable ? data_reg : 0 );
+endmodule

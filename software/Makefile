@@ -101,7 +101,10 @@ test_comparison : test_comparison.bin
 	$(REFLET_SIM) -w 16 -r 3000 $<
 
 test_align_trap.bin : test_align_trap.asm
-	$(REFLET_ASM) $< -o $@ -word-size 16
+	$(REFLET_ASM) $< -o $@ -word-size 16 -no-stack-init
+
+../rtl/simu/rom07.v: test_align_trap.bin
+	ROM_maker -name rom07 -input_file $< -output_file $@ -wordsize 2 -min_addr_size 15
 
 test_align_trap : test_align_trap.bin
 	$(REFLET_SIM) -w 16 -r 3000 $<
