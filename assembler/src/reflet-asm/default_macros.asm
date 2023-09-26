@@ -1,9 +1,8 @@
 ;This macro is used to put the result of the 2 word macro in the WR.
 ;It is used to form set+ or setlab
 @define set_to_constant 2
-    mov R11 SR
+    mov. R11 SR
     @set_default_sr
-    cpy SR
     @set_wordsize_byte
     cpy R12
     @align_word
