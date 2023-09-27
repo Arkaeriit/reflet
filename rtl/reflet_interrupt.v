@@ -86,7 +86,7 @@ module reflet_interrupt#(
             if (new_int & cpu_update)
             begin
                 level <= target_level;
-                addr_memory[target_level] <= program_counter;
+                addr_memory[target_level] <= (oppcode == `opp_softint ? program_counter + 1 : program_counter);
                 level_memory[target_level] <= level;
             end
             else if (instruction == `inst_retint)

@@ -54,7 +54,7 @@ module simu04();
         .addr_size(15),
         .array_size(20),
         .word_size(16),
-        .array_content(320'h0000_0000_0000_00FF_000A_FFF3_0050_005A_0003_000E_FF55_0003_00FF_0002_0000_FFCE_0064_0019_0C80_0006)
+        .array_content(320'h1234_EF00_ABCD_00FF_000A_FFF3_0050_005A_0003_000E_FF55_0003_00FF_0002_0000_FFCE_0064_0019_0C80_0006)
     ) tester (
         .clk(clk),
         .reset(reset),
