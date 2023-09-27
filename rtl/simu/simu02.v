@@ -68,7 +68,7 @@ module simu02();
         end
         #100;
         reset <= 1;
-        #1000;
+        #2000;
         $finish;
     end
 
