@@ -115,6 +115,9 @@ test_fancy_interrupt_use.bin : test_fancy_interrupt_use.asm
 test_fancy_interrupt_use : test_fancy_interrupt_use.bin
 	$(REFLET_SIM) -w 16 -r 256 $<
 
+../rtl/simu/rom08.v: test_fancy_interrupt_use.bin
+	ROM_maker -name rom08 -input_file $< -output_file $@ -wordsize 2 -min_addr_size 15
+
 clean :
 	rm -f *.bin
 
