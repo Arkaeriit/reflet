@@ -24,7 +24,6 @@ struct reflet_int {
 
 struct reflet_int_level {
     int level;
-    int stack_depth;
     int level_stack[5];
     word_t routine_stack[5];
 };

@@ -61,7 +61,6 @@ reflet* reflet_init(){
     }
     struct reflet_int_level* level = malloc(sizeof(struct reflet_int_level));
     level->level = LEVEL_NORMAL;
-    level->stack_depth = 0;
     ret->int_level = level;
     //Input reset values not equal to 0
     ret->PC = START_CHAR;
@@ -204,6 +203,8 @@ static void run_inst(reflet* vm){
                 triger_int(vm, int_number);
                 if (vm->int_level->level == previous_level) { // No new int
                     vm->PC--;
+                } else {
+                    edited_pc = true; // We don't want to edit the PC because we don't want to miss the first instruction of the interrupt routine.
                 }
             } else {
                 fprintf(stderr, "Warning, unknow instruction (%X) at address %" WORD_P ".\n",instruction, vm->PC);
@@ -434,10 +435,9 @@ static void io(reflet* vm) {
  */
 static word_t new_int(reflet* vm, int interupt){
     word_t ret = vm->ints[interupt]->routine;
-    vm->int_level->level_stack[vm->int_level->stack_depth] = vm->int_level->level;
-    vm->int_level->routine_stack[vm->int_level->stack_depth] = vm->PC;
+    vm->int_level->level_stack[interupt] = vm->int_level->level;
+    vm->int_level->routine_stack[interupt] = vm->PC;
     vm->int_level->level = interupt;
-    vm->int_level->stack_depth++;
     return ret;
 }
 
@@ -474,10 +474,9 @@ static void triger_int(reflet* vm, uint8_t int_number){
  * but do not do anything else.
  */
 static void ret_int(reflet* vm){
-    if(vm->int_level->stack_depth){ //We are in an interrupt context, everything is fine
-        vm->int_level->stack_depth--;
-        vm->int_level->level = vm->int_level->level_stack[vm->int_level->stack_depth];
-        vm->PC = vm->int_level->routine_stack[vm->int_level->stack_depth];
+    if(vm->int_level->level != LEVEL_NORMAL){ //We are in an interrupt context, everything is fine
+        vm->PC = vm->int_level->routine_stack[vm->int_level->level];
+        vm->int_level->level = vm->int_level->level_stack[vm->int_level->level];
     }else{
         fprintf(stderr, "Warning: using RETINT while not in an interrupt context.\n");
     }
