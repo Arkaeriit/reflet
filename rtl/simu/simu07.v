@@ -31,8 +31,8 @@ module simu07();
     // The ROM got all the addresses
     rom07 rom07(
         .clk(clk), 
-        .enable(1), 
-        .addr(addr[14:1]), 
+        .enable(1'b1), 
+        .addr(addr[15:1]), 
         .data(dIn));
 
     integer i;
