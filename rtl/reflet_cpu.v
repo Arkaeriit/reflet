@@ -84,6 +84,7 @@ module reflet_cpu #(
         .programCounter(registers[`pc_id]),
         .stackPointer(registers[`sp_id]),
         .otherRegister(other_register),
+        .statusRegister(registers[`sr_id]),
         .reduced_behaviour_bits(reduced_behaviour_bits),
         .in_interrupt_context(in_interrupt_context),
         .instruction(instruction),
