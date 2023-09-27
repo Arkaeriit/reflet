@@ -217,6 +217,19 @@ label true_test
     load R1
     tbm
     register_word ; 17th word should be 255 = 0x00FF
+    ; testing atom
+    @set_wordsize_byte
+    add SP
+    cpy R1
+    set 0
+    str R1
+    read R1
+    atom
+    cmpnot
+    jifl error
+    read R1
+    atom
+    jifl error
     ; testing setint, getint, setintstack, and getintstack
     set+ 0xabcd
     setint 2
