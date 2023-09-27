@@ -1,3 +1,5 @@
+// This tests the jump instructions. This executes the code in test_jump.asm
+// and we expect two debug instruction and a quit.
 
 module simu03();
 
@@ -5,62 +7,43 @@ module simu03();
     always #1 clk <= !clk;
 
     reg reset = 0;
+    reg enable = 1;
     wire [15:0] dIn;
     wire [15:0] dOut;
     wire [15:0] addr;
     wire write_en;
     wire quit;
+    wire debug;
     
     
     reflet_cpu #(.wordsize(16)) cpu(
         .clk(clk), 
         .reset(reset), 
-        .enable(1'b1),
+        .enable(enable),
         .quit(quit), 
+        .debug(debug),
         .data_in(dIn), 
         .addr(addr), 
         .data_out(dOut), 
         .write_en(write_en),
         .interrupt_request(4'h0));
 
-    //The rom got the addresses between 0x0000 and 0x7FFF
-    wire [15:0] dataRom;
-    rom3 rom3(
+    //The rom got the addresses between 0x0000 and 0xFFFF
+    rom03 rom03(
         .clk(clk), 
-        .enable_out(!addr[15]), 
-        .addr(addr[7:0]), 
-        .dataOut(dataRom));
-    //The ram got the addresses between 0x8000 and 0xFFFF
-    wire [15:0] dataRam;
-    reflet_ram16 #(.addrSize(15)) ram(
-        .clk(clk), 
-        .reset(reset), 
-        .enable(addr[15]), 
-        .addr(addr[14:0]), 
-        .data_in(dOut), 
-        .write_en(write_en), 
-        .data_out(dataRam));
-
-    assign dIn = dataRam | dataRom;
-
-    integer i;
+        .enable(1'b1), 
+        .addr(addr[15:1]), 
+        .data(dIn));
 
     initial
     begin
         $dumpfile("simu03.vcd");
         $dumpvars(0, simu03);
-        for(i = 0; i<16; i=i+1)
-            $dumpvars(0, cpu.registers[i]);
-        #10;
-        reset = 1;
-        #800;
+        #100;
+        reset <= 1;
+        #1000;
         $finish;
     end
-
-    always @ (posedge clk)
-        if(quit)
-            reset = 0;
-
 
 endmodule
 

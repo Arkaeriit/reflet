@@ -1,35 +1,72 @@
-/*------------------------------------\
-|This ROM test the instruction used in|
-|The interface with the RAM.          |
-\------------------------------------*/
-
-module rom2(input clk, input enable_out,input [4:0] addr, output [7:0] out);
-reg [7:0] ret = 0; 
-assign out = (enable_out ? ret : 5'h0);
-always @ (posedge clk)
-case(addr)
-  0 : ret = 65;   //A
-  1 : ret = 83;   //S
-  2 : ret = 82;   //R
-  3 : ret = 77;   //M
-  4 : ret = 20;   //set 4
-  5 : ret = 60;   //cpy R12
-  6 : ret = 24;   //set 8
-  7 : ret = 172;  //lsl R12
-  8 : ret = 63;   //cpy SP
-  9 : ret = 21;   //set 5
-  10 : ret = 11;  //push
-  11 : ret = 16;  //set 0
-  12 : ret = 10;  //pop
-  13 : ret = 16;  //set 0
-  14 : ret = 47;  //read SP
-  15 : ret = 76;  //add R12
-  16 : ret = 59;  //cpy R11
-  17 : ret = 25;  //set 9
-  18 : ret = 235; //str R11
-  19 : ret = 16;  //set 0
-  20 : ret = 251; //load R11
-  21 : ret = 14;  //quit
-  default: ret = 0;
-endcase
+module rom02(input clk, input enable, input [7-1:0] addr, output [8-1:0] data);
+    reg [8-1:0] data_reg;
+    always @ (posedge clk)
+        case(addr)
+            7'h0 : data_reg <= 8'h41;
+            7'h1 : data_reg <= 8'h53;
+            7'h2 : data_reg <= 8'h52;
+            7'h3 : data_reg <= 8'h4D;
+            7'h4 : data_reg <= 8'h28;
+            7'h5 : data_reg <= 8'h1C;
+            7'h6 : data_reg <= 8'h21;
+            7'h7 : data_reg <= 8'h8C;
+            7'h8 : data_reg <= 8'h1D;
+            7'h9 : data_reg <= 8'h24;
+            7'hA : data_reg <= 8'h11;
+            7'hB : data_reg <= 8'h28;
+            7'hC : data_reg <= 8'h81;
+            7'hD : data_reg <= 8'h12;
+            7'hE : data_reg <= 8'h13;
+            7'hF : data_reg <= 8'h14;
+            7'h10 : data_reg <= 8'h22;
+            7'h11 : data_reg <= 8'h15;
+            7'h12 : data_reg <= 8'hC3;
+            7'h13 : data_reg <= 8'h21;
+            7'h14 : data_reg <= 8'h33;
+            7'h15 : data_reg <= 8'h13;
+            7'h16 : data_reg <= 8'hD4;
+            7'h17 : data_reg <= 8'h35;
+            7'h18 : data_reg <= 8'h15;
+            7'h19 : data_reg <= 8'hC3;
+            7'h1A : data_reg <= 8'h21;
+            7'h1B : data_reg <= 8'h33;
+            7'h1C : data_reg <= 8'h13;
+            7'h1D : data_reg <= 8'hD4;
+            7'h1E : data_reg <= 8'h35;
+            7'h1F : data_reg <= 8'h15;
+            7'h20 : data_reg <= 8'hC3;
+            7'h21 : data_reg <= 8'h21;
+            7'h22 : data_reg <= 8'h33;
+            7'h23 : data_reg <= 8'h13;
+            7'h24 : data_reg <= 8'hD4;
+            7'h25 : data_reg <= 8'h35;
+            7'h26 : data_reg <= 8'h15;
+            7'h27 : data_reg <= 8'hC3;
+            7'h28 : data_reg <= 8'h21;
+            7'h29 : data_reg <= 8'h33;
+            7'h2A : data_reg <= 8'h13;
+            7'h2B : data_reg <= 8'hD2;
+            7'h2C : data_reg <= 8'hE9;
+            7'h2D : data_reg <= 8'h21;
+            7'h2E : data_reg <= 8'h32;
+            7'h2F : data_reg <= 8'h12;
+            7'h30 : data_reg <= 8'hD2;
+            7'h31 : data_reg <= 8'hE9;
+            7'h32 : data_reg <= 8'h21;
+            7'h33 : data_reg <= 8'h32;
+            7'h34 : data_reg <= 8'h12;
+            7'h35 : data_reg <= 8'hD2;
+            7'h36 : data_reg <= 8'hE9;
+            7'h37 : data_reg <= 8'h21;
+            7'h38 : data_reg <= 8'h32;
+            7'h39 : data_reg <= 8'h12;
+            7'h3A : data_reg <= 8'hD2;
+            7'h3B : data_reg <= 8'hE9;
+            7'h3C : data_reg <= 8'h21;
+            7'h3D : data_reg <= 8'h32;
+            7'h3E : data_reg <= 8'h12;
+            7'h3F : data_reg <= 8'hE8;
+            default : data_reg <= 0;
+        endcase
+    assign data = ( enable ? data_reg : 0 );
 endmodule

@@ -64,7 +64,7 @@ module reflet_cpu #(
     wire interrupt, in_interrupt_context;
     wire [wordsize-1:0] int_routine;
     wire alignment_error;
-    wire [3:0] used_int = {interrupt_request[3:1], interrupt_request[0] | (registers[`sr_id][7] & alignment_error)}; //External interrupt or notification for alignment error
+    wire [3:0] used_int = {interrupt_request[3:1], interrupt_request[0] | (registers[`sr_id][5] & alignment_error)}; //External interrupt or notification for alignment error
 
     reflet_alu #(.wordsize(wordsize)) alu(
         .working_register(registers[`wr_id]),
@@ -74,6 +74,7 @@ module reflet_cpu #(
         .out(content_alu),
         .out_reg(index_alu));
 
+    wire [7:0] reduced_behaviour_bits = (wordsize == 8 ? 8'h0 : registers[`sr_id][15:8]);
     reflet_addr #(.wordsize(wordsize)) ram_interface(
         .clk(clk),
         .reset(reset),
@@ -83,7 +84,8 @@ module reflet_cpu #(
         .programCounter(registers[`pc_id]),
         .stackPointer(registers[`sp_id]),
         .otherRegister(other_register),
-        .reduced_behaviour_bits(registers[`sr_id][2:1]),
+        .statusRegister(registers[`sr_id]),
+        .reduced_behaviour_bits(reduced_behaviour_bits),
         .in_interrupt_context(in_interrupt_context),
         .instruction(instruction),
         .alignment_error(alignment_error),
@@ -100,12 +102,12 @@ module reflet_cpu #(
     reflet_interrupt #(.wordsize(wordsize)) interrupt_ctrl (
         .clk(clk),
         .reset(reset),
-        .enable(enable),
+        .enable(enable & !quit),
         .interrupt_request(used_int),
         .instruction(instruction_int),
         .working_register(registers[`wr_id]),
         .program_counter(registers[`pc_id]),
-        .int_mask(registers[`sr_id][6:3]),
+        .int_mask(registers[`sr_id][4:1]),
         .out(content_int),
         .out_reg(index_int),
         .out_routine(int_routine),

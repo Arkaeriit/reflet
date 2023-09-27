@@ -1,7 +1,10 @@
+// This test bench runs a basic test of some instruction.
+// It executes the code written in test_inst_mini_str.asm
+// and compares it against expected values.
 
 module simu01();
 
-    reg clk = 0;
+    reg clk = 1;
     always #1 clk <= !clk;
 
     reg reset = 0;
@@ -11,40 +14,63 @@ module simu01();
     wire [7:0] addr;
     wire write_en;
     wire quit;
+    wire debug;
+    wire content_ok;    
     
     reflet_cpu #(.wordsize(8)) cpu(
         .clk(clk), 
         .reset(reset), 
         .enable(enable),
         .quit(quit), 
+        .debug(debug),
         .data_in(dIn), 
         .addr(addr), 
         .data_out(dOut), 
         .write_en(write_en),
         .interrupt_request(4'h0));
 
-    rom1 rom1(.clk(clk), .addr(addr[3:0]), .out(dIn));
+    // The rom got the addresses between 0x0000 and 0x7FFF
+    wire [7:0] dataRom;
+    rom01 rom01(
+        .clk(clk), 
+        .enable(!addr[7]), 
+        .addr(addr[6:0]), 
+        .data(dataRom));
+
+    //qFake ROM testing the result of the program
+    wire [7:0] data_memtester;
+    memory_tester #(
+        .base_addr(8'h80),
+        .addr_size(8),
+        .array_size(3),
+        .word_size(8),
+        .array_content(24'h64_0700)
+    ) tester (
+        .clk(clk),
+        .reset(reset),
+        .addr(addr),
+        .data_in(dOut),
+        .write_en(write_en),
+        .data_out(data_memtester),
+        .content_ok(content_ok));
+
+    assign dIn = dataRom | data_memtester;
 
     integer i;
+
     initial
     begin
         $dumpfile("simu01.vcd");
         $dumpvars(0, simu01);
         for(i = 0; i<16; i=i+1)
+        begin
             $dumpvars(0, cpu.registers[i]);
-        #10;
-        reset <= 1;
-        #20;
-        enable <= 0;
-        #30;
-        enable <= 1;
+        end
         #100;
+        reset <= 1;
+        #1000;
         $finish;
     end
-
-    always @ (posedge clk)
-        if(quit)
-            reset = 0;
 
 endmodule
 

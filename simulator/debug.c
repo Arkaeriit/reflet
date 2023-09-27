@@ -43,11 +43,8 @@ static char* dataAboutInstruction(reflet* vm){
     uint8_t opperand = (instruction & 0xF0) >> 4;
     uint8_t reg = instruction & 0x0F;
     switch(opperand){
-        case 0:
+        case 0xE:
             switch(instruction) {
-                case SLP:
-                    sprintf(ret, "SLP: sleeping, value of the working register: %" WORD_PX "", vm->WR);
-                    break;
                 case CC2:
                     sprintf(ret,"CC2: Computing the two's complement of 0x%" WORD_PX "",vm->WR);
                     break;
@@ -78,12 +75,28 @@ static char* dataAboutInstruction(reflet* vm){
                 case RETINT:
                     sprintf(ret, "RETINT: returning from interruption routine");
                     break;
+                case ATOM:
+                    sprintf(ret, "ATOM: working on address %" WORD_PX "", vm->WR);
+                    break;
                 default:
                     if(isSETINT(instruction)){
                         sprintf(ret, "SETINT: setting the routine of interrupt %i to %" WORD_PX, instruction & 3, vm->WR);
                     }else{
                         sprintf(ret, "Unknown instruction");
                     }
+            }
+            break;
+        case 0xF:
+            if (isGETINT(instruction)) {
+                sprintf(ret, "GETINT: setting the routine of interrupt %i", instruction & 3);
+            } else if (isGETINTSTACK(instruction)) {
+                sprintf(ret, "GETINTSTCK: getting the value of index %i of the interrupt stack", instruction & 3);
+            } else if (isSETINTSTACK(instruction)) {
+                sprintf(ret, "SETINTSTCK: setting the value of index %i of the interrupt stack to %" WORD_PX, instruction & 3, vm->WR);
+            } else if (isSOFTINT(instruction)) {
+                sprintf(ret, "SIFTINT: triggering interrupt %i", instruction & 3);
+            } else {
+                sprintf(ret, "Unknown instruction");
             }
             break;
         case SET:
@@ -97,9 +110,6 @@ static char* dataAboutInstruction(reflet* vm){
             break;
         case ADD:
             sprintf(ret, "ADD: adding to the working register (%" WORD_PX ") the value of register %i (%" WORD_PX ")", vm->WR, reg, vm->reg[reg]);
-            break;
-        case SUB:
-            sprintf(ret, "SUB: substracting to the working register (%" WORD_PX ") the value of register %i (%" WORD_PX ")", vm->WR, reg, vm->reg[reg]);
             break;
         case AND:
             sprintf(ret, "AND: logical and between the working register (%" WORD_PX ") and the register %i (%" WORD_PX ")", vm->WR, reg, vm->reg[reg]);

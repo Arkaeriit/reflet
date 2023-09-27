@@ -1,4 +1,5 @@
-// This test bench runs an extensive test of most instructions.
+// This executes test_fancy_interrupt_use.asm, which should do a single debug
+// instruction from interrupt contexts, and then quit.
 
 module simu08();
 
@@ -27,43 +28,12 @@ module simu08();
         .write_en(write_en),
         .interrupt_request(4'h0));
 
-    // The rom got the addresses between 0x0000 and 0x7FFF
-    wire [15:0] dataRom;
-    rom8 rom8(
+    // The ROM got all the addresses
+    rom08 rom08(
         .clk(clk), 
-        .enable(!addr[15]), 
-        .addr(addr[14:1]), 
-        .data(dataRom));
-
-    // A bit of RAM needed for the code to word in the address range 0x8000 to 0x8FFF
-    wire [15:0] dataRam;
-    reflet_ram16 #(.addrSize(12), .size(32'h7FF)) ram(
-        .clk(clk), 
-        .reset(reset), 
-        .enable(addr[15:12] == 4'h8), 
-        .addr(addr[11:0]), 
-        .data_in(dOut), 
-        .write_en(write_en), 
-        .data_out(dataRam));
-
-    // Fake ROM testing the result of the program
-    wire [15:0] data_memtester;
-    memory_tester #(
-        .base_addr(15'h4800), // 0x9000 from the processor's point of view
-        .addr_size(15),
-        .array_size(20),
-        .word_size(16),
-        .array_content(320'h0000_0000_0000_00FF_000A_FFF3_0050_005A_0003_000E_FF55_0003_00FF_0002_0000_FFCE_0064_0019_0C80_0006)
-    ) tester (
-        .clk(clk),
-        .reset(reset),
-        .addr(addr[15:1]),
-        .data_in(dOut),
-        .write_en(write_en),
-        .data_out(data_memtester),
-        .content_ok(content_ok));
-
-    assign dIn = dataRom | dataRam | data_memtester;
+        .enable(1'b1), 
+        .addr(addr[15:1]), 
+        .data(dIn));
 
     integer i;
 
@@ -72,13 +42,10 @@ module simu08();
         $dumpfile("simu08.vcd");
         $dumpvars(0, simu08);
         for(i = 0; i<16; i=i+1)
-        begin
-            $dumpvars(0, ram.ram[i]);
             $dumpvars(0, cpu.registers[i]);
-        end
         #100;
         reset <= 1;
-        #50000;
+        #10000;
         $finish;
     end
 

@@ -17,7 +17,7 @@ label start
     cpy R9
     setlab ISR
     setint 1
-    set8 0x10
+    set8 0x04
     cpy SR
     label loop
         set 2

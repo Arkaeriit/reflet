@@ -24,7 +24,6 @@ struct reflet_int {
 
 struct reflet_int_level {
     int level;
-    int stack_depth;
     int level_stack[5];
     word_t routine_stack[5];
 };
@@ -85,6 +84,15 @@ typedef struct reflet_struct {
 #define SR_REG 13
 #define PC_REG 14
 #define SP_REG 15
+
+#define SR_COMP_MASK 0x01
+#define SR_INT0_MASK 0x02
+#define SR_INT1_MASK 0x04
+#define SR_INT2_MASK 0x08
+#define SR_INT3_MASK 0x10
+#define SR_TRAP_MASK 0x20
+
+#define SR_REDUCED_POS 8
 
 reflet* reflet_init();
 void reflet_initRAM(reflet* vm);

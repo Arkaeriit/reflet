@@ -1,9 +1,8 @@
 ;This macro is used to put the result of the 2 word macro in the WR.
 ;It is used to form set+ or setlab
 @define set_to_constant 2
-    mov R11 SR
+    mov. R11 SR
     @set_default_sr
-    cpy SR
     @set_wordsize_byte
     cpy R12
     @align_word
@@ -136,9 +135,7 @@
 @define @loadX 2
     ; Preserve and set SR
     mov. R12 SR
-    set $1
-    or SR
-    cpy SR
+    @set_sr_for $1
     ; load
     load $2
     cpy R11
@@ -152,9 +149,7 @@
     cpy R11
     ; Preserve and set SR
     mov. R12 SR
-    set $1
-    or SR
-    cpy SR
+    @set_sr_for $1
     ; store
     read R11
     str $2
@@ -166,26 +161,26 @@
 
 ; load/store 8 bits
 @define load8 1
-    @loadX 6 $1
+    @loadX 8 $1
 @end
 @define str8 1
-    @strX 6 $1
+    @strX 8 $1
 @end
 
 ; Load/store 16 bits
 @define load16 1
-    @loadX 4 $1
+    @loadX 16 $1
 @end
 @define str16 1
-    @strX 4 $1
+    @strX 16 $1
 @end
 
 ; Load/store 32 bits
 @define load32 1
-    @loadX 2 $1
+    @loadX 32 $1
 @end
 @define str32 1
-    @strX 2 $1
+    @strX 32 $1
 @end
 
 ; load/store 8 bits swifters
@@ -198,6 +193,26 @@
     tbm
     str $1
     tbm
+@end
+
+; WR = $1 - WR
+@define subto 1
+    cc2
+    add $1
+@end
+
+; WR = WR - $1
+@define sub 1
+    subto $1
+    cc2
+@end
+
+; No op
+@define nop 0
+    read WR
+@end
+@define slp 0
+    nop
 @end
 
 ; Sets the wordsize in bits into WR

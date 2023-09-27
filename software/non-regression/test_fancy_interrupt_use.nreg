@@ -1,0 +1,4 @@
+#!./nreg-tester.lua
+reflet-sim -w 16 -r 256 ../test_fancy_interrupt_use.bin
+dbg 0xaa
+

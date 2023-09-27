@@ -1,3 +1,7 @@
+// This test bench runs test_interruption.asm which tests that the interruptions
+// works as planed. We expect three debug signals and then a quit.
+// Furthermore, as this is a 32 bits CPU running a 16 bits program, this also
+// tests the reduced behavior and how it is implemented in the assembler.
 
 module simu06();
 
@@ -5,32 +9,48 @@ module simu06();
     always #1 clk <= !clk;
 
     reg reset = 0;
-    wire [15:0] dIn;
-    wire [15:0] dOut;
-    wire [15:0] addr;
+    wire enable = 1;
+    wire [31:0] dIn;
+    wire [31:0] dOut;
+    wire [31:0] addr;
     wire write_en;
     wire quit;
     wire debug;
+    wire content_ok;    
+    reg int1 = 0;
     
-    
-    reflet_cpu #(.wordsize(16)) cpu(
+    reflet_cpu #(.wordsize(32)) cpu(
         .clk(clk), 
         .reset(reset), 
-        .debug(debug),
-        .enable(1'b1),
+        .enable(enable),
         .quit(quit), 
+        .debug(debug),
         .data_in(dIn), 
         .addr(addr), 
         .data_out(dOut), 
         .write_en(write_en),
-        .interrupt_request(4'h0));
+        .interrupt_request({2'h0, int1, 1'h0}));
 
-    //The rom
-    rom6 rom6(
+    // The ROM got the addresses between 0x0000 and 0xFFF
+    wire [31:0] dataRom;
+    rom06 rom06(
         .clk(clk), 
-        .enable_out(!addr[15]), 
-        .addr(addr[4:0]), 
-        .dataOut(dIn));
+        .enable(addr < 32'h1000), 
+        .addr(addr[31:2]), 
+        .data(dataRom));
+
+    // A bit of RAM needed for the code to work in the address range 0x1000 to 0x1FFF
+    wire [31:0] dataRam;
+    reflet_ram #(.addrSize(30), .wordsize(32), .size(32'h400)) ram(
+        .clk(clk), 
+        .reset(reset), 
+        .enable(addr >= 32'h1000), 
+        .addr(addr[31:2]), 
+        .data_in(dOut), 
+        .write_en(write_en), 
+        .data_out(dataRam));
+
+    assign dIn = dataRom | dataRam;
 
     integer i;
 
@@ -40,16 +60,40 @@ module simu06();
         $dumpvars(0, simu06);
         for(i = 0; i<16; i=i+1)
             $dumpvars(0, cpu.registers[i]);
-        #10;
+        for(i = 0; i<4; i=i+1)
+        begin
+            $dumpvars(0, cpu.interrupt_ctrl.routines[i]);
+            $dumpvars(0, cpu.interrupt_ctrl.level_memory[i]);
+            $dumpvars(0, cpu.interrupt_ctrl.addr_memory[i]);
+        end
+        #100;
         reset <= 1;
-        #200;
+        #4900;
+        int1 <= 1;
+        #5
+        int1 <= 0;
+        #4995;
+        int1 <= 1;
+        #5
+        int1 <= 0;
+        #4995;
+        int1 <= 1;
+        #5
+        int1 <= 0;
+        #4995;
+        int1 <= 1;
+        #5
+        int1 <= 0;
+        #4995;
+        int1 <= 1;
+        #5
+        int1 <= 0;
+        #4995;
+        int1 <= 1;
+        #5
+        int1 <= 0;
         $finish;
     end
-
-    always @ (posedge clk)
-        if(quit)
-            reset = 0;
-
 
 endmodule
 

@@ -66,6 +66,8 @@ Beyond the directives to declare macros and sections, the assembler offers other
 * `@string "..."` writes the strings in the quotes following the directive in the machine code.
 * `@import <path>` include in the assembly the content of the given file. The path is relative to the path of the file where the import directive is.
 * `@set8 <number>` sets the 8 bit number into the WR.
+* `@set_sr_for <size in bits>` sets the SR to a value suitable to move the given size.
+* `@set_default_sr` sets the SR to a value suitable to move the wordsize of the processor.
 
 As alternatives to `@string`, there is also `@string-nl`, `@string-0`, and `@string-nl-0` which add respectively a new line, a null byte, and a new line followed by a null byte after the string.
 
@@ -85,7 +87,7 @@ To ease the use of the assembler, some macros are predefined.
 * `goto <name>` jumps to the given label.
 * `jmp` jumps to the address in the working register.
 * `jifl <name>` jump  to the given label if the comparison bit is set to 1.
-* `@set_wordsize_byte`: sets the number of bytes in a word in the working register.
+* `@set_wordsize_byte` sets the number of bytes in a word in the working register.
 * `@align_word` align to the size of the word.
 * `load<bit number> <reg>` calls `load <reg>` after setting the status register to only interact with the given numbers of bits.
 * `str<bit number> <reg>` calls `str <reg>` after setting the status register to only interact with the given numbers of bits.
@@ -93,6 +95,9 @@ To ease the use of the assembler, some macros are predefined.
 * `addup <reg>` increase the target register with the value in the working register.
 * `inc <reg>` increase by one the value in the target register.
 * `inc_ws <reg>` increase by the word size in bytes the value in the target register.
+* `subto <reg>` put in the working register `<reg> - wr`.
+* `sub <reg>` put in the working register `wr - <reg>`.
+* `nop` and `slp` both do nothing.
 * `set_wordsize_bit` set the number of bits in a word into the working register.
 * `leseq <reg>` set the comparison bit if the working register is smaller or equal to the target register.
 * `great <reg>` set the comparison bit if the working register is greater than the target register.
@@ -123,5 +128,5 @@ You can then install to `/usr/local/bin` it with `make install` or uninstall it 
 
 ## Legacy assemblers
 
-Before writing this assembler, I had written two other that can be found in the `legacy_assemblers` folder. Note that even if they can write correct code, `reflet-masm` is not suitable to write code that is compliant with alignment constrain, and `reflet-asm-nelua` is very similar in features as this one but is way slower.
+Before writing this assembler, I had written two other that can be found in the `legacy_assemblers` folder. They were written for a previous version of the ISA so they will not write correct code.
 

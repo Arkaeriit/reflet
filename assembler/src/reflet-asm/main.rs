@@ -65,13 +65,7 @@ fn make_assembler(args: &cli_arguments::Arguments) -> Assembler {
     asm.micro_assembly = &micro_assembler::micro_assembler;
     // Size specific macros
     let align_word = format!("@define @align_word 0\n@align {}\n@end", args.word_size/8);
-    let default_sr = match args.word_size {
-        8 => 7,
-        16 => 5,
-        32 => 3,
-        _ => 1, // Mediocre support for 64 and 128 bits.
-    };
-    let set_default_sr = format!("@define @set_default_sr 0\nset {}\n@end", default_sr);
+    let set_default_sr = format!("@define @set_default_sr 0\n@set_sr_for {}\n@end", args.word_size);
     let set_word_size_byte_def = match args.word_size {
         128 => "set 4\nadd WR\nadd WR\n".to_string(),
         64 => "set 4\n add WR\n".to_string(),
@@ -89,7 +83,7 @@ fn make_assembler(args: &cli_arguments::Arguments) -> Assembler {
         runtime_start.push_str("@string \"ASRM\"\n");
     }
     if !args.no_compatibility {
-        runtime_start.push_str("@set_default_sr\ncpy SR\n");
+        runtime_start.push_str("@set_default_sr\n");
     }
     if args.set_stack {
         if args.stack_addr.as_str() == "" {
@@ -100,9 +94,10 @@ fn make_assembler(args: &cli_arguments::Arguments) -> Assembler {
         runtime_start.push_str("cpy SP\n");
     }
     if !args.ignore_start {
-        runtime_start.push_str("goto start");
+        runtime_start.push_str("goto start\n");
 
     }
+    runtime_start.push_str("@label __code__start__\n");
     asm.add_text_before(&runtime_start, "runtime_start");
     // End runtime
     asm.add_text_after("@align_word\n@label __code__end__\n", "runtime_end");

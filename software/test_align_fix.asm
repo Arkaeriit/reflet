@@ -7,6 +7,12 @@ setr R1 0x1000
 setr R2 0xABCDEF00
 setr R3 0x01020304
 
+; Set a trap for alignemnet error to ensure that no error is raised
+setlab quit
+setint 0
+set8 0x22
+cpy SR
+
 @define inc_R1 1
     set $1
     add R1
@@ -23,8 +29,7 @@ str R1
 inc_R1 4
 
 ; Testing 16 bit writes
-set 4
-cpy SR
+@set_sr_for 16
 
 read R2
 str R1
@@ -35,8 +40,7 @@ str R1
 inc_R1 2
 
 ; Testing 8 bit writes
-set 6
-cpy SR
+@set_sr_for 8
 
 set 10
 str R1
@@ -55,8 +59,7 @@ str R1
 inc_R1 1
 
 ; Reading the 4 word written
-set 0
-cpy SR
+@set_default_sr
 setr R1 0x1000
 
 load R1
@@ -71,6 +74,6 @@ inc_R1 4
 load R1
 debug
 
-
+label quit
 quit
 

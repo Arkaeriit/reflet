@@ -19,7 +19,8 @@ module reflet_addr #(
     input [wordsize-1:0] programCounter,
     input [wordsize-1:0] stackPointer,
     input [wordsize-1:0] otherRegister,
-    input [1:0] reduced_behaviour_bits,
+    input [wordsize-1:0] statusRegister,
+    input [7:0] reduced_behaviour_bits,
     input in_interrupt_context,
     output reg [7:0] instruction,
     output alignment_error,
@@ -41,36 +42,38 @@ module reflet_addr #(
     wire [wordsize-1:0] addr_pop = ( instruction == `inst_pop || instruction == `inst_ret ? stackPointer - wordsize/8 : 0 ); //We need the -wordsize/8 because the CPU updated the stack pointer
     wire [wordsize-1:0] addr_push = ( instruction == `inst_push || instruction == `inst_call ? stackPointer : 0 );
     wire [wordsize-1:0] addr_reg = ( opperand == `opp_str || opperand == `opp_load ? otherRegister : 0 );
-    wire [wordsize-1:0] cpu_addr = ( instruction_ok ? addr_reg | addr_pop | addr_push : programCounter ); //The default behavior is to seek the address of the next piece of code
+    wire [wordsize-1:0] addr_wr  = ( instruction == `inst_atom ? workingRegister : 0 );
+    wire [wordsize-1:0] cpu_addr = ( instruction_ok ? addr_reg | addr_pop | addr_push | addr_wr : programCounter ); //The default behavior is to seek the address of the next piece of code
 
     always @ (posedge clk)
         if (enable && reset)
             addr <= cpu_addr;
 
     // Talking back to the CPU
-    assign out_reg = ( instruction == `inst_ret || instruction == `inst_call ? `pc_id : 0 ); 
+    assign out_reg = ( instruction == `inst_ret || instruction == `inst_call ? `pc_id : ( instruction == `inst_atom ? `sr_id : 0 ) ); 
     wire [wordsize-1:0] data_in_cpu;
     wire returning_value = instruction == `inst_pop || instruction == `inst_ret || opperand == `opp_load;
     wire [wordsize-1:0] data_in_usable = ( returning_value ? (instruction == `inst_ret ? data_in_cpu + 1 : data_in_cpu) : 0 ); //When we want to use value read from ram. Note, when returning from a function, we need to go after what we put in the stack in order not to be trapped in an infinite loop
     wire [wordsize-1:0] wr_out = ( instruction == `inst_push || instruction == `inst_call || opperand == `opp_str || instruction == `inst_tbm ? workingRegister : 0 ); //when we don't need to update any register we will simply put the content of the working register into itself
-    assign out = wr_out | data_in_usable;
+    wire [wordsize-1:0] atom_out = ( instruction == `inst_atom ? ( |data_in_cpu ? statusRegister & ~1 : statusRegister | 1) : 0 );
+    assign out = wr_out | data_in_usable | atom_out;
 
     // Sending data to RAM
-    wire [wordsize-1:0] data_out_wr = ( instruction == `inst_push || opperand == `opp_str ? workingRegister : 0 );
-    wire [wordsize-1:0] data_out_pc = ( instruction == `inst_call ? programCounter : 0 );
-    wire [wordsize-1:0] data_out_cpu = data_out_wr | data_out_pc;
-
+    wire [wordsize-1:0] data_out_wr   = ( instruction == `inst_push || opperand == `opp_str ? workingRegister : 0 );
+    wire [wordsize-1:0] data_out_pc   = ( instruction == `inst_call ? programCounter : 0 );
+    wire [wordsize-1:0] data_out_atom = (instruction == `inst_atom ? 1 : 0);
+    wire [wordsize-1:0] data_out_cpu  = data_out_wr | data_out_pc | data_out_atom;
 
 
     // Reduced behavior mode
     reg byte_mode;
     wire [$clog2(wordsize/8):0] size_used_max = $clog2(wordsize/8);
+    wire [$clog2(wordsize/8):0] size_normal_access = (reduced_behaviour_bits == 8'h0 ? size_used_max : reduced_behaviour_bits - 1);
     wire [$clog2(wordsize/8):0] size_used = 
-        ( instruction_ok && (instruction == `inst_pop || instruction == `inst_push || instruction == `inst_ret || instruction == `inst_call) ? size_used_max :
-            ( (byte_mode & !in_interrupt_context) || !instruction_ok || reduced_behaviour_bits == 2'b11 || wordsize <= 8 ? 0 : 
-              ( reduced_behaviour_bits == 2'b10 || wordsize <= 16 ? 1 :
-                ( reduced_behaviour_bits == 2'b01 || wordsize <= 32 ? 2 :
-                  ( size_used_max )))));
+        ( !instruction_ok ? 0 : 
+          ( (!in_interrupt_context & byte_mode) ? 0 : (
+            ( instruction_ok && (instruction == `inst_pop || instruction == `inst_push || instruction == `inst_ret || instruction == `inst_call) ? size_used_max :
+              (size_normal_access)))));
 
     always @ (posedge clk)
         if (!reset)
@@ -79,8 +82,8 @@ module reflet_addr #(
             byte_mode <= !byte_mode;
 
     // Taking action
-    wire inst_read = opperand == `opp_load || instruction == `inst_pop || instruction == `inst_ret;
-    wire inst_write = opperand == `opp_str || instruction == `inst_push || instruction == `inst_call;
+    wire inst_read = opperand == `opp_load || instruction == `inst_pop || instruction == `inst_ret || instruction == `inst_atom;
+    wire inst_write = opperand == `opp_str || instruction == `inst_push || instruction == `inst_call || instruction == `inst_atom;
     reg inst_mem, readying_ram, inst_mem_r, read_ready_reset, read_ready_latched;
     wire read_ready, write_ready;
     wire read_request = inst_mem & !inst_mem_r;
@@ -192,14 +195,16 @@ module reflet_addr #(
         .write_request(inst_write && read_ready && instruction_ok),
         .write_ready(write_ready));
 
+    wire alignment_error_continuous;
     reflet_mem_shift_mask #(wordsize) rmsm (
         .addr(addr),
         .size_used(size_used),
         .mask(),
         .shift(),
-        .alignment_error(alignment_error));
+        .alignment_error(alignment_error_continuous));
 
     assign write_en = write_ready;
+    assign alignment_error = alignment_error_continuous & inst_mem;
 
 endmodule
 

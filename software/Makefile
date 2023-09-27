@@ -1,85 +1,122 @@
 # This makefile containts comands to assemble and test the
 # various files of this folder.
 
-all : libtesting.bin exampleIO.bin primes.bin fibonacci.bin test_jump.bin test_instructions.bin test_inst_mini_str.bin test_inst_mini_load.bin test_align_fix.bin test_interrupt.bin hello_world.bin test_comparison.bin
+all : libtesting.bin exampleIO.bin primes.bin fibonacci.bin test_jump.bin test_instructions.bin test_inst_mini_str.bin test_inst_mini_load.bin test_align_fix.bin test_interrupt.bin hello_world.bin test_comparison.bin test_align_trap.bin test_fancy_interrupt_use.bin
+
+REFLET_SIM ?= reflet-sim
+
+REFLET_ASM ?= reflet-asm
 
 .PHONY: libtesting
 libtesting : libtesting.bin
-	reflet-sim -c config16 libtesting.bin
+	$(REFLET_SIM) -c config16 libtesting.bin
 
 exampleIO : exampleIO.bin
-	reflet-sim exampleIO.bin
+	$(REFLET_SIM) exampleIO.bin
 
 primes : primes.bin
-	reflet-sim -c config16 primes.bin
+	$(REFLET_SIM) -c config16 primes.bin
 
 fibonacci : fibonacci.bin
-	reflet-sim -c config16 fibonacci.bin
+	$(REFLET_SIM) -c config16 fibonacci.bin
 
 test_jump : test_jump.bin
-	reflet-sim -c config16 test_jump.bin
+	$(REFLET_SIM) -c config16 test_jump.bin
 
 test_instructions : test_instructions.bin
-	reflet-sim -c config16 test_instructions.bin
+	$(REFLET_SIM) -c config16 test_instructions.bin
 
 test_inst_mini_str: test_inst_mini_str.bin
-	reflet-sim test_inst_mini_str.bin
+	$(REFLET_SIM) test_inst_mini_str.bin
 
 test_inst_mini_load: test_inst_mini_load.bin
-	reflet-sim test_inst_mini_load.bin
+	$(REFLET_SIM) test_inst_mini_load.bin
 
 libtesting.bin : libtesting.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm libs/import_all_libs.asm
-	reflet-asm libtesting.asm -word-size 16 -o libtesting.bin
+	$(REFLET_ASM) libtesting.asm -word-size 16 -o libtesting.bin
 
 exampleIO.bin : exampleIO.asm
-	reflet-asm exampleIO.asm -o exampleIO.bin -word-size 8
+	$(REFLET_ASM) exampleIO.asm -o exampleIO.bin -word-size 8
 
 primes.bin : primes.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm  libs/import_all_libs.asm
-	reflet-asm primes.asm -o primes.bin -word-size 16
+	$(REFLET_ASM) primes.asm -o primes.bin -word-size 16
 
 fibonacci.bin : fibonacci.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm libs/import_all_libs.asm
-	reflet-asm fibonacci.asm -o fibonacci.bin -word-size 16
+	$(REFLET_ASM) fibonacci.asm -o fibonacci.bin -word-size 16
 
 test_jump.bin : test_jump.asm
-	reflet-asm test_jump.asm -o test_jump.bin -word-size 16 -no-stack-init -label-dump
+	$(REFLET_ASM) test_jump.asm -o test_jump.bin -word-size 16 -no-stack-init -label-dump
+
+../rtl/simu/rom03.v: test_jump.bin
+	ROM_maker -name rom03 -input_file $< -output_file $@ -wordsize 2 -min_addr_size 15
 
 test_instructions.bin : test_instructions.asm
-	reflet-asm test_instructions.asm -o test_instructions.bin -word-size 16
+	$(REFLET_ASM) test_instructions.asm -o test_instructions.bin -word-size 16
+
+../rtl/simu/rom04.v: test_instructions.bin
+	ROM_maker -name rom04 -input_file $< -output_file $@ -wordsize 2 -min_addr_size 14
 
 test_inst_mini_str.bin: test_inst_mini_str.asm
-	reflet-asm test_inst_mini_str.asm -o test_inst_mini_str.bin -no-stack-init -ignore-start -word-size 8
+	$(REFLET_ASM) test_inst_mini_str.asm -o test_inst_mini_str.bin -no-stack-init -ignore-start -word-size 8
+
+../rtl/simu/rom01.v: test_inst_mini_str.bin
+	ROM_maker -name rom01 -input_file $< -output_file $@ -wordsize 1 -min_addr_size 7
 
 test_inst_mini_load.bin: test_inst_mini_load.asm
-	reflet-asm test_inst_mini_load.asm -o test_inst_mini_load.bin -no-stack-init -ignore-start -word-size 8
+	$(REFLET_ASM) test_inst_mini_load.asm -o test_inst_mini_load.bin -no-stack-init -ignore-start -word-size 8
+
+../rtl/simu/rom02.v: test_inst_mini_load.bin
+	ROM_maker -name rom02 -input_file $< -output_file $@ -wordsize 1 -min_addr_size 7
 
 test_align_fix.bin: test_align_fix.asm
-	reflet-asm test_align_fix.asm -o test_align_fix.bin -no-stack-init -ignore-start -word-size 32
+	$(REFLET_ASM) test_align_fix.asm -o test_align_fix.bin -no-stack-init -ignore-start -word-size 32
 
 .PHONY: test_align_fix
 test_align_fix: test_align_fix.bin
-	reflet-sim -c config32 test_align_fix.bin
+	$(REFLET_SIM) -c config32 test_align_fix.bin
 
-../rtl/simu/rom11.v: test_align_fix.bin
-	ROM_maker -name rom11 -input_file $< -output_file $@ -wordsize 4 -min_addr_size 30
+../rtl/simu/rom05.v: test_align_fix.bin
+	ROM_maker -name rom05 -input_file $< -output_file $@ -wordsize 4 -min_addr_size 30
 
 test_interrupt.bin: test_interrupt.asm
-	reflet-asm $< -o $@ -word-size 16
+	$(REFLET_ASM) $< -o $@ -word-size 16 -set-stack-to 0x1000
 
 test_interrupt: test_interrupt.bin
-	reflet-sim -c config16 $<
+	$(REFLET_SIM) -c config16 $<
+
+../rtl/simu/rom06.v: test_interrupt.bin
+	ROM_maker -name rom06 -input_file $< -output_file $@ -wordsize 4 -min_addr_size 30
 
 hello_world.bin : hello_world.asm
-	reflet-asm $< -o $@ -word-size 32
+	$(REFLET_ASM) $< -o $@ -word-size 32
 
 .PHONY: hello_world
 hello_world: hello_world.bin
-	reflet-sim -w 32 -r 3000 $<
+	$(REFLET_SIM) -w 32 -r 3000 $<
 
 test_comparison.bin : test_comparison.asm
-	reflet-asm $< -o $@ -word-size 16
+	$(REFLET_ASM) $< -o $@ -word-size 16
 
 test_comparison : test_comparison.bin
-	reflet-sim -w 16 -r 3000 $<
+	$(REFLET_SIM) -w 16 -r 3000 $<
+
+test_align_trap.bin : test_align_trap.asm
+	$(REFLET_ASM) $< -o $@ -word-size 16 -no-stack-init
+
+../rtl/simu/rom07.v: test_align_trap.bin
+	ROM_maker -name rom07 -input_file $< -output_file $@ -wordsize 2 -min_addr_size 15
+
+test_align_trap : test_align_trap.bin
+	$(REFLET_SIM) -w 16 -r 3000 $<
+
+test_fancy_interrupt_use.bin : test_fancy_interrupt_use.asm
+	$(REFLET_ASM) $< -o $@ -word-size 8 -no-stack-init
+
+test_fancy_interrupt_use : test_fancy_interrupt_use.bin
+	$(REFLET_SIM) -w 16 -r 256 $<
+
+../rtl/simu/rom08.v: test_fancy_interrupt_use.bin
+	ROM_maker -name rom08 -input_file $< -output_file $@ -wordsize 2 -min_addr_size 15
 
 clean :
 	rm -f *.bin

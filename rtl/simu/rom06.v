@@ -1,43 +1,49 @@
-/*---------------------\
-|This rom test the     |
-|misaligned acces trap.|
-\---------------------*/
-
-module rom6_byte_access(input clk, input enable_out,input [4:0] addr, output [7:0] dataOut);
-reg [7:0] ret; assign dataOut = (enable_out ? ret : 8'h0);
-always @ (posedge clk)
-case(addr)
-  5'h00 : ret = 8'h0F;  //debug; start of the interupt handler
-  5'h01 : ret = 8'h18;  //set 8
-  5'h02 : ret = 8'h3D;  //cpy SR; Disabble alignment trap
-  5'h03 : ret = 8'h02;  //retint
-  5'h04 : ret = 8'h10;  //set 0
-  5'h05 : ret = 8'h04;  //setint 0
-  5'h06 : ret = 8'h14;  //set 4
-  5'h07 : ret = 8'h31;  //cpy R1
-  5'h08 : ret = 8'h18;  //set 8
-  5'h09 : ret = 8'h32;  //cpy R2
-  5'h0A : ret = 8'hA1;  //lsl R1
-  5'h0B : ret = 8'h72;  //or R2
-  5'h0C : ret = 8'h3D;  //cpy SR; The status register is set to 0x88 which mean that the interupt 1 is enabled and the misaligned trap is enabled
-  5'h0D : ret = 8'h00;  //slp
-  5'h0E : ret = 8'h00;  //slp
-  5'h0F : ret = 8'h11;  //set 1
-  5'h10 : ret = 8'hF0;  //load wr; an interupt should be raised, then the interupt manager will disable the trap 
-  5'h11 : ret = 8'h00;  //slp
-  5'h12 : ret = 8'h11;  //set 1
-  5'h13 : ret = 8'hF0;  //load wr; no interupt expected
-  5'h14 : ret = 8'h00;  //slp
-  5'h15 : ret = 8'h0E;  //quit
-  default: ret = 0;
-endcase
+module rom06(input clk, input enable, input [30-1:0] addr, output [32-1:0] data);
+    reg [32-1:0] data_reg;
+    always @ (posedge clk)
+        case(addr)
+            30'h0 : data_reg <= 32'h4D525341;
+            30'h1 : data_reg <= 32'h9C0D1C28;
+            30'h2 : data_reg <= 32'h221D6D8C;
+            30'h3 : data_reg <= 32'h0D1D5D8C;
+            30'h4 : data_reg <= 32'h0D1C281B;
+            30'h5 : data_reg <= 32'h1D6D8C9C;
+            30'h6 : data_reg <= 32'h1D5D8C22;
+            30'h7 : data_reg <= 32'h3C221C22;
+            30'h8 : data_reg <= 32'h10001E3E;
+            30'h9 : data_reg <= 32'h3EE53C23;
+            30'hA : data_reg <= 32'h1D0B1CD0;
+            30'hB : data_reg <= 32'h1B0D1F0C;
+            30'hC : data_reg <= 32'h9C0D1C28;
+            30'hD : data_reg <= 32'h221D6D8C;
+            30'hE : data_reg <= 32'h221D5D8C;
+            30'hF : data_reg <= 32'h3C22001C;
+            30'h10 : data_reg <= 32'h00551E3E;
+            30'h11 : data_reg <= 32'h3EE53C23;
+            30'h12 : data_reg <= 32'h1D0B1CD0;
+            30'h13 : data_reg <= 32'h21E41E0C;
+            30'h14 : data_reg <= 32'hE319E939;
+            30'h15 : data_reg <= 32'h0D1920EB;
+            30'h16 : data_reg <= 32'h0D1C281B;
+            30'h17 : data_reg <= 32'h1D6D8C9C;
+            30'h18 : data_reg <= 32'h1D5D8C22;
+            30'h19 : data_reg <= 32'h3C221C22;
+            30'h1A : data_reg <= 32'h004E1E3E;
+            30'h1B : data_reg <= 32'h3EE53C23;
+            30'h1C : data_reg <= 32'h1D0B1CD0;
+            30'h1D : data_reg <= 32'h1C24ED0C;
+            30'h1E : data_reg <= 32'h241C8C20;
+            30'h1F : data_reg <= 32'hB9221D5C;
+            30'h20 : data_reg <= 32'h281B0DE6;
+            30'h21 : data_reg <= 32'h8C9C0D1C;
+            30'h22 : data_reg <= 32'h8C221D6D;
+            30'h23 : data_reg <= 32'h1C221D5D;
+            30'h24 : data_reg <= 32'h1E3E3C22;
+            30'h25 : data_reg <= 32'h3C23007E;
+            30'h26 : data_reg <= 32'h1CD03EE5;
+            30'h27 : data_reg <= 32'hE00C1D0B;
+            30'h28 : data_reg <= 32'h000000E8;
+            default : data_reg <= 0;
+        endcase
+    assign data = ( enable ? data_reg : 0 );
 endmodule
-
-module rom6(input clk, input enable_out,input [4:0] addr, output [15:0] dataOut);
-    wire [7:0] data_even;
-    wire [7:0] data_odd;
-    rom6_byte_access rom_even(clk, enable_out, addr, data_even);
-    rom6_byte_access rom_odd(clk, enable_out, addr+5'b1, data_odd);
-    assign dataOut = {data_odd, data_even};
-endmodule
-
