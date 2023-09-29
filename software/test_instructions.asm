@@ -85,7 +85,7 @@ label debug_arr
 ; R10 holds the address of the function used to register a nuber in the array
 
 ; This small macro register the number in the working register
-@define register_word 0
+@macro register_word 0
     cpy R1
     read R10
     call

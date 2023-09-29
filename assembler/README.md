@@ -35,7 +35,7 @@ Instruction start with the mnemonic for the operation and then, if the instructi
 
 Macros are defined in the following way:
 ```
-@define <macro_name> <number of args>
+@macro <macro_name> <number of args>
     <content>
     <content>
 @end

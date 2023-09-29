@@ -10,7 +10,7 @@ mod assembly_source;
 /// `@import` directive.
 mod import;
 
-/// A module used to register macros with the `@define` directive and expand
+/// A module used to register macros with the `@macro` directive and expand
 /// macros called in the source.
 mod macros;
 
@@ -30,8 +30,8 @@ mod strings;
 /// A module to register sections and put code in them.
 mod section;
 
-/// A module to register constants and math expressions.
-mod constants;
+/// A module to register flat defines and math expressions.
+mod define;
 
 /// A mod with miscellaneous useful functions.
 pub mod utils;
@@ -159,7 +159,7 @@ impl Assembler<'_> {
         // First pass of transformation
         import::include_source(self);
         macros::register_macros(self);
-        constants::handle_constants(self);
+        define::handle_define(self);
         macros::expand_macros(self);
         section::handle_sections(self);
         import::include_source(self); // This should not do anything but it will show more useful error messages if there was some include directives inside of a macro.
@@ -175,7 +175,7 @@ impl Assembler<'_> {
         // An other run of first pass transformations if the
         // implementation-macros include some directives
         macros::register_macros(self);
-        constants::handle_constants(self);
+        define::handle_define(self);
         macros::expand_macros(self);
         section::handle_sections(self);
         label::register_labels(self);

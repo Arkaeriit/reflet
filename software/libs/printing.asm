@@ -142,7 +142,7 @@ label printNum
 
 ;-----------------------
 ; Prints the string given as macro argument
-@define prints 1
+@macro prints 1
     @in-section prints-strings
         label $1
         @string-0 $1
@@ -154,7 +154,7 @@ label printNum
 ;-----------------------
 ; Same as `prints` but if the string is already
 ; used in a `prints`.
-@define _prints 1
+@macro _prints 1
     setlab $1
     cpy R1
     callf print

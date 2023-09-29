@@ -15,14 +15,14 @@ label game_over
     quit
 
 ; Ensure that the comparison bit is set to 1
-@define comp_to_1 0
+@macro comp_to_1 0
     setlab game_over
     cmpnot
     jif
 @end
 
 ; Ensure that the comparison bit is set to 0
-@define comp_to_0 0
+@macro comp_to_0 0
     cmpnot
     comp_to_1
 @end
@@ -30,7 +30,7 @@ label game_over
 ; Takes an operation, executite on more, eq, and
 ; less from a referen and runs each of the 3
 ; macros
-@define run_test 4
+@macro run_test 4
     set 10
     cpy R1
     set 15

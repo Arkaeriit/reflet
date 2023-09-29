@@ -25,7 +25,7 @@ fn my_implementation_specific_macros(code: &Vec<String>) -> Result<Option<String
     }
 }
 
-const MY_RUNTIME_START: &str = "@define set_10_plus 1
+const MY_RUNTIME_START: &str = "@macro set_10_plus 1
     set 10
     add $1
 @end

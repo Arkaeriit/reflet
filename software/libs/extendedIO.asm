@@ -1,19 +1,19 @@
 ;----------------------
 ;This lib contains functions to do extended IO in the simulator
 
-@define set_io_cout 0
+@macro set_io_cout 0
     set 0
 @end
 
-@define set_io_cin 0
+@macro set_io_cin 0
     set 1
 @end
 
-@define set_io_cmd 0
+@macro set_io_cmd 0
     set 2
 @end
 
-@define set_io_status 0
+@macro set_io_status 0
     set 3
 @end
 

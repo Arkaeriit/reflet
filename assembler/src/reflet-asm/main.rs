@@ -64,14 +64,14 @@ fn make_assembler(args: &cli_arguments::Arguments) -> Assembler {
     asm.implementation_macro = &macros::macros;
     asm.micro_assembly = &micro_assembler::micro_assembler;
     // Size specific macros
-    let align_word = format!("@define @align_word 0\n@align {}\n@end", args.word_size/8);
-    let set_default_sr = format!("@define @set_default_sr 0\n@set_sr_for {}\n@end", args.word_size);
+    let align_word = format!("@macro @align_word 0\n@align {}\n@end", args.word_size/8);
+    let set_default_sr = format!("@macro @set_default_sr 0\n@set_sr_for {}\n@end", args.word_size);
     let set_word_size_byte_def = match args.word_size {
         128 => "set 4\nadd WR\nadd WR\n".to_string(),
         64 => "set 4\n add WR\n".to_string(),
         word_size => format!("set {}", word_size/8),
     };
-    let set_word_size_byte = format!("@define @set_wordsize_byte 0\n{}\n@end", set_word_size_byte_def);
+    let set_word_size_byte = format!("@macro @set_wordsize_byte 0\n{}\n@end", set_word_size_byte_def);
     asm.add_text_before(&align_word, "align_word");
     asm.add_text_before(&set_default_sr, "set_default_sr");
     asm.add_text_before(&set_word_size_byte, "set_wordsize_byte");

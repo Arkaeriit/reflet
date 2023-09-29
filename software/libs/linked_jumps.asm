@@ -7,14 +7,14 @@
 ; The first argument of the macro is the label of
 ; the function, the second is the register used
 ; as a link register.
-@define callf_lr 2
+@macro callf_lr 2
     setlab $1
     call_lr $2
 @end
 
 ; Jumps to the content of the working register
 ; using a link register given as argument.
-@define call_lr 1
+@macro call_lr 1
     cpy R12
     set 4
     add PC
@@ -26,7 +26,7 @@
 ; Jumps back from a function using a link
 ; register. That register should be given as
 ; argument to the macro.
-@define ret_lr 1
+@macro ret_lr 1
     read $1
     cpy PC
 @end

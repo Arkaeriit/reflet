@@ -1,7 +1,7 @@
 ; This program performs a misaligned read and catches it in a trap that
 ; runs a debug operation. It is meant to run on a 16 bit processor.
 
-@define trap_mask 0
+@macro trap_mask 0
     set 5
     cpy R1
     set 1

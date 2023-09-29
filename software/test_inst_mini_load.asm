@@ -33,14 +33,14 @@ label main
 
 ;----------------------------------- Macros -----------------------------------;
 
-@define write_in_r3_and_increment 0
+@macro write_in_r3_and_increment 0
     str R3
     set 1
     add R3
     cpy R3
 @end
 
-@define debug_from_r2_and_increment 0
+@macro debug_from_r2_and_increment 0
     load R2
     debug
     set 1
@@ -48,7 +48,7 @@ label main
     cpy R2
 @end
 
-@define update_from_R5_and_arr 0
+@macro update_from_R5_and_arr 0
     load R4
     add R5
     cpy R5

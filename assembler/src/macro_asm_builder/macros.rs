@@ -22,7 +22,7 @@ impl Macro {
     }
 }
 
-/// Traverse the source in search of `@define` lines. At those line a new macro
+/// Traverse the source in search of `@macro` lines. At those line a new macro
 /// is defined and all lines until a `@end` line will be put in the macro.
 /// Then, the resulting macro is registered in the assembler's state.
 /// All used up lines are replaced with Empty nodes.
@@ -35,7 +35,7 @@ pub fn register_macros(asm: &mut Assembler) {
         match node {
             Source{code, meta} => {
                 match code[0].as_str() {
-                    "@define" => {
+                    "@macro" => {
                         if in_macro {
                             Some(Error{msg: "Error, macro definitions can't be nested.".to_string(), meta: meta.clone()})
                         } else {
@@ -49,10 +49,10 @@ pub fn register_macros(asm: &mut Assembler) {
                                         Some(Empty)
                                     },
                                     Err(_) =>
-                                        Some(Error{msg: "Error, macro definitions should have the form `@define <macro name> <number_of_arguments>`.".to_string(), meta: meta.clone()})
+                                        Some(Error{msg: "Error, macro definitions should have the form `@macro <macro name> <number_of_arguments>`.".to_string(), meta: meta.clone()})
                                 }
                             } else {
-                                Some(Error{msg: "Error, macro definitions should have the form `@define <macro name> <number_of_arguments>`.".to_string(), meta: meta.clone()})
+                                Some(Error{msg: "Error, macro definitions should have the form `@macro <macro name> <number_of_arguments>`.".to_string(), meta: meta.clone()})
                             }
                         }
                     },
@@ -140,7 +140,7 @@ pub fn expand_macros(asm: &mut Assembler) {
 
 #[test]
 fn test_register_macros() {
-    let mut assembler = Assembler::from_text("@define my_macro 3\nmacromacro\ntxttxt\n@end");
+    let mut assembler = Assembler::from_text("@macro my_macro 3\nmacromacro\ntxttxt\n@end");
     let expected_hash_map = std::collections::HashMap::from([
         ("my_macro".to_string(), Macro{number_of_arguments: 3, content: "macromacro\ntxttxt\n".to_string()}),
     ]);
@@ -151,7 +151,7 @@ fn test_register_macros() {
 
 #[test]
 fn test_expand_macro_no_arg_substitution() {
-    let mut assembler = Assembler::from_text("@define m 0\nx x\n@end\nm\nm\n");
+    let mut assembler = Assembler::from_text("@macro m 0\nx x\n@end\nm\nm\n");
     register_macros(&mut assembler);
     expand_macros(&mut assembler);
     assert_eq!(assembler.root.to_string(), "x x\nx x\n");
@@ -159,7 +159,7 @@ fn test_expand_macro_no_arg_substitution() {
 
 #[test]
 fn test_expand_macro() {
-    let mut assembler = Assembler::from_text("@define m 2\nx $1 $2\n@end\nm a A\nm b B\n");
+    let mut assembler = Assembler::from_text("@macro m 2\nx $1 $2\n@end\nm a A\nm b B\n");
     register_macros(&mut assembler);
     expand_macros(&mut assembler);
     assert_eq!(assembler.root.to_string(), "x a A\nx b B\n");
@@ -167,10 +167,10 @@ fn test_expand_macro() {
 
 #[test]
 fn test_expand_macro_recursive() {
-    let mut assembler = Assembler::from_text("@define m 2
+    let mut assembler = Assembler::from_text("@macro m 2
                                                   $1 $2
                                               @end
-                                              @define in 1
+                                              @macro in 1
                                                   x $1
                                               @end
                                               m in a

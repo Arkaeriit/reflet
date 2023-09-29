@@ -13,7 +13,7 @@ setint 0
 set8 0x22
 cpy SR
 
-@define inc_R1 1
+@macro inc_R1 1
     set $1
     add R1
     cpy R1
