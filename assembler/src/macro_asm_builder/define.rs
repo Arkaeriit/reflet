@@ -1,14 +1,12 @@
 use crate::Assembler;
 use crate::tree::AsmNode::*;
 use crate::tree::*;
-use std::collections::HashMap;
 
 /* -------------------------------- Constants ------------------------------- */
 
 /// Traverse the tree to register the `@define` directive.
-/// Return a map of the keys of the content to their values.
-fn register_define(asm: &mut Assembler) -> HashMap<String, Vec<String>> {
-    let mut ret = HashMap::<String, Vec<String>>::new();
+/// Update the assembler's map.
+fn register_define(asm: &mut Assembler) {
 
     let mut registering_define = |node: &AsmNode| -> Option<AsmNode> {
         match node {
@@ -18,7 +16,7 @@ fn register_define(asm: &mut Assembler) -> HashMap<String, Vec<String>> {
                     if code.len() < 3 {
                         return Some(Error{msg: format!("Error, directive {} should take as argument a define name and at least a replacement value.\n", &code[0]), meta: meta.clone()});
                     }
-                    if ret.contains_key(name) {
+                    if asm.defines.contains_key(name) {
                         return Some(Error{msg: format!("Error, define {} has already been defined.\n", name), meta: meta.clone()});
                     }
                     if contains_math_chars(name) {
@@ -26,7 +24,7 @@ fn register_define(asm: &mut Assembler) -> HashMap<String, Vec<String>> {
                     }
 
                     let value = code[2..].to_vec();
-                    let _ = ret.insert(name.to_string(), value);
+                    let _ = asm.defines.insert(name.to_string(), value);
                     Some(Empty)
                 } else {
                     None
@@ -37,18 +35,20 @@ fn register_define(asm: &mut Assembler) -> HashMap<String, Vec<String>> {
     };
 
     asm.root.traverse_tree(&mut registering_define);
-    ret
 }
 
 /// Traverse the tree and replace text with are define names with appropriate
-/// values.
-fn apply_define(asm: &mut Assembler, map: &HashMap<String, Vec<String>>) {
+/// values. Return true if a defines have been expanded.
+fn apply_define(asm: &mut Assembler) -> bool {
+    let mut applied_define = false;
+
     let mut applying_define = |node: &AsmNode| -> Option<AsmNode> {
         if let Source{code, meta} = node {
 
             let mut new_source = Vec::<String>::new();
             for txt in code {
-                if let Some(substitution) = map.get(txt) {
+                if let Some(substitution) = asm.defines.get(txt) {
+                    applied_define = true;
                     for word in substitution {
                         new_source.push(word.to_string());
                     }
@@ -64,12 +64,14 @@ fn apply_define(asm: &mut Assembler, map: &HashMap<String, Vec<String>>) {
     };
 
     asm.root.traverse_tree(&mut applying_define);
+    applied_define
 }
 
-/// Register all define and apply them.
-pub fn handle_define(asm: &mut Assembler) {
-    let map = register_define(asm);
-    apply_define(asm, &map);
+/// Register all define and apply them. Return true is a define have been
+/// applied.
+pub fn handle_define(asm: &mut Assembler) -> bool {
+    register_define(asm);
+    apply_define(asm)
 }
 
 /* ---------------------------------- Utils --------------------------------- */
@@ -86,9 +88,9 @@ fn contains_math_chars(s: &str) -> bool {
 #[test]
 fn test_register_define() {
     let mut assembler = Assembler::from_text("@define name 123\n@define name_2 234 345\nnormal text\n@define name error\n");
-    let map = register_define(&mut assembler);
+    register_define(&mut assembler);
     assert_eq!(assembler.root.to_string().as_str(), "normal text\n! Error, define name has already been defined.\n file: ./__asm_init line: 4 raw_line: @define name error\n");
-    assert_eq!(map, HashMap::from([
+    assert_eq!(assembler.defines, std::collections::HashMap::from([
           ("name".to_string(),   vec!["123".to_string()]),
           ("name_2".to_string(), vec!["234".to_string(), "345".to_string()]),
     ]));
@@ -103,10 +105,10 @@ fn test_contains_math_chars() {
 #[test]
 fn test_apply_define() {
     let mut assembler = Assembler::from_text("@define name 123\n@define name_2 234 345\nnormal text\nname name_2  name\n");
-    let map = register_define(&mut assembler);
-    apply_define(&mut assembler, &map);
+    register_define(&mut assembler);
+    apply_define(&mut assembler);
     assert_eq!(assembler.root.to_string().as_str(), "normal text\n123 234 345 123\n");
-    assert_eq!(map, HashMap::from([
+    assert_eq!(assembler.defines, std::collections::HashMap::from([
           ("name".to_string(),   vec!["123".to_string()]),
           ("name_2".to_string(), vec!["234".to_string(), "345".to_string()]),
     ]));

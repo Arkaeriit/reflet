@@ -52,6 +52,9 @@ pub struct Assembler<'a> {
     /// A map of all the macros linking their names to their contents
     macros: HashMap<String, Macro>,
 
+    /// A map of all flat defines linking their names to their contents
+    defines: HashMap<String, Vec<String>>,
+
     /// The number of bytes in a constant or address
     wordsize: usize,
 
@@ -94,6 +97,7 @@ impl Assembler<'_> {
         Assembler {
             root: parse_source(text, name),
             macros: HashMap::new(),
+            defines: HashMap::new(),
             wordsize: 0,
             align_pattern: vec![0],
             start_address: 0,
@@ -159,11 +163,12 @@ impl Assembler<'_> {
         // operation added new text, we want to run them all from the start to
         // ensure that we are not missing anything. It should end with the most
         // costly operations as we don't want to rerun them too much time.
-        const TEXT_ADDING_PASSES: [&dyn Fn(&mut Assembler) -> bool; 4] = [
+        const TEXT_ADDING_PASSES: [&dyn Fn(&mut Assembler) -> bool; 5] = [
             &import::include_source,
             &macros::register_macros,
             &run_implementation_macros,
             &macros::expand_macros,
+            &define::handle_define,
         ];
 
         let mut pass_index = 0;
@@ -182,7 +187,6 @@ impl Assembler<'_> {
     pub fn assemble(&mut self) -> Result<Vec<u8>, String> {
         // Manage macros and directives
         self.run_text_adding_passes();
-        define::handle_define(self);
         section::handle_sections(self);
         label::register_labels(self);
         align::register_align(self);
