@@ -160,7 +160,7 @@ impl Assembler<'_> {
         // ensure that we are not missing anything. It should end with the most
         // costly operations as we don't want to rerun them too much time.
         const TEXT_ADDING_PASSES: [&dyn Fn(&mut Assembler) -> bool; 4] = [
-            &import::include_source, // This one always return false but it doesn't matters as it runs first.
+            &import::include_source,
             &macros::register_macros,
             &run_implementation_macros,
             &macros::expand_macros,

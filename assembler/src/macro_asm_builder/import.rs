@@ -7,10 +7,11 @@ use crate::Assembler;
 
 /// Traverse the tree searching for @import directive in source nodes. When
 /// found, they are replaced with the content of the file to be imported.
-/// Always return false.
+/// Return true if some text was included.
 pub fn include_source(asm: &mut Assembler) -> bool {
+    let mut included_source = false;
 
-    fn _include_source(node: &AsmNode) -> Option<AsmNode> {
+    let mut _include_source = |node: &AsmNode| -> Option<AsmNode> {
         match node {
             Source{code, meta} => {
                 if code[0] == "@import" {
@@ -35,8 +36,8 @@ pub fn include_source(asm: &mut Assembler) -> bool {
                                     };
                                 match fs::read_to_string(&target_path) {
                                     Ok(txt) => {
-                                        let mut ret_node = parse_source(&txt, &target_path);
-                                        ret_node.traverse_tree(&mut _include_source);
+                                        let ret_node = parse_source(&txt, &target_path);
+                                        included_source = true;
                                         Some(ret_node)
                                     },
                                     Err(_) => {
@@ -57,10 +58,10 @@ pub fn include_source(asm: &mut Assembler) -> bool {
             }
             _ => None
         }
-    }
+    };
 
     asm.root.traverse_tree(&mut _include_source);
-    false
+    included_source
 }
 
 /* --------------------------------- Testing -------------------------------- */
@@ -68,7 +69,10 @@ pub fn include_source(asm: &mut Assembler) -> bool {
 #[test]
 fn test_include() {
     let mut assembler = Assembler::from_file("tests/include/root");
-    include_source(&mut assembler);
+    let mut need_to_run = true;
+    while need_to_run {
+        need_to_run = include_source(&mut assembler);
+    }
     assert_eq!(assembler.root.to_string(), "a\na\nd\nd\nb\na\na\n");
 }
 
