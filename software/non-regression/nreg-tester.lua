@@ -54,10 +54,22 @@ function preformat_command(cmd)
     return {command, argument}
 end
 
+-- Remove null bytes from a string
+function no_null(line)
+    local ret = ""
+    for i=1,#line do
+        if line:char_at(i) ~= "\0" then
+            ret = ret..line:char_at(i)
+        end
+    end
+    return ret
+end
+
 -- Reads a line that should be a debug instruction. If it is, return the value
 -- of the working register. If it is not, return nil.
-function read_debug(line)
-    local dbg_match = line:match("Debug instruction reached at address %x+. The content of the working register is 0x%x+")
+function read_debug(_line)
+    local line = no_null(_line)
+    local dbg_match = line:match("Debug instruction reached at address %x+. [a-zA-Z0-9 ]+ 0x%x+")
     if dbg_match == line then
         return line:match("0x%x+")
     else
