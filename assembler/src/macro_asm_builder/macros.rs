@@ -26,7 +26,8 @@ impl Macro {
 /// is defined and all lines until a `@end` line will be put in the macro.
 /// Then, the resulting macro is registered in the assembler's state.
 /// All used up lines are replaced with Empty nodes.
-pub fn register_macros(asm: &mut Assembler) {
+pub fn register_macros(asm: &mut Assembler) -> bool {
+    let mut registered_macro = false;
     let mut in_macro = false;
     let mut new_macro = Macro::new(0);
     let mut new_macro_name = "".to_string();
@@ -60,6 +61,7 @@ pub fn register_macros(asm: &mut Assembler) {
                         if in_macro {
                             in_macro = false;
                             asm.macros.insert(new_macro_name.clone(), new_macro.clone());
+                            registered_macro = true;
                             Some(Empty)
                         } else {
                             Some(Error{msg: "Error, @end should only be used to end macro definitions.".to_string(), meta: meta.clone()})
@@ -84,12 +86,14 @@ pub fn register_macros(asm: &mut Assembler) {
     if in_macro {
         asm.root.error_on_top(format!("Error, macro {} is not closed with `@end` directive", new_macro_name));
     }
+    registered_macro
 }
 
 /// Search all the sources lines of the code for macro to be expanded. In those
 /// cases, the content of the macro is fetched from the assembler's macro list
 /// and the lines are replaced with an Inode containing the expanded macro.
-pub fn expand_macros(asm: &mut Assembler) {
+pub fn expand_macros(asm: &mut Assembler) -> bool {
+    let mut expanded_any_macro = false;
 
     let mut expand_macros_closure = | node: &AsmNode | -> Option<AsmNode> {
         // All the work is done in this function. The outer closure is needed to
@@ -119,6 +123,7 @@ pub fn expand_macros(asm: &mut Assembler) {
                             expanded_macro.macros = asm.macros.clone();
                             expanded_macro.macros.remove(&code[0]); // Remove the macro name to prevent infinite recursion. Instead an error will be raised when the macro is not found. Furthermore, this can be used to shadow macros or instructions.
                             expand_macros(&mut expanded_macro);
+                            expanded_any_macro = true;
                             Some(expanded_macro.root)
                         } else {
                             let msg = format!("Error, invalid number of arguments for macro {}. Expected {}, got {}.", &code[0], macro_txt.number_of_arguments, code.len() - 1);
@@ -134,6 +139,7 @@ pub fn expand_macros(asm: &mut Assembler) {
 
 
     asm.root.traverse_tree(&mut expand_macros_closure);
+    expanded_any_macro
 }
 
 /* --------------------------------- Testing -------------------------------- */

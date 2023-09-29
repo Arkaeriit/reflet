@@ -152,31 +152,37 @@ impl Assembler<'_> {
         }
     }
 
+    /// Runs all passes of the assembly process that might add new text in the
+    /// tree.
+    fn run_text_adding_passes(&mut self) {
+        // All the operations that might add new text on the tree. If an
+        // operation added new text, we want to run them all from the start to
+        // ensure that we are not missing anything. It should end with the most
+        // costly operations as we don't want to rerun them too much time.
+        const TEXT_ADDING_PASSES: [&dyn Fn(&mut Assembler) -> bool; 4] = [
+            &import::include_source, // This one always return false but it doesn't matters as it runs first.
+            &macros::register_macros,
+            &run_implementation_macros,
+            &macros::expand_macros,
+        ];
+
+        let mut pass_index = 0;
+        while pass_index < TEXT_ADDING_PASSES.len() {
+            if TEXT_ADDING_PASSES[pass_index](self) {
+                pass_index = 0;
+            } else {
+                pass_index += 1;
+            }
+        }
+    }
+
     /// Perform a complete assembly process. Return a vector of bytes of the
     /// resulting binary in case of success and an error message in case of
     /// error.
     pub fn assemble(&mut self) -> Result<Vec<u8>, String> {
-        // First pass of transformation
-        import::include_source(self);
-        macros::register_macros(self);
+        // Manage macros and directives
+        self.run_text_adding_passes();
         define::handle_define(self);
-        macros::expand_macros(self);
-        section::handle_sections(self);
-        import::include_source(self); // This should not do anything but it will show more useful error messages if there was some include directives inside of a macro.
-        label::register_labels(self);
-        align::register_align(self);
-        raw::expand_constants(self);
-        raw::decode_raw_bytes(self);
-        strings::register_strings(self);
-
-        // User defined macros
-        self.run_implementation_macros();
-
-        // An other run of first pass transformations if the
-        // implementation-macros include some directives
-        macros::register_macros(self);
-        define::handle_define(self);
-        macros::expand_macros(self);
         section::handle_sections(self);
         label::register_labels(self);
         align::register_align(self);
@@ -197,22 +203,6 @@ impl Assembler<'_> {
             Some(txt) => Err(txt),
             None => Ok(ret),
         }
-    }
-
-    /// Executes the implementation-specific macros.
-    fn run_implementation_macros(&mut self) {
-        let mut running_implementation_macros = | node: &AsmNode | -> Option<AsmNode> {
-            match node {
-                Source{code, meta} => match (self.implementation_macro)(code) {
-                    Err(msg) => Some(Error{msg, meta: meta.clone()}),
-                    Ok(None) => None,
-                    Ok(Some(txt)) => Some(parse_source(&txt, &format!("Expantion of line {} from file {}, being {}", meta.line, &meta.source_file, &meta.raw))),
-                },
-                _ => None,
-            }
-        };
-
-        self.root.traverse_tree(&mut running_implementation_macros);
     }
 
     /// Executes the implementation-specific micro-assembler.
@@ -294,6 +284,30 @@ impl Assembler<'_> {
         }
     }
 }
+
+/// Executes the implementation-specific macros. Return true if some macros
+/// have been expanded.
+fn run_implementation_macros(asm: &mut Assembler) -> bool {
+    let mut expanded_macros = false;
+    let mut running_implementation_macros = | node: &AsmNode | -> Option<AsmNode> {
+        match node {
+            Source{code, meta} => match (asm.implementation_macro)(code) {
+                Err(msg) => Some(Error{msg, meta: meta.clone()}),
+                Ok(None) => None,
+                Ok(Some(txt)) => {
+                    expanded_macros = true;
+                    Some(parse_source(&txt, &format!("Expantion of line {} from file {}, being {}", meta.line, &meta.source_file, &meta.raw)))
+                },
+            },
+            _ => None,
+        }
+    };
+
+    asm.root.traverse_tree(&mut running_implementation_macros);
+    expanded_macros
+}
+
+
 
 /* --------------------------------- Testing -------------------------------- */
 #[test]

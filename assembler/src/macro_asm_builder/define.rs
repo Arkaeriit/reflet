@@ -66,7 +66,7 @@ fn apply_define(asm: &mut Assembler, map: &HashMap<String, Vec<String>>) {
     asm.root.traverse_tree(&mut applying_define);
 }
 
-/// Register all define and apply them
+/// Register all define and apply them.
 pub fn handle_define(asm: &mut Assembler) {
     let map = register_define(asm);
     apply_define(asm, &map);
