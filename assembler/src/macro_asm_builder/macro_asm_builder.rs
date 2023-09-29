@@ -30,6 +30,9 @@ mod strings;
 /// A module to register sections and put code in them.
 mod section;
 
+/// A module to register constants and math expressions.
+mod constants;
+
 /// A mod with miscellaneous useful functions.
 pub mod utils;
 
@@ -59,7 +62,7 @@ pub struct Assembler<'a> {
     start_address: usize,
 
     /// A function that expand implementation-specifics macros. Takes a vector
-    /// of tokens from a line of code and return Ok<None> if the macro expansion
+    /// of tokens from a line of code and return Ok<None> if no macro expansion
     /// is needed, Ok<txt> to replace the text with txt, or Err<txt> to return
     /// an error message destined to the user.
     pub implementation_macro: &'a dyn Fn(&Vec<String>) -> Result<Option<String>, String>,
@@ -156,6 +159,7 @@ impl Assembler<'_> {
         // First pass of transformation
         import::include_source(self);
         macros::register_macros(self);
+        constants::handle_constants(self);
         macros::expand_macros(self);
         section::handle_sections(self);
         import::include_source(self); // This should not do anything but it will show more useful error messages if there was some include directives inside of a macro.
@@ -171,6 +175,7 @@ impl Assembler<'_> {
         // An other run of first pass transformations if the
         // implementation-macros include some directives
         macros::register_macros(self);
+        constants::handle_constants(self);
         macros::expand_macros(self);
         section::handle_sections(self);
         label::register_labels(self);
