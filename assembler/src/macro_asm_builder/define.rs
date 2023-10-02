@@ -1,6 +1,7 @@
 use crate::Assembler;
 use crate::tree::AsmNode::*;
 use crate::tree::*;
+use std::collections::HashMap;
 
 /* -------------------------------- Constants ------------------------------- */
 
@@ -37,6 +38,25 @@ fn register_define(asm: &mut Assembler) {
     asm.root.traverse_tree(&mut registering_define);
 }
 
+/// Replace defined constant with their expanded values in a line of text.
+/// Return the new words and true if at list a word have been replaced.
+fn apply_define_in_line(line: &[String], map: &HashMap<String, Vec<String>>) -> (Vec<String>, bool) {
+    let mut applied_define = false;
+
+    let mut new_source = Vec::<String>::new();
+    for txt in line {
+        if let Some(substitution) = map.get(txt) {
+            applied_define = true;
+            for word in substitution {
+                new_source.push(word.to_string());
+            }
+        } else {
+            new_source.push(txt.to_string());
+        }
+    }
+    (new_source, applied_define)
+}
+
 /// Traverse the tree and replace text with are define names with appropriate
 /// values. Return true if a defines have been expanded.
 fn apply_define(asm: &mut Assembler) -> bool {
@@ -44,18 +64,11 @@ fn apply_define(asm: &mut Assembler) -> bool {
 
     let mut applying_define = |node: &AsmNode| -> Option<AsmNode> {
         if let Source{code, meta} = node {
-
-            let mut new_source = Vec::<String>::new();
-            for txt in code {
-                if let Some(substitution) = asm.defines.get(txt) {
-                    applied_define = true;
-                    for word in substitution {
-                        new_source.push(word.to_string());
-                    }
-                } else {
-                    new_source.push(txt.to_string());
-                }
+            let (new_source, applied_a_define) = apply_define_in_line(&code, &asm.defines);
+            if applied_define {
+                applied_define = true;
             }
+
             Some(Source{code: new_source, meta: meta.clone()})
 
         } else {
@@ -90,7 +103,7 @@ fn test_register_define() {
     let mut assembler = Assembler::from_text("@define name 123\n@define name_2 234 345\nnormal text\n@define name error\n");
     register_define(&mut assembler);
     assert_eq!(assembler.root.to_string().as_str(), "normal text\n! Error, define name has already been defined.\n file: ./__asm_init line: 4 raw_line: @define name error\n");
-    assert_eq!(assembler.defines, std::collections::HashMap::from([
+    assert_eq!(assembler.defines, HashMap::from([
           ("name".to_string(),   vec!["123".to_string()]),
           ("name_2".to_string(), vec!["234".to_string(), "345".to_string()]),
     ]));
@@ -108,7 +121,7 @@ fn test_apply_define() {
     register_define(&mut assembler);
     apply_define(&mut assembler);
     assert_eq!(assembler.root.to_string().as_str(), "normal text\n123 234 345 123\n");
-    assert_eq!(assembler.defines, std::collections::HashMap::from([
+    assert_eq!(assembler.defines, HashMap::from([
           ("name".to_string(),   vec!["123".to_string()]),
           ("name_2".to_string(), vec!["234".to_string(), "345".to_string()]),
     ]));
