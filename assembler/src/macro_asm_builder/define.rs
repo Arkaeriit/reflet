@@ -81,7 +81,7 @@ fn apply_define(asm: &mut Assembler) -> bool {
     let mut applying_define = |node: &AsmNode| -> Option<AsmNode> {
         if let Source{code, meta} = node {
             let (new_source, applied_a_define) = apply_define_in_line(&code, &asm.defines);
-            if applied_define {
+            if applied_a_define {
                 applied_define = true;
             }
 
