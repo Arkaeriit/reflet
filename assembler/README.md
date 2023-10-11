@@ -47,6 +47,29 @@ In assembly, macros are called by doing `<macro_name> <arg1> <arg2> ...`
 
 Note: The first argument is accessed with $1.
 
+### Flat defines
+
+User-defined macros are only expanded if they are the first element in a line. If you want to have a word be a synonym for any placed words, you can use flat defined as follow:
+
+```
+@define two 2
+@define r4_two R4 two
+
+set two ; Will be expanded to `set 2`
+setr r4_five ; Will be expanded st `setr R4 2`
+```
+
+If you want to do some compile-time computation in your flat defines, you can use the `@define-math` directive as follow:
+
+```
+@define-math four 3 + 1
+@define-math height four * 2
+
+set height ; Will be expanded to `set 8`
+```
+
+You can use the value of words defined in `@define-math` in other `@define-math`, but not the ones defined in `@define`. `@define-math` uses [Math-Parse](https://github.com/Arkaeriit/math-parse) under the hood, you can use all it's integer functions.
+
 ### Sections
 
 By default, the content in the generated binary file follows the order of the content in the source files. But you might want to have more flexibility in where to place code or data. You can do so with the `@section <section name>` directive to declare the position of a section. Then, you can put content at that section by placing it between the directives `@in-section <section name>` and `@end-section`.
