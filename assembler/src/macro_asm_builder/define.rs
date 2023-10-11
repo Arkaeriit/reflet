@@ -5,14 +5,15 @@ use std::collections::HashMap;
 
 /* -------------------------------- Constants ------------------------------- */
 
-/// Traverse the tree to register the `@define` directive.
+/// Traverse the tree to register the `@define` and `@define-math` directive.
 /// Update the assembler's map.
 fn register_define(asm: &mut Assembler) {
+    let mut math_variables = HashMap::<String, String>::new();
 
     let mut registering_define = |node: &AsmNode| -> Option<AsmNode> {
         match node {
             Source{code, meta} => {
-                if code[0].as_str() == "@define" {
+                if code[0].as_str() == "@define" || code[0].as_str() == "@define-math" {
                     let name = &code[1];
                     if code.len() < 3 {
                         return Some(Error{msg: format!("Error, directive {} should take as argument a define name and at least a replacement value.\n", &code[0]), meta: meta.clone()});
@@ -20,13 +21,28 @@ fn register_define(asm: &mut Assembler) {
                     if asm.defines.contains_key(name) {
                         return Some(Error{msg: format!("Error, define {} has already been defined.\n", name), meta: meta.clone()});
                     }
-                    if contains_math_chars(name) {
-                        return Some(Error{msg: format!("Error, name of define {} contains not allowed chars (any of {:?}).\n", name, MATH_CHARS), meta: meta.clone()});
+                    if math_parse::contains_math_char(name) {
+                        return Some(Error{msg: format!("Error, name of define {} contains not allowed char.\n", name), meta: meta.clone()});
                     }
 
-                    let value = code[2..].to_vec();
-                    let _ = asm.defines.insert(name.to_string(), value);
-                    Some(Empty)
+                    if code[0].as_str() == "@define" {
+                        let value = code[2..].to_vec();
+                        let _ = asm.defines.insert(name.to_string(), value);
+                        Some(Empty)
+                    } else { // @define-math
+                        let mut math_line = String::new();
+                        for word in &code[2..] {
+                            math_line.push_str(word);
+                        }
+                        match math_parse::math_parse_int(&math_line, Some(&math_variables)) {
+                            Ok(i) => {
+                                let _ = asm.defines.insert(name.to_string(), vec![format!("{i}")]);
+                                let _ = math_variables.insert(name.to_string(), format!("{i}"));
+                                Some(Empty)
+                            },
+                            Err(err) => Some(Error{msg: format!("Error while parsing math: {}\n", err), meta: meta.clone()}),
+                        }
+                    }
                 } else {
                     None
                 }
@@ -87,15 +103,6 @@ pub fn handle_define(asm: &mut Assembler) -> bool {
     apply_define(asm)
 }
 
-/* ---------------------------------- Utils --------------------------------- */
-
-/// Return true if a string got any chars from the `MATH_CHARS`.
-fn contains_math_chars(s: &str) -> bool {
-    s.contains(MATH_CHARS)
-}
-
-const MATH_CHARS: [char; 6] = ['+', '-', '*', '/', '(', ')'];
-
 /* --------------------------------- Testing -------------------------------- */
 
 #[test]
@@ -111,8 +118,8 @@ fn test_register_define() {
 
 #[test]
 fn test_contains_math_chars() {
-    assert_eq!(contains_math_chars("abc+d"), true);
-    assert_eq!(contains_math_chars("abcd"), false);
+    assert_eq!(math_parse::contains_math_char("abc+d"), true);
+    assert_eq!(math_parse::contains_math_char("abcd"), false);
 }
 
 #[test]
@@ -124,6 +131,18 @@ fn test_apply_define() {
     assert_eq!(assembler.defines, HashMap::from([
           ("name".to_string(),   vec!["123".to_string()]),
           ("name_2".to_string(), vec!["234".to_string(), "345".to_string()]),
+    ]));
+}
+
+#[test]
+fn test_define_math() {
+    let mut assembler = Assembler::from_text("@define-math name 123\n@define-math name_2 name * 2\nnormal text\nname name_2  name\n");
+    register_define(&mut assembler);
+    apply_define(&mut assembler);
+    assert_eq!(assembler.root.to_string().as_str(), "normal text\n123 246 123\n");
+    assert_eq!(assembler.defines, HashMap::from([
+          ("name".to_string(),   vec!["123".to_string()]),
+          ("name_2".to_string(), vec!["246".to_string()]),
     ]));
 }
 
