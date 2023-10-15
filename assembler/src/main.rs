@@ -1,4 +1,3 @@
-extern crate macro_asm_builder;
 use std::process::exit;
 use macro_asm_builder::*;
 use std::io::Write;

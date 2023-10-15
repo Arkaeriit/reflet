@@ -4,18 +4,12 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Maxime Bouillot maxbouillot@gmail.com"]
 license = "BSD-3-Clause"
-description = "A library to make macro-assemblers and a macro assembler for the Reflet architectures build as a reference."
-
-[lib]
-name = "macro_asm_builder"
-path = "src/macro_asm_builder/macro_asm_builder.rs"
+description = "A macro assembler for the Reflet architectures."
 
 [dependencies]
-math-parse = "0.4.0"
+macro-asm-builder = "0.1.0"
 
 [[bin]]
 name = "reflet-asm"
-path = "src/reflet-asm/main.rs"
-
-
+path = "src/main.rs"
 
