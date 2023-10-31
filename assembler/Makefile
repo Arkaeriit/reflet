@@ -1,6 +1,6 @@
 all: reflet-asm.bin
 
-reflet-asm.bin: src/macro_asm_builder/* src/reflet-asm/*
+reflet-asm.bin: src/*
 	cargo build --release
 	cp ./target/release/reflet-asm $@
 
