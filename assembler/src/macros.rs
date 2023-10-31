@@ -15,7 +15,7 @@ pub fn macros(code: &Vec<String>) -> Result<Option<String>, String> {
 fn get_macro_to_use(code0: &str) -> Option<&dyn Fn(&Vec<String>) -> Result<String, String>> {
     match code0 {
         "@set8" => Some(&set8),
-        "@set_sr_for" => Some(&set_sr_for),
+        "@set_sr_for" | "@get_sr_for" => Some(&get_or_set_sr_for),
         _ => None,
     }
 }
@@ -54,7 +54,7 @@ fn format_set8(num: u8) -> String {
     or R12", (num & 0xF0) >> 4, num & 0x0F)
 }
 
-/* ------------------------------- @set_sr_for ------------------------------ */
+/* ----------------------- @set_sr_for or @get_sr_for ----------------------- */
 
 /// Comput the ceil of the log2 of a number
 fn clog2(n: u128) -> usize {
@@ -62,48 +62,59 @@ fn clog2(n: u128) -> usize {
     (bit_used - 1).try_into().unwrap()
 }
 
-/// Expands the @set_sr_for macro
-fn set_sr_for(code: &Vec<String>) -> Result<String, String> {
+/// Expands the @set_sr_for or @get_sr_for macro
+fn get_or_set_sr_for(code: &Vec<String>) -> Result<String, String> {
     match code[0].as_str() {
-        "@set_sr_for" => {
+        "@set_sr_for" | "@get_sr_for" => {
+            let format_function = if code[0].as_str() == "@set_sr_for" {
+                format_set_sr_for
+            } else {
+                format_get_sr_for
+            };
             if code.len() == 2 {
                 match format_string_into_number(&code[1]) {
                     Some((num, false)) => {
                         let sr_value = clog2(num / 8) + 1;
                         if sr_value < 16 {
-                            Ok(format_set_sr_for(sr_value))
+                            Ok(format_function(sr_value))
                         } else {
-                            Err(format!("Error, the assembler does not support @set_sr_for with a value of {}.", num))
+                            Err(format!("Error, the assembler does not support {} with a value of {}.", code[0], num))
                         }
                     },
-                    None | Some((_, true)) => Err(format!("Error, macro @set_sr_for should take a single number as argument.")),
+                    None | Some((_, true)) => Err(format!("Error, macro {} should take a single number as argument.", code[0])),
                 }
             } else {
                 Err(format!("Error, macro @set_sr_for should take a single 1-byte number as argument."))
             }
         },
-        _ => Err(format!("Error in the assembler, set_sr_for should not parse {:?}!", code)),
+        _ => Err(format!("Error in the assembler, get_or_set_sr_for should not parse {:?}!", code)),
     }
 }
 
 /// Generates the code used for a @set_sr_for macro
 fn format_set_sr_for(sr_value: usize) -> String {
     format!("
+    {}
+    cpy SR", format_get_sr_for(sr_value))
+}
+
+/// Generates the code used for a @get_sr_for macro
+fn format_get_sr_for(sr_value: usize) -> String {
+    format!("
     ; Use 8 as it is the offset to the reduced behavior bits
     set 8
     cpy R12
-    ; Clears reduced behaviors bits of the SR but keep the 8 lsb intact
-    read SR
-    lsr R12
-    lsl R12
-    xor SR
-    cpy SR
     ; The the desires reduced behaviors bits
     set {}
     lsl R12
-    or SR
-    cpy SR", sr_value)
+    xor SR
+    ; Now WR contains the 8 LSB of SR and its MSB are the XOR between the desired SR and teh current SR
+    lsr R12
+    lsl R12
+    ; The 8 LSB of the WR have been cleared, doing a xor with SR will get the 8 LSB of SR and the new and updated MSB
+    xor SR", sr_value)
 }
+
 
 /* --------------------------------- Testing -------------------------------- */
 

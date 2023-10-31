@@ -134,28 +134,37 @@
 ; Takes as first argument a value to mask the SR with and as second a register to load from
 @macro @loadX 2
     ; Preserve and set SR
-    mov. R12 SR
+    mov. R11 SR
     @set_sr_for $1
     ; load
     load $2
-    cpy R11
+    cpy R12
     ; Restore SR
-    mov. SR R12
-    read R11
+    mov. SR R11
+    read R12
 @end
 
 ; Same idea as @loadX but for str
 @macro @strX 2
+    ; Preserve the value
     cpy R11
-    ; Preserve and set SR
-    mov. R12 SR
-    @set_sr_for $1
-    ; store
+    ; In R12, put the xor of old SR and new SR
+    @get_sr_for $1
+    xor SR
+    cpy R12
+    ; Xor R12 and the current SR to get the new SR
+    read SR
+    xor R12
+    cpy SR
+    ; Read back the value and store it
     read R11
     str $2
     cpy R11
-    ; Restore SR
-    mov. SR R12
+    ; Xor R12 and SR to get the old SR
+    read R12
+    xor SR
+    cpy SR
+    ; Put the value back in the WR
     read R11
 @end
 
