@@ -1,7 +1,7 @@
 # This makefile containts comands to assemble and test the
 # various files of this folder.
 
-all : libtesting.bin exampleIO.bin primes.bin fibonacci.bin test_jump.bin test_instructions.bin test_inst_mini_str.bin test_inst_mini_load.bin test_align_fix.bin test_interrupt.bin hello_world.bin test_comparison.bin test_align_trap.bin test_fancy_interrupt_use.bin
+all : libtesting.bin exampleIO.bin primes.bin fibonacci.bin test_jump.bin test_instructions.bin test_inst_mini_str.bin test_inst_mini_load.bin test_align_fix.bin test_interrupt.bin hello_world.bin test_comparison.bin test_align_trap.bin test_fancy_interrupt_use.bin os_demo.bin
 
 REFLET_SIM ?= reflet-sim
 
@@ -117,6 +117,12 @@ test_fancy_interrupt_use : test_fancy_interrupt_use.bin
 
 ../rtl/simu/rom08.v: test_fancy_interrupt_use.bin
 	ROM_maker -name rom08 -input_file $< -output_file $@ -wordsize 2 -min_addr_size 15
+
+os_demo.bin: os/os_demo.asm os/reflet_os.asm
+	$(REFLET_ASM) $< -word-size 16 -o $@ -no-stack-init
+
+os_demo: os_demo.bin
+	$(REFLET_SIM) -w 16 -r 60000 $<
 
 clean :
 	rm -f *.bin
