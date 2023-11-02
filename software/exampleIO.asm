@@ -36,4 +36,5 @@ set 10 ;preparing a new line
 str r1
 set 0
 str WR
+quit
 
