@@ -81,3 +81,7 @@ Here is an example of that in action:
 Hello, word!
 ```
 
+### Log
+
+To ease debug, you can make the simulator generate a log file using the command line argument or a config file. This file contains a line for each instruction executed by the computer. Be careful, those file can grow really big if used on a big program.
+
