@@ -10,6 +10,8 @@ Available options:
     -c/--config-file <file>       : Config file used to describe the VM.
     -!/--ignore-first-line <file> : Ignore chars up to the first new line in input binary.
     -x/--extended-io              : Use extended IOs instead of basic ones.
+    -l/--log-file <file>          : Use the given file as a log file.
+
 ```
 
 

@@ -30,6 +30,7 @@ static void help(){
            "    -c/--config-file <file>       : Config file used to describe the VM.\n"
            "    -!/--ignore-first-line <file> : Ignore chars up to the first new line in input binary.\n"
            "    -x/--extended-io              : Use extended IOs instead of basic ones.\n"
+           "    -l/--log-file <file>          : Use the given file as a log file.\n"
           );
 }
 
@@ -43,6 +44,7 @@ static bool parse_arg(const char* arg, reflet* vm) {
     static bool reading_ram_size    = false;
     static bool rom_loaded          = false;
     static bool ignore_first_line   = false;
+    static bool reading_log_file    = false;
     if (reading_config_file) {
         reading_config_file = false;
         applyConfig(vm, arg);
@@ -69,6 +71,17 @@ static bool parse_arg(const char* arg, reflet* vm) {
             fprintf(stderr, "Error in arguments, ram size should be a number.\n");
             exit(RET_CONFIG);
         }
+    } else if (reading_log_file) {
+        if(vm->debug->enable){
+            fprintf(stderr, "Error, multiple log files opened.\n");
+            exit(RET_CONFIG);
+        }
+        vm->debug->enable = true;
+        if((vm->debug->file = fopen(arg, "w")) == NULL){
+            fprintf(stderr, "Error, unable to open log file '%s'.\n", arg);
+            exit(RET_CONFIG);
+        }
+        reading_log_file = false;
     } else {
         if (!strcmp(arg, "--config-file") || !strcmp(arg, "-c")) {
             reading_config_file = true;
@@ -83,6 +96,8 @@ static bool parse_arg(const char* arg, reflet* vm) {
         } else if (!strcmp(arg, "help") || !strcmp(arg, "--help") || !strcmp(arg, "-h")) {
             help();
             exit(0);
+        } else if (!strcmp(arg, "--log-file") || !strcmp(arg, "-l")) {
+            reading_log_file = true;
         } else if (!rom_loaded) {
             bool loading = load_file(arg, vm, ignore_first_line);
             if(!loading){
