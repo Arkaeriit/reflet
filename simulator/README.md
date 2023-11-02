@@ -15,14 +15,14 @@ Available options:
 
 ## IO
 
-## Basic IOs
+### Basic IOs
 By default, the simulator only have basic IOs that can only write from stdin and to stdout. This works with 4 memory addresses. To print a character, write it at address `tx_data` (default to 0x1) and then write 0 at address `tx_cmd` (default to 0x0). To get an input char, write 0 at address `rx_cmd` (default to 0x2). The input char will be written at address `rx_data` (default to 0x3).
 
 When reading a char, if the read have been successful, 1 is written back to `rx_cmd`. If nor, 2 is written to `rx_cmd`.
 
 The addresses can be chosen with a config file if you ever feel the need to simulate a reflet-microcontroller and need the addresses at a specific place in memory.
 
-## Extended IOs
+### Extended IOs
 If you want the simulator to perform more IOs such as file operation, you can enable the extended IOs. As this is no longer useful to simulate hardware such as a microcontroller, the used addresses are no longer configurable.
 
 The address 0x0 is the char-out address, the address 0x1 is the char-in address. The address 0x2 is the command address, where you write commands to perform some IOs. The address 0x3 is the status address, where you can see the success or failure of those commands.
