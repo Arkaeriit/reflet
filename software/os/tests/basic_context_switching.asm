@@ -129,6 +129,6 @@ label start
 
 ;----------------------------------- imports ----------------------------------;
 
-@import ../libs/import_all_libs.asm
-@import reflet_os.asm
+@import ../../libs/import_all_libs.asm
+@import ../reflet_os.asm
 
