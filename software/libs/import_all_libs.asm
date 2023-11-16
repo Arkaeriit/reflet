@@ -3,4 +3,5 @@
 @import string.asm
 @import printing.asm
 @import linked_jumps.asm
+@import memory.asm
 
