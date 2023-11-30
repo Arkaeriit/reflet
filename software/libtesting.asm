@@ -8,6 +8,8 @@
 label testString
 @string "Reflet is a neat ISA!"
 @rawbytes 0A 0
+label usedString ; This string is empty but will be filled in by the program
+@rawbytes 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 
 label start
     callf testingPrinting
@@ -56,11 +58,15 @@ label testingPrinting
     callf strlen
     read R1
     debug ;expecting the length of the string which is 22 = 0x16
+    cpy R3
     setlab testString
     cpy R1
+    setlab usedString
+    cpy R2
+    callf memcpy ; We put the message in the string in R2
+    mov. R1 R2
     callf print ;should print "Reflet is a neat ISA!\n"
-    set+ 200
-    add SP
+    setlab usedString
     cpy R2
     set+ 0xABCD
     cpy R1

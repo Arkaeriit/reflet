@@ -34,43 +34,6 @@ label strlen
     ret
 
 ;-------------------------------------------
-;Fill R2 bytes with the char in R3 at the address starting at R1
-label memset
-    pushr R1
-    pushr R2
-    pushr R3
-    pushr R5 ;loop pointer
-    pushr R6
-    setlab memsetLoop
-    cpy R5
-    setlab memsetLoopEnd
-    cpy R6
-    set 1  ;constant 1 in R12
-    cpy R12
-    label memsetLoop
-        set 0 ;testing for loop end
-        eq R2
-        read R6
-        jif
-        read R3 ;setting mem
-        str8 R1
-        read R1 ;updating R1 and R2
-        add R12
-        cpy R1
-        read R2
-        sub R12
-        cpy R2
-        read R5 ;looping back
-        jmp
-    label memsetLoopEnd
-    popr R6 ;restoring registers
-    popr R5
-    popr R3
-    popr R2
-    popr R1
-    ret
-
-;-------------------------------------------
 ;Flip the string in R1
 label strFlip
     pushr. R1 ; pointer to start of string
