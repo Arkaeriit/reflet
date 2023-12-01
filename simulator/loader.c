@@ -30,10 +30,13 @@ bool load_file(const char* filename, reflet* vm, bool ignore_first_line){
     }
     //reading file
     char* ram_char = (char*) vm->ram;
+    bool finished_reading = false;
     for(word_t i=0; i<vm->config->ram_size; i++){
         char ch = fgetc(f);
-        if(feof(f))
+        if (feof(f)) {
+            finished_reading = true;
             break;
+        }
         ram_char[i] = ch;
     }
     fclose(f);
@@ -43,10 +46,14 @@ bool load_file(const char* filename, reflet* vm, bool ignore_first_line){
         if(MAGIC_WORD_CHECKING == MAGIC_WORD_WARNING && !no_error)
             fprintf(stderr, "Warning: magic word not found.\n");
         if(MAGIC_WORD_CHECKING == MAGIC_WORD_ERROR && !no_error){
-            fprintf(stderr, "Error: magic word not founr.\n");
+            fprintf(stderr, "Error: magic word not found.\n");
             reflet_free(vm);
             return false;
         }
+    }
+    if (!finished_reading) {
+        fprintf(stderr, "Error: the allocated RAM size is smaller than the program.\n");
+        return false;
     }
     //Checking that the io cmd address are not empty to prevent unwanted io
     if(!vm->ram[vm->config->tx_cmd])
