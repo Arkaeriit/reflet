@@ -98,7 +98,7 @@ test_comparison.bin : test_comparison.asm
 	$(REFLET_ASM) $< -o $@ -word-size 16
 
 test_comparison : test_comparison.bin
-	$(REFLET_SIM) -w 16 -r 3000 $<
+	$(REFLET_SIM) -c config16 $<
 
 test_align_trap.bin : test_align_trap.asm
 	$(REFLET_ASM) $< -o $@ -word-size 16 -no-stack-init
