@@ -319,6 +319,22 @@ static void check_alignement_ok(reflet* vm, word_t addr, bool stack_b){
 }
 
 /*
+ * Check if the current memory access is inside of the allocated RAM.
+ * If it is not, print it and exit the program.
+ *  Arguments:
+ *      vm : the reflet struct
+ *      addr : the starting address of where we must put the word
+ *      stack_b : are we ignoring the behavior bits
+ */
+static void check_access_valid(const reflet* vm, word_t addr, bool stack_b) {
+    int byte_exchanged = byteExchanged(vm, stack_b);
+    if (addr + byte_exchanged > vm->config->ram_size) {
+        fprintf(stderr, "Critical error, the vm tries to access address %" WORD_PX " while having only access to address %" WORD_PX"!\n", addr + byte_exchanged - 1, vm->config->ram_size - 1);
+        exit(RET_MEMORY);
+    }
+}
+
+/*
  * Fetches a full word from ram
  *  Arguments:
  *      vm : the reflet struct
@@ -328,6 +344,7 @@ static void check_alignement_ok(reflet* vm, word_t addr, bool stack_b){
  *      The word in RAM (the byte at the address and the following bytes)
  */
 static word_t loadWordRAM(reflet* vm, word_t addr, bool stack_b){
+    check_access_valid(vm, addr, stack_b);
     check_alignement_ok(vm, addr, stack_b);
     uint8_t* target = vm->ram + addr;
     int exchanged = byteExchanged(vm, stack_b);
@@ -348,6 +365,7 @@ static word_t loadWordRAM(reflet* vm, word_t addr, bool stack_b){
  *      stack_b : are we ignoring the behavior bits
  */
 static void putRAMWord(reflet* vm, word_t addr, word_t content, bool stack_b){
+    check_access_valid(vm, addr, stack_b);
     check_alignement_ok(vm, addr, stack_b);
     uint8_t* target = vm->ram + addr;
     for(int offset=0; offset<byteExchanged(vm, stack_b); offset++){

@@ -37,9 +37,10 @@ typedef uint8_t ram_word_t;
 
 //Return value
 #define RET_INVALID_ARGS 1
-#define RET_NO_VM 2
-#define RET_UNOPEN_FILE 3
-#define RET_CONFIG 5
+#define RET_NO_VM        2
+#define RET_UNOPEN_FILE  3
+#define RET_MEMORY       4
+#define RET_CONFIG       5
 
 //Interupt level
 #define LEVEL_NORMAL 4
