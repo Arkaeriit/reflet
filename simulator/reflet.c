@@ -98,11 +98,15 @@ void reflet_run(reflet* vm){
     if (vm->config->extended_io) {
         prepare_extended_io(vm);
     }
-    while((vm->PC < vm->config->ram_size) && vm->active){
+    while (vm->active) {
         debugLog(vm);
         check_int(vm);
         run_inst(vm);
         io(vm);
+        if (vm->PC >= vm->config->ram_size) {
+            fprintf(stderr, "Error: the program counter (0x%" WORD_PX ") is greater than the highest address available.\n", vm->PC);
+            exit(RET_MEMORY);
+        }
     }
 }
 
@@ -329,7 +333,7 @@ static void check_alignement_ok(reflet* vm, word_t addr, bool stack_b){
 static void check_access_valid(const reflet* vm, word_t addr, bool stack_b) {
     int byte_exchanged = byteExchanged(vm, stack_b);
     if (addr + byte_exchanged > vm->config->ram_size) {
-        fprintf(stderr, "Critical error, the vm tries to access address %" WORD_PX " while having only access to address %" WORD_PX"!\n", addr + byte_exchanged - 1, vm->config->ram_size - 1);
+        fprintf(stderr, "Error: the vm tries to access address 0x%" WORD_PX " while having only access to address 0x%" WORD_PX"!\n", addr + byte_exchanged - 1, vm->config->ram_size - 1);
         exit(RET_MEMORY);
     }
 }
