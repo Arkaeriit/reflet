@@ -62,6 +62,7 @@ fn make_assembler(args: &cli_arguments::Arguments) -> Assembler {
     }
     asm.implementation_macro = &macros::macros;
     asm.micro_assembly = &micro_assembler::micro_assembler;
+    asm.start_address = args.start_addr;
     // Size specific macros
     let align_word = format!("@macro @align_word 0\n@align {}\n@end", args.word_size/8);
     let set_default_sr = format!("@macro @set_default_sr 0\n@set_sr_for {}\n@end", args.word_size);

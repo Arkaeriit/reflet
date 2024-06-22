@@ -7,7 +7,7 @@ license = "BSD-3-Clause"
 description = "A macro assembler for the Reflet architectures."
 
 [dependencies]
-macro-asm-builder = "0.1.0"
+macro-asm-builder = "1.0.3"
 
 [[bin]]
 name = "reflet-asm"
