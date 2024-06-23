@@ -57,9 +57,13 @@ fn format_set8(num: u8) -> String {
 /* ----------------------- @set_sr_for or @get_sr_for ----------------------- */
 
 /// Comput the ceil of the log2 of a number
-fn clog2(n: u128) -> usize {
-    let bit_used: u128 = (u128::BITS - n.leading_zeros()).try_into().unwrap();
-    (bit_used - 1).try_into().unwrap()
+fn clog2(n: u128) -> Option<usize> {
+    let bit_used: u128 = (u128::BITS - n.leading_zeros()).into();
+    if bit_used > 0 {
+        Some(<u128 as TryInto<usize>>::try_into(bit_used - 1).unwrap())
+    } else {
+        None
+    }
 }
 
 /// Expands the @set_sr_for or @get_sr_for macro
@@ -74,7 +78,11 @@ fn get_or_set_sr_for(code: &Vec<String>) -> Result<String, String> {
             if code.len() == 2 {
                 match format_string_into_number(&code[1]) {
                     Some((num, false)) => {
-                        let sr_value = clog2(num / 8) + 1;
+                        let sr_value = if let Some(log) = clog2(num / 8) {
+                            log + 1
+                        } else {
+                            return Err(format!("Error, the directive {} can't have {} as input. Valid values are 8, 16, 32, 64, and 128.", code[0], num));
+                        };
                         if sr_value < 16 {
                             Ok(format_function(sr_value))
                         } else {
@@ -120,21 +128,20 @@ fn format_get_sr_for(sr_value: usize) -> String {
 
 #[test]
 fn test_clog2() {
-    assert_eq!(clog2(1), 0);
-    assert_eq!(clog2(2), 1);
-    assert_eq!(clog2(3), 1);
-    assert_eq!(clog2(4), 2);
-    assert_eq!(clog2(5), 2);
-    assert_eq!(clog2(6), 2);
-    assert_eq!(clog2(7), 2);
-    assert_eq!(clog2(8), 3);
-    assert_eq!(clog2(9), 3);
+    assert_eq!(clog2(1), Some(0));
+    assert_eq!(clog2(2), Some(1));
+    assert_eq!(clog2(3), Some(1));
+    assert_eq!(clog2(4), Some(2));
+    assert_eq!(clog2(5), Some(2));
+    assert_eq!(clog2(6), Some(2));
+    assert_eq!(clog2(7), Some(2));
+    assert_eq!(clog2(8), Some(3));
+    assert_eq!(clog2(9), Some(3));
 }
 
 #[test]
-#[should_panic]
 fn test_clog2_fail() {
-    let _ = clog2(0);
+    assert_eq!(clog2(0), None);
 }
 
 #[test]
@@ -144,7 +151,7 @@ fn test_set_sr_for() {
         for s in format!("@set_sr_for {}", n).split(" ") {
             ret.push(s.to_string());
         }
-        set_sr_for(&ret)
+        get_or_set_sr_for(&ret)
     }
     assert_eq!(direct_sr_for(8), Ok(format_set_sr_for(1)));
     assert_eq!(direct_sr_for(16), Ok(format_set_sr_for(2)));
