@@ -6,7 +6,7 @@
 
 @align_word
 label testString
-@string "Reflet is a neat ISA!"
+@string MESSAGE
 @rawbytes 0A 0
 label usedString ; This string is empty but will be filled in by the program
 @rawbytes 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0

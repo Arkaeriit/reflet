@@ -19,7 +19,9 @@ Options:
   * -ignore-compatibility-runtime: do not write the code that edit the status
     register to make the binary works on larger processors.
   * -label-dump: if set, a dump of all labels will be printed just before
-    linkage.";
+    linkage.
+  * -D <name>=<definition>: defines the macro `name` with te=he current
+    definition. It will be a flat define macro.";
 
 /// State of all the command line options.
 pub struct Arguments {
@@ -55,6 +57,9 @@ pub struct Arguments {
 
     /// Should we do a label dump ?
     pub label_dump: bool,
+
+    /// List of -D defines
+    pub defines: Vec<(String, String)>,
 }
 
 use macro_asm_builder::utils::format_string_into_number;
@@ -89,6 +94,7 @@ fn read_args() -> Option<Arguments> {
         no_prefix: false,
         no_compatibility: false,
         label_dump: false,
+        defines: vec![],
     };
 
     for arg in &args {
@@ -135,6 +141,14 @@ fn read_args() -> Option<Arguments> {
                     },
                 }
             },
+            "-D" => {
+                not_last_arg!();
+                if let Some(definition) = process_define(&args[i]) {
+                    ret.defines.push(definition);
+                } else {
+                    return None;
+                }
+            }
             "-no-stack-init" => {
                 ret.set_stack = false;
             },
@@ -165,6 +179,34 @@ fn read_args() -> Option<Arguments> {
         ret.help = true;
     }
     Some(ret)
+}
+
+/// Read the argument to the -D flag and try to process it.
+fn process_define(arg: &str) -> Option<(String, String)> {
+    let chars = arg.chars().collect::<Vec<char>>();
+    let mut name = String::new();
+    let mut index = 0;
+    loop {
+        if index == chars.len() {
+            break;
+        }
+        if chars[index] == '=' {
+            index += 1;
+            break;
+        }
+        name.push(chars[index]);
+        index += 1;
+    }
+    let mut value = String::new();
+    for i in index..chars.len() {
+        value.push(chars[i]);
+    }
+    if name == "" || value == "" {
+        eprintln!("Error, argument defines should be in the format `-D <name>=<value>`.");
+        None
+    } else {
+        Some((name, value))
+    }
 }
 
 /// Checks that the arguments are coherent and return true if they are and false

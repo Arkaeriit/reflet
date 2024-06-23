@@ -77,6 +77,10 @@ fn make_assembler(args: &cli_arguments::Arguments) -> Assembler {
     asm.add_text_before(&set_word_size_byte, "set_wordsize_byte");
     // Default macros
     asm.add_text_before(include_str!("default_macros.asm"), "default_macros");
+    // Argument-given defines
+    for (name, value) in &args.defines {
+        asm.add_text_before(&format!("@define {name} {value}"), &format!("{name} definition"));
+    }
     // Start runtime
     let mut runtime_start = "".to_string();
     if !args.no_prefix {

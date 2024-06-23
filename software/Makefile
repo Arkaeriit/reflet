@@ -33,7 +33,7 @@ test_inst_mini_load: test_inst_mini_load.bin
 	$(REFLET_SIM) test_inst_mini_load.bin
 
 libtesting.bin : libtesting.asm libs/math.asm libs/printing.asm libs/basicIO.asm libs/string.asm libs/import_all_libs.asm
-	$(REFLET_ASM) libtesting.asm -word-size 16 -o libtesting.bin
+	$(REFLET_ASM) libtesting.asm -D MESSAGE='"Reflet is a neat ISA!"' -word-size 16 -o libtesting.bin
 
 exampleIO.bin : exampleIO.asm
 	$(REFLET_ASM) exampleIO.asm -o exampleIO.bin -word-size 8

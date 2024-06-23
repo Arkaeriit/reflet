@@ -18,6 +18,7 @@ The possible options are the following:
 * -ignore-start: if set, the program will not start at the "start" label but at the beginning of the first input file.
 * -word-size xxx : set the wordsize to xxx (a number in bits).
 * -label-dump: if set, a dump of all labels will be printed just before linkage.
+* -D name=definition: defines the macro `name` with te=he current definition. It will be a flat define macro.
 
 ## Assembly language file
 
