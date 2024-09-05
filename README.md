@@ -42,7 +42,7 @@ Here is a list of the instruction of Reflet processor.
 | read        | 0x0     | A register                 | Copies the value in the argument register into the working register |
 | cpy         | 0x1     | A register                 | Copies the value of the working register into the argument register |
 | set         | 0x2     | A 4 bits number            | Put the number in the working register|
-| add         | 0x3     | A register                 | Add the value in the working directory to the value in the argument register and put the result in the working register |
+| add         | 0x3     | A register                 | Add the value in the working register to the value in the argument register and put the result in the working register |
 | and         | 0x4     | A register                 | Do a bit-wise and between the working register and the argument register |
 | or          | 0x5     | A register                 | Do a bit-wise or between the working register and the argument register |
 | xor         | 0x6     | A register                 | Do a bitwise xor between the working register and the argument register |
